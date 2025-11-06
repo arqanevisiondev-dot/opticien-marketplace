@@ -1,0 +1,89 @@
+'use client';
+
+import Link from 'next/link';
+import { Mail, Phone, MapPin } from 'lucide-react';
+
+export default function Footer() {
+  return (
+    <footer className="bg-blue-fantastic text-white mt-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* About */}
+          <div>
+            <h3 className="text-lg font-bold mb-4">OptiMarket</h3>
+            <p className="text-sm text-gray-300">
+              Plateforme de marché pour montures de lunettes à destination des opticiens professionnels.
+            </p>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-lg font-bold mb-4">Liens rapides</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link href="/catalogue" className="text-gray-300 hover:text-burning-flame transition-colors">
+                  Catalogue
+                </Link>
+              </li>
+              <li>
+                <Link href="/opticiens" className="text-gray-300 hover:text-burning-flame transition-colors">
+                  Trouver un opticien
+                </Link>
+              </li>
+              <li>
+                <Link href="/auth/signup" className="text-gray-300 hover:text-burning-flame transition-colors">
+                  Devenir partenaire
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h3 className="text-lg font-bold mb-4">Légal</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link href="/legal/terms" className="text-gray-300 hover:text-burning-flame transition-colors">
+                  Conditions générales
+                </Link>
+              </li>
+              <li>
+                <Link href="/legal/privacy" className="text-gray-300 hover:text-burning-flame transition-colors">
+                  Politique de confidentialité
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-gray-300 hover:text-burning-flame transition-colors">
+                  Contact
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h3 className="text-lg font-bold mb-4">Contact</h3>
+            <ul className="space-y-2 text-sm text-gray-300">
+              <li className="flex items-center space-x-2">
+                <Mail className="h-4 w-4" />
+                <span>contact@optimarket.com</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <Phone className="h-4 w-4" />
+                <span>+33 1 23 45 67 89</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <MapPin className="h-4 w-4" />
+                <span>Paris, France</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-8 pt-8 border-t border-white/20 text-center text-sm text-gray-300">
+          <p>&copy; {new Date().getFullYear()} OptiMarket. Tous droits réservés.</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
