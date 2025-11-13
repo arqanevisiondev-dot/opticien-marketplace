@@ -58,7 +58,7 @@ export async function PUT(
         select: { slug: true }
       });
       
-      const existingSlugs = existingWithSlug.map(c => c.slug);
+      const existingSlugs = existingWithSlug.map((c: { slug: string }) => c.slug);
       finalSlug = baseSlug;
       let counter = 1;
       
