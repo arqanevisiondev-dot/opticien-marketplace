@@ -27,7 +27,16 @@ export async function GET() {
       },
     });
 
-    const formattedOpticians = opticians.map((optician) => ({
+    const formattedOpticians = opticians.map((optician: {
+      id: string;
+      businessName: string;
+      firstName: string;
+      lastName: string;
+      phone: string;
+      user: { email: string };
+      status: 'PENDING' | 'APPROVED' | 'REJECTED';
+      createdAt: Date;
+    }) => ({
       id: optician.id,
       businessName: optician.businessName,
       firstName: optician.firstName,
