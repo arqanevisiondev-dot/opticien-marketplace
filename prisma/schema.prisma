@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -63,33 +63,67 @@ model Supplier {
   email       String    @unique
   phone       String
   whatsapp    String?
-  description String?   @db.Text
+  description String?
+  address     String?
+  city        String?
+  postalCode  String?
+  latitude    Float?
+  longitude   Float?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   products    Product[]
+  
+  @@index([latitude, longitude])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+  
+  @@index([slug])
 }
 
 model Product {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   supplierId  String
-  supplier    Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  supplier    Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   name        String
-  reference   String   @unique
-  description String?  @db.Text
+  slug        String    @unique
+  reference   String    @unique
+  description String?
   material    String?
   gender      String?
   shape       String?
   color       String?
   price       Float
-  images      String   @db.Text // JSON array of image URLs
-  inStock     Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  images      String    // JSON array of image URLs
+  inStock     Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   
   @@index([supplierId])
+  @@index([categoryId])
   @@index([material])
   @@index([gender])
   @@index([inStock])
+  @@index([slug])
+}
+
+model ProductOption {
+  id        String   @id @default(cuid())
+  type      String   // "material" or "gender"
+  value     String
+  createdAt DateTime @default(now())
+  
+  @@unique([type, value])
+  @@index([type])
 }
 
 model EmailCampaign {
@@ -97,7 +131,7 @@ model EmailCampaign {
   creatorId   String
   creator     User     @relation("CampaignCreator", fields: [creatorId], references: [id])
   subject     String
-  content     String   @db.Text
+  content     String
   targetRole  String?  // "ALL", "APPROVED", "PENDING", or specific region
   sentAt      DateTime @default(now())
   recipients  Int      @default(0)

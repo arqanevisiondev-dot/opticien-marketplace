@@ -3,12 +3,19 @@
 import { useState, useEffect } from 'react';
 import { MapPin, Phone, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/contexts/LanguageContext';
 import dynamic from 'next/dynamic';
 
 // Dynamically import map component to avoid SSR issues
 const MapComponent = dynamic(() => import('@/components/map/OpticianMap'), {
   ssr: false,
-  loading: () => <div className="h-96 bg-gray-200 animate-pulse flex items-center justify-center">Chargement de la carte...</div>
+  loading: () => {
+    const LoadingComponent = () => {
+      const { t } = useLanguage();
+      return <div className="h-96 bg-gray-200 animate-pulse flex items-center justify-center">{t.loadingMap}</div>;
+    };
+    return <LoadingComponent />;
+  }
 });
 
 interface Optician {
@@ -26,6 +33,7 @@ interface Optician {
 }
 
 export default function OpticiensPage() {
+  const { t } = useLanguage();
   const [opticians, setOpticians] = useState<Optician[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
@@ -59,9 +67,9 @@ export default function OpticiensPage() {
     <div className="min-h-screen bg-palladian">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-abyssal mb-4">Trouver un Opticien</h1>
+          <h1 className="text-4xl font-bold text-abyssal mb-4">{t.findAnOptician}</h1>
           <p className="text-gray-600">
-            Localisez les opticiens partenaires près de chez vous
+            {t.locateOpticians}
           </p>
         </div>
 
@@ -70,22 +78,23 @@ export default function OpticiensPage() {
           <Button
             variant={viewMode === 'map' ? 'primary' : 'outline'}
             onClick={() => setViewMode('map')}
+            className="flex items-center"
           >
             <MapPin className="mr-2 h-4 w-4" />
-            Vue Carte
+            {t.mapView}
           </Button>
           <Button
             variant={viewMode === 'list' ? 'primary' : 'outline'}
             onClick={() => setViewMode('list')}
           >
-            Vue Liste
+            {t.listView}
           </Button>
         </div>
 
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-fantastic"></div>
-            <p className="mt-4 text-gray-600">Chargement des opticiens...</p>
+            <p className="mt-4 text-gray-600">{t.loadingOpticians}</p>
           </div>
         ) : (
           <>
@@ -106,7 +115,7 @@ export default function OpticiensPage() {
                     
                     {optician.address && (
                       <div className="flex items-start mb-3 text-sm text-gray-600">
-                        <MapPin className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+                        <MapPin className="h-4 w-4 mr-2 mt-0.5 shrink-0" />
                         <div>
                           <div>{optician.address}</div>
                           <div>{optician.postalCode} {optician.city}</div>
@@ -114,29 +123,30 @@ export default function OpticiensPage() {
                       </div>
                     )}
 
-                    <div className="space-y-2 mt-4">
+                   <div className="space-y-2 mt-4">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      className="w-full flex items-center justify-center"
+                      onClick={() => handlePhoneClick(optician.phone)}
+                    >
+                      <Phone className="mr-2 h-4 w-4" />
+                      {optician.phone}
+                    </Button>
+
+                    {optician.whatsapp && (
                       <Button
-                        variant="primary"
+                        variant="secondary"
                         size="sm"
-                        className="w-full"
-                        onClick={() => handlePhoneClick(optician.phone)}
+                        className="w-full flex items-center justify-center"
+                        onClick={() => handleWhatsAppClick(optician.whatsapp!)}
                       >
-                        <Phone className="mr-2 h-4 w-4" />
-                        {optician.phone}
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        WhatsApp
                       </Button>
-                      
-                      {optician.whatsapp && (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          className="w-full"
-                          onClick={() => handleWhatsAppClick(optician.whatsapp!)}
-                        >
-                          <MessageCircle className="mr-2 h-4 w-4" />
-                          WhatsApp
-                        </Button>
-                      )}
-                    </div>
+                    )}
+                  </div>
+
                   </div>
                 ))}
               </div>
@@ -144,7 +154,7 @@ export default function OpticiensPage() {
 
             {opticians.length === 0 && (
               <div className="text-center py-12 bg-white shadow-lg">
-                <p className="text-gray-600 text-lg">Aucun opticien trouvé</p>
+                <p className="text-gray-600 text-lg">{t.noOpticianFound}</p>
               </div>
             )}
           </>

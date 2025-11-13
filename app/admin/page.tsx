@@ -1,9 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Users, Package, Building2, Mail, TrendingUp } from 'lucide-react';
+import { Users, Package, Mail, TrendingUp, FolderTree, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface DashboardStats {
   totalOpticians: number;
@@ -13,6 +16,9 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const { t } = useLanguage();
   const [stats, setStats] = useState<DashboardStats>({
     totalOpticians: 0,
     pendingOpticians: 0,
@@ -21,9 +27,17 @@ export default function AdminDashboard() {
   });
   const [loading, setLoading] = useState(true);
 
+  // Protection: Vérifier que l'utilisateur est admin
   useEffect(() => {
+    if (status === 'loading') return;
+    
+    if (!session || session.user?.role !== 'ADMIN') {
+      router.push('/');
+      return;
+    }
+    
     fetchStats();
-  }, []);
+  }, [session, status, router]);
 
   const fetchStats = async () => {
     try {
@@ -39,32 +53,25 @@ export default function AdminDashboard() {
 
   const statCards = [
     {
-      title: 'Opticiens',
+      title: t.opticians,
       value: stats.totalOpticians,
       icon: Users,
-      color: 'bg-blue-fantastic',
+      color: 'bg-burning-flame',
       link: '/admin/opticians',
     },
     {
-      title: 'En attente',
+      title: t.pending,
       value: stats.pendingOpticians,
       icon: TrendingUp,
-      color: 'bg-burning-flame',
-      link: '/admin/opticians?status=pending',
+      color: 'bg-truffle-trouble',
+      link: '/admin/opticians?filter=pending',
     },
     {
-      title: 'Produits',
+      title: t.products,
       value: stats.totalProducts,
       icon: Package,
-      color: 'bg-truffle-trouble',
-      link: '/admin/products',
-    },
-    {
-      title: 'Fournisseurs',
-      value: stats.totalSuppliers,
-      icon: Building2,
       color: 'bg-blue-fantastic',
-      link: '/admin/suppliers',
+      link: '/catalogue',
     },
   ];
 
@@ -72,8 +79,8 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-palladian">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-abyssal mb-2">Dashboard Administrateur</h1>
-          <p className="text-gray-600">Gérez votre plateforme OptiMarket</p>
+          <h1 className="text-4xl font-bold text-abyssal mb-2">{t.adminDashboard}</h1>
+          <p className="text-gray-600">{t.ctaSubtitle}</p>
         </div>
 
         {loading ? (
@@ -83,7 +90,7 @@ export default function AdminDashboard() {
         ) : (
           <>
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {statCards.map((card) => (
                 <Link key={card.title} href={card.link}>
                   <div className="bg-white p-6 shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
@@ -101,30 +108,36 @@ export default function AdminDashboard() {
 
             {/* Quick Actions */}
             <div className="bg-white p-6 shadow-lg mb-8">
-              <h2 className="text-2xl font-bold text-abyssal mb-6">Actions Rapides</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <h2 className="text-2xl font-bold text-abyssal mb-6">{t.quickActions}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <Link href="/admin/opticians">
-                  <Button variant="primary" className="w-full">
+                  <Button variant="primary" className="w-full flex items-center justify-center">
                     <Users className="mr-2 h-4 w-4" />
-                    Gérer Opticiens
+                    {t.manageOpticians}
+                  </Button>
+                </Link>
+                <Link href="/admin/categories">
+                  <Button variant="secondary" className="w-full flex items-center justify-center">
+                    <FolderTree className="mr-2 h-4 w-4" />
+                    {t.manageCategories}
                   </Button>
                 </Link>
                 <Link href="/admin/products/new">
-                  <Button variant="secondary" className="w-full">
+                  <Button variant="secondary" className="w-full flex items-center justify-center">
                     <Package className="mr-2 h-4 w-4" />
-                    Ajouter Produit
+                    {t.newProduct}
                   </Button>
                 </Link>
-                <Link href="/admin/suppliers">
-                  <Button variant="primary" className="w-full">
-                    <Building2 className="mr-2 h-4 w-4" />
-                    Gérer Fournisseurs
+                <Link href="/admin/settings">
+                  <Button variant="secondary" className="w-full flex items-center justify-center">
+                    <Settings className="mr-2 h-4 w-4" />
+                    {t.productOptions}
                   </Button>
                 </Link>
                 <Link href="/admin/campaigns">
-                  <Button variant="secondary" className="w-full">
+                  <Button variant="secondary" className="w-full flex items-center justify-center">
                     <Mail className="mr-2 h-4 w-4" />
-                    Campagnes Email
+                    {t.emailCampaigns}
                   </Button>
                 </Link>
               </div>
@@ -132,7 +145,7 @@ export default function AdminDashboard() {
 
             {/* Recent Activity */}
             <div className="bg-white p-6 shadow-lg">
-              <h2 className="text-2xl font-bold text-abyssal mb-6">Activité Récente</h2>
+              <h2 className="text-2xl font-bold text-abyssal mb-6">{t.recentActivity}</h2>
               <div className="space-y-4">
                 <div className="flex items-center justify-between py-3 border-b border-gray-200">
                   <div className="flex items-center">
@@ -140,12 +153,12 @@ export default function AdminDashboard() {
                       <Users className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-medium text-abyssal">Nouvelle inscription opticien</p>
-                      <p className="text-sm text-gray-500">Il y a 2 heures</p>
+                      <p className="font-medium text-abyssal">{t.newOpticianRegistration}</p>
+                      <p className="text-sm text-gray-500">{t.hoursAgo}</p>
                     </div>
                   </div>
                   <Link href="/admin/opticians?status=pending">
-                    <Button variant="outline" size="sm">Voir</Button>
+                    <Button variant="outline" size="sm">{t.view}</Button>
                   </Link>
                 </div>
                 <div className="flex items-center justify-between py-3 border-b border-gray-200">
@@ -154,12 +167,12 @@ export default function AdminDashboard() {
                       <Package className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-medium text-abyssal">Nouveau produit ajouté</p>
-                      <p className="text-sm text-gray-500">Il y a 5 heures</p>
+                      <p className="font-medium text-abyssal">{t.newProductAdded}</p>
+                      <p className="text-sm text-gray-500">{t.hoursAgo}</p>
                     </div>
                   </div>
-                  <Link href="/admin/products">
-                    <Button variant="outline" size="sm">Voir</Button>
+                  <Link href="/admin/products/new">
+                    <Button variant="outline" size="sm">{t.view}</Button>
                   </Link>
                 </div>
               </div>

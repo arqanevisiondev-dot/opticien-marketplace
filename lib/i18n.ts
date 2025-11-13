@@ -1,0 +1,589 @@
+export type Language = 'fr' | 'en' | 'ar';
+
+export const translations = {
+  fr: {
+    // Navigation
+    home: 'Accueil',
+    catalog: 'Catalogue',
+    opticians: 'Opticiens',
+    contact: 'Contact',
+    login: 'Connexion',
+    logout: 'Déconnexion',
+    signup: 'S\'inscrire',
+    
+    // Hero Section
+    heroTitle: 'Plateforme B2B pour Opticiens',
+    heroSubtitle: 'Connectez-vous avec les meilleurs fournisseurs de montures',
+    discoverCatalog: 'Découvrir le Catalogue',
+    becomePartner: 'Devenir Partenaire',
+    
+    // Features
+    features: 'Nos Avantages',
+    exclusiveCatalog: 'Catalogue Exclusif',
+    exclusiveCatalogDesc: 'Accédez à une sélection premium de montures',
+    professionalPrices: 'Prix Professionnels',
+    professionalPricesDesc: 'Tarifs négociés pour les professionnels',
+    fastDelivery: 'Livraison Rapide',
+    fastDeliveryDesc: 'Recevez vos commandes sous 48h',
+    
+    // CTA
+    ctaTitle: 'Prêt à rejoindre OptiMarket?',
+    ctaSubtitle: 'Inscrivez-vous dès maintenant et accédez à notre catalogue complet avec les prix professionnels.',
+    createFreeAccount: 'Créer un Compte Gratuit',
+    
+    // Products
+    products: 'Produits',
+    search: 'Rechercher',
+    filter: 'Filtrer',
+    priceOnRequest: 'Prix sur demande',
+    inStock: 'En stock',
+    outOfStock: 'Rupture de stock',
+    loading: 'Chargement',
+    noProducts: 'Aucun produit trouvé',
+    
+    // Product Details
+    backToCatalog: 'Retour au catalogue',
+    reference: 'Référence',
+    material: 'Matériau',
+    gender: 'Genre',
+    shape: 'Forme',
+    color: 'Couleur',
+    description: 'Description',
+    contactSupplier: 'Contacter l\'Opticien',
+    call: 'Appeler',
+    whatsapp: 'WhatsApp',
+    
+    // Admin
+    adminDashboard: 'Dashboard Administrateur',
+    manageOpticians: 'Gérer Opticiens',
+    newProduct: 'Nouveau Produit',
+    newSupplier: 'Nouveau Fournisseur',
+    emailCampaigns: 'Campagnes Email',
+    quickActions: 'Actions Rapides',
+    pending: 'En attente',
+    approved: 'Approuvé',
+    rejected: 'Rejeté',
+    
+    // Forms
+    name: 'Nom',
+    email: 'Email',
+    password: 'Mot de passe',
+    phone: 'Téléphone',
+    submit: 'Soumettre',
+    cancel: 'Annuler',
+    save: 'Enregistrer',
+    
+    // Messages
+    loginRequired: 'Vous devez être connecté pour voir les prix',
+    approvalRequired: 'Votre compte doit être approuvé pour voir les prix',
+    contactForPrice: 'Contactez l\'opticien pour connaître le prix',
+    
+    // Footer
+    quickLinks: 'Liens rapides',
+    findOptician: 'Trouver un opticien',
+    becomePartnerLink: 'Devenir partenaire',
+    legal: 'Légal',
+    termsConditions: 'Conditions générales',
+    privacyPolicy: 'Politique de confidentialité',
+    allRightsReserved: 'Tous droits réservés',
+    platformDescription: 'Plateforme de marché pour montures de lunettes à destination des opticiens professionnels.',
+    
+    // Opticians Page
+    findAnOptician: 'Trouver un Opticien',
+    locateOpticians: 'Localisez les opticiens partenaires près de chez vous',
+    mapView: 'Vue Carte',
+    listView: 'Vue Liste',
+    loadingOpticians: 'Chargement des opticiens...',
+    noOpticianFound: 'Aucun opticien trouvé',
+    loadingMap: 'Chargement de la carte...',
+    
+    // Admin Opticians
+    opticianManagement: 'Gestion des Opticiens',
+    searchOptician: 'Rechercher un opticien...',
+    all: 'Tous',
+    business: 'Entreprise',
+    contactInfo: 'Contact',
+    status: 'Statut',
+    actions: 'Actions',
+    approve: 'Approuver',
+    reject: 'Rejeter',
+    viewDetails: 'Voir détails',
+    
+    // Admin Products
+    newProductTitle: 'Nouveau Produit',
+    backToDashboard: 'Retour au dashboard',
+    productName: 'Nom du produit',
+    productReference: 'Référence',
+    productDescription: 'Description',
+    productMaterial: 'Matériau',
+    productGender: 'Genre',
+    selectGender: 'Sélectionner',
+    male: 'Homme',
+    female: 'Femme',
+    unisex: 'Mixte',
+    kids: 'Enfant',
+    productShape: 'Forme',
+    productColor: 'Couleur',
+    price: 'Prix',
+    imageUrls: 'URLs des images (une par ligne)',
+    oneUrlPerLine: 'Une URL par ligne',
+    creating: 'Création...',
+    createProduct: 'Créer le produit',
+    
+    // Admin Dashboard
+    recentActivity: 'Activité Récente',
+    newOpticianRegistration: 'Nouvelle inscription opticien',
+    hoursAgo: 'Il y a 2 heures',
+    newProductAdded: 'Nouveau produit ajouté',
+    view: 'Voir',
+    
+    // Optician Prompt Modal
+    opticianPromptTitle: 'Êtes-vous un opticien ?',
+    opticianPromptMessage: 'Rejoignez notre plateforme pour accéder à des prix professionnels et un catalogue exclusif.',
+    yes: 'Oui',
+    no: 'Non',
+    
+    // Categories
+    categories: 'Catégories',
+    category: 'Catégorie',
+    manageCategories: 'Gérer les Catégories',
+    newCategory: 'Nouvelle Catégorie',
+    editCategory: 'Modifier la Catégorie',
+    deleteCategory: 'Supprimer la Catégorie',
+    categoryName: 'Nom de la catégorie',
+    categoryDescription: 'Description',
+    categorySlug: 'Slug',
+    createCategory: 'Créer la catégorie',
+    updateCategory: 'Mettre à jour',
+    confirmDelete: 'Confirmer la suppression',
+    categoryHasProducts: 'Cette catégorie contient {count} produit(s)',
+    cannotDeleteCategory: 'Impossible de supprimer cette catégorie car elle contient des produits',
+    forceDelete: 'Forcer la suppression',
+    forceDeleteWarning: 'Êtes-vous sûr ? Les produits seront dissociés de cette catégorie.',
+    categoryDeleted: 'Catégorie supprimée avec succès',
+    categoryCreated: 'Catégorie créée avec succès',
+    categoryUpdated: 'Catégorie mise à jour avec succès',
+    noCategories: 'Aucune catégorie trouvée',
+    searchCategory: 'Rechercher une catégorie...',
+    productCount: 'Nombre de produits',
+    edit: 'Modifier',
+    delete: 'Supprimer',
+    
+    // Product Options
+    productOptions: 'Options Produits',
+    manageOptions: 'Gérer les Options',
+    materials: 'Matériaux',
+    genders: 'Genres',
+    addMaterial: 'Ajouter un matériau',
+    addGender: 'Ajouter un genre',
+    materialName: 'Nom du matériau',
+    genderName: 'Nom du genre',
+    addOption: 'Ajouter',
+    noMaterials: 'Aucun matériau',
+    noGenders: 'Aucun genre',
+    optionAdded: 'Option ajoutée avec succès',
+    optionDeleted: 'Option supprimée avec succès',
+    
+    // Geolocation
+    findNearestOptician: 'Trouver un opticien près de chez vous',
+    findOpticianForProduct: 'Trouvez un opticien qui peut vous fournir',
+    allowLocationAccess: 'Autorisez l\'accès à votre position pour trouver les opticiens les plus proches de vous.',
+    useMyLocation: 'Utiliser ma position',
+    searchByCity: 'Rechercher par ville',
+    locationDenied: 'Accès à la localisation refusé. Vous pouvez rechercher par ville ci-dessous.',
+    enterCity: 'Entrez le nom de la ville...',
+    searchingOpticians: 'Recherche des opticiens...',
+  },
+  
+  en: {
+    // Navigation
+    home: 'Home',
+    catalog: 'Catalog',
+    opticians: 'Opticians',
+    contact: 'Contact',
+    login: 'Login',
+    logout: 'Logout',
+    signup: 'Sign Up',
+    
+    // Hero Section
+    heroTitle: 'B2B Platform for Opticians',
+    heroSubtitle: 'Connect with the best eyewear frame suppliers',
+    discoverCatalog: 'Discover Catalog',
+    becomePartner: 'Become a Partner',
+    
+    // Features
+    features: 'Our Advantages',
+    exclusiveCatalog: 'Exclusive Catalog',
+    exclusiveCatalogDesc: 'Access a premium selection of frames',
+    professionalPrices: 'Professional Prices',
+    professionalPricesDesc: 'Negotiated rates for professionals',
+    fastDelivery: 'Fast Delivery',
+    fastDeliveryDesc: 'Receive your orders within 48h',
+    
+    // CTA
+    ctaTitle: 'Ready to join OptiMarket?',
+    ctaSubtitle: 'Sign up now and access our complete catalog with professional prices.',
+    createFreeAccount: 'Create Free Account',
+    
+    // Products
+    products: 'Products',
+    search: 'Search',
+    filter: 'Filter',
+    priceOnRequest: 'Price on request',
+    inStock: 'In stock',
+    outOfStock: 'Out of stock',
+    loading: 'Loading',
+    noProducts: 'No products found',
+    
+    // Product Details
+    backToCatalog: 'Back to catalog',
+    reference: 'Reference',
+    material: 'Material',
+    gender: 'Gender',
+    shape: 'Shape',
+    color: 'Color',
+    description: 'Description',
+    contactSupplier: 'Contact Optician',
+    call: 'Call',
+    whatsapp: 'WhatsApp',
+    
+    // Admin
+    adminDashboard: 'Admin Dashboard',
+    manageOpticians: 'Manage Opticians',
+    newProduct: 'New Product',
+    newSupplier: 'New Supplier',
+    emailCampaigns: 'Email Campaigns',
+    quickActions: 'Quick Actions',
+    pending: 'Pending',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    
+    // Forms
+    name: 'Name',
+    email: 'Email',
+    password: 'Password',
+    phone: 'Phone',
+    submit: 'Submit',
+    cancel: 'Cancel',
+    save: 'Save',
+    
+    // Messages
+    loginRequired: 'You must be logged in to see prices',
+    approvalRequired: 'Your account must be approved to see prices',
+    contactForPrice: 'Contact the optician for pricing',
+    
+    // Footer
+    quickLinks: 'Quick Links',
+    findOptician: 'Find an optician',
+    becomePartnerLink: 'Become a partner',
+    legal: 'Legal',
+    termsConditions: 'Terms and Conditions',
+    privacyPolicy: 'Privacy Policy',
+    allRightsReserved: 'All rights reserved',
+    platformDescription: 'Marketplace platform for eyewear frames for professional opticians.',
+    
+    // Opticians Page
+    findAnOptician: 'Find an Optician',
+    locateOpticians: 'Locate partner opticians near you',
+    mapView: 'Map View',
+    listView: 'List View',
+    loadingOpticians: 'Loading opticians...',
+    noOpticianFound: 'No optician found',
+    loadingMap: 'Loading map...',
+    
+    // Admin Opticians
+    opticianManagement: 'Optician Management',
+    searchOptician: 'Search for an optician...',
+    all: 'All',
+    business: 'Business',
+    contactInfo: 'Contact',
+    status: 'Status',
+    actions: 'Actions',
+    approve: 'Approve',
+    reject: 'Reject',
+    viewDetails: 'View details',
+    
+    // Admin Products
+    newProductTitle: 'New Product',
+    backToDashboard: 'Back to dashboard',
+    productName: 'Product name',
+    productReference: 'Reference',
+    productDescription: 'Description',
+    productMaterial: 'Material',
+    productGender: 'Gender',
+    selectGender: 'Select',
+    male: 'Male',
+    female: 'Female',
+    unisex: 'Unisex',
+    kids: 'Kids',
+    productShape: 'Shape',
+    productColor: 'Color',
+    price: 'Price',
+    imageUrls: 'Image URLs (one per line)',
+    oneUrlPerLine: 'One URL per line',
+    creating: 'Creating...',
+    createProduct: 'Create product',
+    
+    // Admin Dashboard
+    recentActivity: 'Recent Activity',
+    newOpticianRegistration: 'New optician registration',
+    hoursAgo: '2 hours ago',
+    newProductAdded: 'New product added',
+    view: 'View',
+    
+    // Optician Prompt Modal
+    opticianPromptTitle: 'Are you an optician?',
+    opticianPromptMessage: 'Join our platform to access professional prices and an exclusive catalog.',
+    yes: 'Yes',
+    no: 'No',
+    
+    // Categories
+    categories: 'Categories',
+    category: 'Category',
+    manageCategories: 'Manage Categories',
+    newCategory: 'New Category',
+    editCategory: 'Edit Category',
+    deleteCategory: 'Delete Category',
+    categoryName: 'Category name',
+    categoryDescription: 'Description',
+    categorySlug: 'Slug',
+    createCategory: 'Create category',
+    updateCategory: 'Update',
+    confirmDelete: 'Confirm deletion',
+    categoryHasProducts: 'This category contains {count} product(s)',
+    cannotDeleteCategory: 'Cannot delete this category because it contains products',
+    forceDelete: 'Force delete',
+    forceDeleteWarning: 'Are you sure? Products will be unlinked from this category.',
+    categoryDeleted: 'Category deleted successfully',
+    categoryCreated: 'Category created successfully',
+    categoryUpdated: 'Category updated successfully',
+    noCategories: 'No categories found',
+    searchCategory: 'Search for a category...',
+    productCount: 'Product count',
+    edit: 'Edit',
+    delete: 'Delete',
+    
+    // Product Options
+    productOptions: 'Product Options',
+    manageOptions: 'Manage Options',
+    materials: 'Materials',
+    genders: 'Genders',
+    addMaterial: 'Add material',
+    addGender: 'Add gender',
+    materialName: 'Material name',
+    genderName: 'Gender name',
+    addOption: 'Add',
+    noMaterials: 'No materials',
+    noGenders: 'No genders',
+    optionAdded: 'Option added successfully',
+    optionDeleted: 'Option deleted successfully',
+    
+    // Geolocation
+    findNearestOptician: 'Find an optician near you',
+    findOpticianForProduct: 'Find an optician who can provide you',
+    allowLocationAccess: 'Allow location access to find the nearest opticians.',
+    useMyLocation: 'Use my location',
+    searchByCity: 'Search by city',
+    locationDenied: 'Location access denied. You can search by city below.',
+    enterCity: 'Enter city name...',
+    searchingOpticians: 'Searching for opticians...',
+  },
+  
+  ar: {
+    // Navigation
+    home: 'الرئيسية',
+    catalog: 'الكتالوج',
+    opticians: 'أخصائيو البصريات',
+    contact: 'اتصل بنا',
+    login: 'تسجيل الدخول',
+    logout: 'تسجيل الخروج',
+    signup: 'التسجيل',
+    
+    // Hero Section
+    heroTitle: 'منصة B2B لأخصائيي البصريات',
+    heroSubtitle: 'تواصل مع أفضل موردي إطارات النظارات',
+    discoverCatalog: 'اكتشف الكتالوج',
+    becomePartner: 'كن شريكاً',
+    
+    // Features
+    features: 'مميزاتنا',
+    exclusiveCatalog: 'كتالوج حصري',
+    exclusiveCatalogDesc: 'احصل على مجموعة مميزة من الإطارات',
+    professionalPrices: 'أسعار احترافية',
+    professionalPricesDesc: 'أسعار متفاوض عليها للمحترفين',
+    fastDelivery: 'توصيل سريع',
+    fastDeliveryDesc: 'استلم طلباتك خلال 48 ساعة',
+    
+    // CTA
+    ctaTitle: 'هل أنت مستعد للانضمام إلى OptiMarket؟',
+    ctaSubtitle: 'سجل الآن واحصل على كتالوجنا الكامل بأسعار احترافية.',
+    createFreeAccount: 'إنشاء حساب مجاني',
+    
+    // Products
+    products: 'المنتجات',
+    search: 'بحث',
+    filter: 'تصفية',
+    priceOnRequest: 'السعر عند الطلب',
+    inStock: 'متوفر',
+    outOfStock: 'غير متوفر',
+    loading: 'جاري التحميل',
+    noProducts: 'لم يتم العثور على منتجات',
+    
+    // Product Details
+    backToCatalog: 'العودة إلى الكتالوج',
+    reference: 'المرجع',
+    material: 'المادة',
+    gender: 'الجنس',
+    shape: 'الشكل',
+    color: 'اللون',
+    description: 'الوصف',
+    contactSupplier: 'اتصل بأخصائي البصريات',
+    call: 'اتصل',
+    whatsapp: 'واتساب',
+    
+    // Admin
+    adminDashboard: 'لوحة تحكم المسؤول',
+    manageOpticians: 'إدارة أخصائيي البصريات',
+    newProduct: 'منتج جديد',
+    newSupplier: 'مورد جديد',
+    emailCampaigns: 'حملات البريد الإلكتروني',
+    quickActions: 'إجراءات سريعة',
+    pending: 'قيد الانتظار',
+    approved: 'موافق عليه',
+    rejected: 'مرفوض',
+    
+    // Forms
+    name: 'الاسم',
+    email: 'البريد الإلكتروني',
+    password: 'كلمة المرور',
+    phone: 'الهاتف',
+    submit: 'إرسال',
+    cancel: 'إلغاء',
+    save: 'حفظ',
+    
+    // Messages
+    loginRequired: 'يجب تسجيل الدخول لرؤية الأسعار',
+    approvalRequired: 'يجب الموافقة على حسابك لرؤية الأسعار',
+    contactForPrice: 'اتصل بأخصائي البصريات لمعرفة السعر',
+    
+    // Footer
+    quickLinks: 'روابط سريعة',
+    findOptician: 'ابحث عن أخصائي بصريات',
+    becomePartnerLink: 'كن شريكاً',
+    legal: 'قانوني',
+    termsConditions: 'الشروط والأحكام',
+    privacyPolicy: 'سياسة الخصوصية',
+    allRightsReserved: 'جميع الحقوق محفوظة',
+    platformDescription: 'منصة سوق لإطارات النظارات لأخصائيي البصريات المحترفين.',
+    
+    // Opticians Page
+    findAnOptician: 'ابحث عن أخصائي بصريات',
+    locateOpticians: 'حدد موقع شركاء أخصائيي البصريات بالقرب منك',
+    mapView: 'عرض الخريطة',
+    listView: 'عرض القائمة',
+    loadingOpticians: 'جاري تحميل أخصائيي البصريات...',
+    noOpticianFound: 'لم يتم العثور على أخصائي بصريات',
+    loadingMap: 'جاري تحميل الخريطة...',
+    
+    // Admin Opticians
+    opticianManagement: 'إدارة أخصائيي البصريات',
+    searchOptician: 'البحث عن أخصائي بصريات...',
+    all: 'الكل',
+    business: 'الأعمال',
+    contactInfo: 'معلومات الاتصال',
+    status: 'الحالة',
+    actions: 'الإجراءات',
+    approve: 'موافقة',
+    reject: 'رفض',
+    viewDetails: 'عرض التفاصيل',
+    
+    // Admin Products
+    newProductTitle: 'منتج جديد',
+    backToDashboard: 'العودة إلى لوحة التحكم',
+    productName: 'اسم المنتج',
+    productReference: 'المرجع',
+    productDescription: 'الوصف',
+    productMaterial: 'المادة',
+    productGender: 'الجنس',
+    selectGender: 'اختر',
+    male: 'رجالي',
+    female: 'نسائي',
+    unisex: 'للجنسين',
+    kids: 'أطفال',
+    productShape: 'الشكل',
+    productColor: 'اللون',
+    price: 'السعر',
+    imageUrls: 'عناوين URL للصور (واحد لكل سطر)',
+    oneUrlPerLine: 'عنوان URL واحد لكل سطر',
+    creating: 'جاري الإنشاء...',
+    createProduct: 'إنشاء المنتج',
+    
+    // Admin Dashboard
+    recentActivity: 'النشاط الأخير',
+    newOpticianRegistration: 'تسجيل أخصائي بصريات جديد',
+    hoursAgo: 'منذ ساعتين',
+    newProductAdded: 'تمت إضافة منتج جديد',
+    view: 'عرض',
+    
+    // Optician Prompt Modal
+    opticianPromptTitle: 'هل أنت أخصائي بصريات؟',
+    opticianPromptMessage: 'انضم إلى منصتنا للوصول إلى الأسعار المهنية والكتالوج الحصري.',
+    yes: 'نعم',
+    no: 'لا',
+    
+    // Categories
+    categories: 'الفئات',
+    category: 'الفئة',
+    manageCategories: 'إدارة الفئات',
+    newCategory: 'فئة جديدة',
+    editCategory: 'تعديل الفئة',
+    deleteCategory: 'حذف الفئة',
+    categoryName: 'اسم الفئة',
+    categoryDescription: 'الوصف',
+    categorySlug: 'الرابط',
+    createCategory: 'إنشاء الفئة',
+    updateCategory: 'تحديث',
+    confirmDelete: 'تأكيد الحذف',
+    categoryHasProducts: 'تحتوي هذه الفئة على {count} منتج',
+    cannotDeleteCategory: 'لا يمكن حذف هذه الفئة لأنها تحتوي على منتجات',
+    forceDelete: 'فرض الحذف',
+    forceDeleteWarning: 'هل أنت متأكد؟ سيتم فصل المنتجات عن هذه الفئة.',
+    categoryDeleted: 'تم حذف الفئة بنجاح',
+    categoryCreated: 'تم إنشاء الفئة بنجاح',
+    categoryUpdated: 'تم تحديث الفئة بنجاح',
+    noCategories: 'لم يتم العثور على فئات',
+    searchCategory: 'البحث عن فئة...',
+    productCount: 'عدد المنتجات',
+    edit: 'تعديل',
+    delete: 'حذف',
+    
+    // Product Options
+    productOptions: 'خيارات المنتج',
+    manageOptions: 'إدارة الخيارات',
+    materials: 'المواد',
+    genders: 'الأجناس',
+    addMaterial: 'إضافة مادة',
+    addGender: 'إضافة جنس',
+    materialName: 'اسم المادة',
+    genderName: 'اسم الجنس',
+    addOption: 'إضافة',
+    noMaterials: 'لا توجد مواد',
+    noGenders: 'لا توجد أجناس',
+    optionAdded: 'تمت إضافة الخيار بنجاح',
+    optionDeleted: 'تم حذف الخيار بنجاح',
+    
+    // Geolocation
+    findNearestOptician: 'ابحث عن أخصائي بصريات بالقرب منك',
+    findOpticianForProduct: 'ابحث عن أخصائي بصريات يمكنه تزويدك',
+    allowLocationAccess: 'اسمح بالوصول إلى الموقع للعثور على أقرب أخصائيي البصريات.',
+    useMyLocation: 'استخدم موقعي',
+    searchByCity: 'البحث حسب المدينة',
+    locationDenied: 'تم رفض الوصول إلى الموقع. يمكنك البحث حسب المدينة أدناه.',
+    enterCity: 'أدخل اسم المدينة...',
+    searchingOpticians: 'البحث عن أخصائيي البصريات...',
+  },
+};
+
+export function useTranslation(lang: Language) {
+  return translations[lang];
+}

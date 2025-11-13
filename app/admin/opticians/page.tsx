@@ -1,7 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Check, X, Eye, Search } from 'lucide-react';
 
 interface Optician {
@@ -16,14 +19,25 @@ interface Optician {
 }
 
 export default function AdminOpticiansPage() {
+  const { t } = useLanguage();
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [opticians, setOpticians] = useState<Optician[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Protection: Vérifier que l'utilisateur est admin
   useEffect(() => {
+    if (status === 'loading') return;
+    
+    if (!session || session.user?.role !== 'ADMIN') {
+      router.push('/');
+      return;
+    }
+    
     fetchOpticians();
-  }, []);
+  }, [session, status, router]);
 
   const fetchOpticians = async () => {
     try {
@@ -75,7 +89,7 @@ export default function AdminOpticiansPage() {
   return (
     <div className="min-h-screen bg-palladian">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-4xl font-bold text-abyssal mb-8">Gestion des Opticiens</h1>
+        <h1 className="text-4xl font-bold text-abyssal mb-8">{t.opticianManagement}</h1>
 
         {/* Filters */}
         <div className="bg-white p-6 shadow-lg mb-6">
@@ -84,7 +98,7 @@ export default function AdminOpticiansPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Rechercher un opticien..."
+                placeholder={t.searchOptician}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-fantastic"
@@ -98,7 +112,7 @@ export default function AdminOpticiansPage() {
                   size="sm"
                   onClick={() => setFilter(status)}
                 >
-                  {status === 'ALL' ? 'Tous' : status === 'PENDING' ? 'En attente' : status === 'APPROVED' ? 'Approuvés' : 'Rejetés'}
+                  {status === 'ALL' ? t.all : status === 'PENDING' ? t.pending : status === 'APPROVED' ? t.approved : t.rejected}
                 </Button>
               ))}
             </div>
@@ -115,19 +129,19 @@ export default function AdminOpticiansPage() {
               <thead className="bg-blue-fantastic">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                    Entreprise
+                    {t.business}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                    Contact
+                    {t.contactInfo}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                    Email
+                    {t.email}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                    Statut
+                    {t.status}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                    Actions
+                    {t.actions}
                   </th>
                 </tr>
               </thead>
@@ -148,7 +162,7 @@ export default function AdminOpticiansPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold ${getStatusBadge(optician.status)}`}>
-                        {optician.status === 'PENDING' ? 'En attente' : optician.status === 'APPROVED' ? 'Approuvé' : 'Rejeté'}
+                        {optician.status === 'PENDING' ? t.pending : optician.status === 'APPROVED' ? t.approved : t.rejected}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
@@ -157,14 +171,14 @@ export default function AdminOpticiansPage() {
                           <button
                             onClick={() => handleStatusChange(optician.id, 'APPROVED')}
                             className="text-green-600 hover:text-green-900"
-                            title="Approuver"
+                            title={t.approve}
                           >
                             <Check className="h-5 w-5" />
                           </button>
                           <button
                             onClick={() => handleStatusChange(optician.id, 'REJECTED')}
                             className="text-red-600 hover:text-red-900"
-                            title="Rejeter"
+                            title={t.reject}
                           >
                             <X className="h-5 w-5" />
                           </button>
@@ -172,7 +186,7 @@ export default function AdminOpticiansPage() {
                       )}
                       <button
                         className="text-blue-600 hover:text-blue-900"
-                        title="Voir détails"
+                        title={t.viewDetails}
                       >
                         <Eye className="h-5 w-5" />
                       </button>
@@ -183,7 +197,7 @@ export default function AdminOpticiansPage() {
             </table>
             {filteredOpticians.length === 0 && (
               <div className="text-center py-12 text-gray-500">
-                Aucun opticien trouvé
+                {t.noOpticianFound}
               </div>
             )}
           </div>

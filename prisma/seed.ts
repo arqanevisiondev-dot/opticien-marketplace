@@ -19,37 +19,30 @@ async function main() {
   });
   console.log('✅ Admin user created');
 
-  // Create suppliers
-  const suppliers = await Promise.all([
-    prisma.supplier.upsert({
-      where: { email: 'contact@luxottica.com' },
-      update: {},
-      create: {
-        name: 'Luxottica',
-        email: 'contact@luxottica.com',
-        phone: '+33 1 23 45 67 89',
-        whatsapp: '+33623456789',
-        description: 'Leader mondial de la lunetterie de luxe',
-      },
-    }),
-    prisma.supplier.upsert({
-      where: { email: 'info@safilo.com' },
-      update: {},
-      create: {
-        name: 'Safilo Group',
-        email: 'info@safilo.com',
-        phone: '+33 1 98 76 54 32',
-        whatsapp: '+33698765432',
-        description: 'Fabricant italien de montures de qualité',
-      },
-    }),
-  ]);
-  console.log('✅ Suppliers created');
+  // Create default supplier (OptiMarket Admin)
+  const adminSupplier = await prisma.supplier.upsert({
+    where: { email: 'admin@optimarket.com' },
+    update: {},
+    create: {
+      name: 'OptiMarket',
+      email: 'admin@optimarket.com',
+      phone: '+33 1 23 45 67 89',
+      whatsapp: '+33612345678',
+      description: 'Plateforme OptiMarket - Fournisseur principal',
+      address: '10 Rue de Rivoli',
+      city: 'Paris',
+      postalCode: '75001',
+      latitude: 48.8566,
+      longitude: 2.3522,
+    },
+  });
+  console.log('✅ Default supplier created');
 
   // Create products
   const products = [
     {
       name: 'Aviator Classic',
+      slug: 'aviator-classic',
       reference: 'AV-001',
       description: 'Monture aviateur classique en métal doré',
       material: 'Métal',
@@ -60,10 +53,11 @@ async function main() {
       images: JSON.stringify([
         'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400',
       ]),
-      supplierId: suppliers[0].id,
+      supplierId: adminSupplier.id,
     },
     {
       name: 'Wayfarer Modern',
+      slug: 'wayfarer-modern',
       reference: 'WF-002',
       description: 'Monture wayfarer moderne en acétate noir',
       material: 'Acétate',
@@ -74,10 +68,11 @@ async function main() {
       images: JSON.stringify([
         'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=400',
       ]),
-      supplierId: suppliers[0].id,
+      supplierId: adminSupplier.id,
     },
     {
       name: 'Round Vintage',
+      slug: 'round-vintage',
       reference: 'RV-003',
       description: 'Monture ronde vintage en métal argenté',
       material: 'Métal',
@@ -88,10 +83,11 @@ async function main() {
       images: JSON.stringify([
         'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=400',
       ]),
-      supplierId: suppliers[1].id,
+      supplierId: adminSupplier.id,
     },
     {
       name: 'Cat Eye Elegance',
+      slug: 'cat-eye-elegance',
       reference: 'CE-004',
       description: 'Monture cat eye élégante pour femme',
       material: 'Acétate',
@@ -102,10 +98,11 @@ async function main() {
       images: JSON.stringify([
         'https://images.unsplash.com/photo-1577803645773-f96470509666?w=400',
       ]),
-      supplierId: suppliers[1].id,
+      supplierId: adminSupplier.id,
     },
     {
       name: 'Sport Pro',
+      slug: 'sport-pro',
       reference: 'SP-005',
       description: 'Monture sportive légère en titane',
       material: 'Titane',
@@ -116,7 +113,7 @@ async function main() {
       images: JSON.stringify([
         'https://images.unsplash.com/photo-1509695507497-903c140c43b0?w=400',
       ]),
-      supplierId: suppliers[0].id,
+      supplierId: adminSupplier.id,
     },
   ];
 

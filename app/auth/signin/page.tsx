@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/Button';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function SignInPage() {
-  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -22,19 +21,18 @@ export default function SignInPage() {
     setError('');
 
     try {
-      const res = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Erreur de connexion');
+      if (result?.error) {
+        throw new Error('Email ou mot de passe incorrect');
       }
 
-      router.push('/dashboard');
+      // Attendre que la session soit mise à jour
+      window.location.href = '/auth/callback';
     } catch (err: any) {
       setError(err.message);
     } finally {

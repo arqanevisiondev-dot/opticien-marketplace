@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Footer() {
+  const { t } = useLanguage();
   return (
     <footer className="bg-blue-fantastic text-white mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -12,27 +14,27 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-bold mb-4">OptiMarket</h3>
             <p className="text-sm text-gray-300">
-              Plateforme de marché pour montures de lunettes à destination des opticiens professionnels.
+              {t.platformDescription}
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-bold mb-4">Liens rapides</h3>
+            <h3 className="text-lg font-bold mb-4">{t.quickLinks}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/catalogue" className="text-gray-300 hover:text-burning-flame transition-colors">
-                  Catalogue
+                  {t.catalog}
                 </Link>
               </li>
               <li>
                 <Link href="/opticiens" className="text-gray-300 hover:text-burning-flame transition-colors">
-                  Trouver un opticien
+                  {t.findOptician}
                 </Link>
               </li>
               <li>
                 <Link href="/auth/signup" className="text-gray-300 hover:text-burning-flame transition-colors">
-                  Devenir partenaire
+                  {t.becomePartnerLink}
                 </Link>
               </li>
             </ul>
@@ -40,21 +42,21 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="text-lg font-bold mb-4">Légal</h3>
+            <h3 className="text-lg font-bold mb-4">{t.legal}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/legal/terms" className="text-gray-300 hover:text-burning-flame transition-colors">
-                  Conditions générales
+                  {t.termsConditions}
                 </Link>
               </li>
               <li>
                 <Link href="/legal/privacy" className="text-gray-300 hover:text-burning-flame transition-colors">
-                  Politique de confidentialité
+                  {t.privacyPolicy}
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="text-gray-300 hover:text-burning-flame transition-colors">
-                  Contact
+                  {t.contact}
                 </Link>
               </li>
             </ul>
@@ -62,7 +64,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="text-lg font-bold mb-4">Contact</h3>
+            <h3 className="text-lg font-bold mb-4">{t.contact}</h3>
             <ul className="space-y-2 text-sm text-gray-300">
               <li className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
@@ -81,7 +83,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-white/20 text-center text-sm text-gray-300">
-          <p>&copy; {new Date().getFullYear()} OptiMarket. Tous droits réservés.</p>
+          <p>&copy; {new Date().getFullYear()} OptiMarket. {t.allRightsReserved}.</p>
         </div>
       </div>
     </footer>

@@ -12,6 +12,13 @@ export async function GET(request: NextRequest) {
             whatsapp: true,
           },
         },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',

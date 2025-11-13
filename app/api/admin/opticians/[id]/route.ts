@@ -1,11 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Vérifier que l'utilisateur est admin
+    const session = await auth();
+    
+    if (!session || session.user?.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: 'Accès non autorisé' },
+        { status: 403 }
+      );
+    }
+
+    const { id } = await params;
     const { status } = await request.json();
 
     if (!['APPROVED', 'REJECTED', 'PENDING'].includes(status)) {
@@ -16,7 +28,7 @@ export async function PATCH(
     }
 
     const optician = await prisma.optician.update({
-      where: { id: params.id },
+      where: { id },
       data: { status },
     });
 
