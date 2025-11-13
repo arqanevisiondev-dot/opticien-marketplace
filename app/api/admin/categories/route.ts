@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       select: { slug: true }
     });
     
-    const existingSlugs = existingWithSlug.map(c => c.slug);
+    const existingSlugs = existingWithSlug.map((c: { slug: string }) => c.slug);
     let finalSlug = baseSlug;
     let counter = 1;
     
