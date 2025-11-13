@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -25,8 +25,8 @@ enum OpticianStatus {
 }
 
 model User {
-  id            String          @id @default(cuid())
-  email         String          @unique
+  id            String          @id @default(cuid()) @db.VarChar(191)
+  email         String          @unique @db.VarChar(191)
   password      String
   role          UserRole        @default(OPTICIAN)
   createdAt     DateTime        @default(now())
@@ -36,8 +36,8 @@ model User {
 }
 
 model Optician {
-  id              String          @id @default(cuid())
-  userId          String          @unique
+  id              String          @id @default(cuid()) @db.VarChar(191)
+  userId          String          @unique @db.VarChar(191)
   user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   businessName    String
   firstName       String
@@ -58,12 +58,12 @@ model Optician {
 }
 
 model Supplier {
-  id          String    @id @default(cuid())
+  id          String    @id @default(cuid()) @db.VarChar(191)
   name        String
-  email       String    @unique
+  email       String    @unique @db.VarChar(191)
   phone       String
   whatsapp    String?
-  description String?
+  description String?  @db.Text
   address     String?
   city        String?
   postalCode  String?
@@ -77,9 +77,9 @@ model Supplier {
 }
 
 model Category {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  slug        String    @unique
+  id          String    @id @default(cuid()) @db.VarChar(191)
+  name        String    @unique @db.VarChar(191)
+  slug        String    @unique @db.VarChar(191)
   description String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -89,21 +89,21 @@ model Category {
 }
 
 model Product {
-  id          String    @id @default(cuid())
-  supplierId  String
+  id          String    @id @default(cuid()) @db.VarChar(191)
+  supplierId  String    @db.VarChar(191)
   supplier    Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
-  categoryId  String?
+  categoryId  String?   @db.VarChar(191)
   category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   name        String
-  slug        String    @unique
-  reference   String    @unique
-  description String?
-  material    String?
-  gender      String?
+  slug        String    @unique @db.VarChar(191)
+  reference   String    @unique @db.VarChar(191)
+  description String?  @db.Text
+  material    String?   @db.VarChar(191)
+  gender      String?   @db.VarChar(191)
   shape       String?
   color       String?
   price       Float
-  images      String    // JSON array of image URLs
+  images      String    @db.Text // JSON array of image URLs
   inStock     Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -117,9 +117,9 @@ model Product {
 }
 
 model ProductOption {
-  id        String   @id @default(cuid())
-  type      String   // "material" or "gender"
-  value     String
+  id        String   @id @default(cuid()) @db.VarChar(191)
+  type      String   @db.VarChar(191)  // "material" or "gender"
+  value     String   @db.VarChar(191)
   createdAt DateTime @default(now())
   
   @@unique([type, value])
@@ -127,11 +127,11 @@ model ProductOption {
 }
 
 model EmailCampaign {
-  id          String   @id @default(cuid())
-  creatorId   String
+  id          String   @id @default(cuid()) @db.VarChar(191)
+  creatorId   String   @db.VarChar(191)
   creator     User     @relation("CampaignCreator", fields: [creatorId], references: [id])
   subject     String
-  content     String
+  content     String   @db.Text
   targetRole  String?  // "ALL", "APPROVED", "PENDING", or specific region
   sentAt      DateTime @default(now())
   recipients  Int      @default(0)

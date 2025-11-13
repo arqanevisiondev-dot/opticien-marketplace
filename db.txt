@@ -1,0 +1,9 @@
+Use TCP (not socket) for Prisma and create/seed
+Point Prisma to TCP on 127.0.0.1
+export DATABASE_URL="mysql://root:@127.0.0.1:3306/opticien_marketplace"
+Generate, create tables, and seed
+pnpm prisma generate
+pnpm prisma db push
+pnpm db:seed
+pnpm tsx prisma/seed-categories.ts
+pnpm tsx prisma/seed-options.ts
