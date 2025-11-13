@@ -13,15 +13,15 @@ declare module 'next-auth' {
     user: {
       id: string;
       email: string;
-      role: string;
-      opticianStatus?: string;
+      role: UserRole;
+      opticianStatus?: OpticianStatus;
     };
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
-    role: string;
-    opticianStatus?: string;
+    role: UserRole;
+    opticianStatus?: OpticianStatus;
   }
 }

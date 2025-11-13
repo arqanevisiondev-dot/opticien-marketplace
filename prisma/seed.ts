@@ -204,6 +204,131 @@ async function main() {
     },
   });
 
+  const saleOpt1 = await prisma.user.upsert({
+    where: { email: 'alami.optic.sale@example.com' },
+    update: {},
+    create: {
+      email: 'alami.optic.sale@example.com',
+      password: opticianPassword,
+      role: 'OPTICIAN',
+      optician: {
+        create: {
+          businessName: 'Alami Optic',
+          firstName: 'Ahmed',
+          lastName: 'Alami',
+          phone: '+212 537 123 456',
+          whatsapp: '+212612345678',
+          address: '4 Boulevard Lalla Asmaa, Résidence My Youssef, Mag 5, Tabriquet',
+          city: 'Salé',
+          postalCode: '11000',
+          latitude: 34.0452,
+          longitude: -6.8106,
+          status: 'APPROVED',
+        },
+      },
+    },
+  });
+
+  const saleOpt2 = await prisma.user.upsert({
+    where: { email: 'chemaou.optic.sale@example.com' },
+    update: {},
+    create: {
+      email: 'chemaou.optic.sale@example.com',
+      password: opticianPassword,
+      role: 'OPTICIAN',
+      optician: {
+        create: {
+          businessName: 'Chemaou Optic',
+          firstName: 'Khalid',
+          lastName: 'Chemaou',
+          phone: '+212 537 654 321',
+          whatsapp: '+212611223344',
+          address: '61 Boulevard Ahmed Balafrej, Hay Nahda, Route de Kénitra',
+          city: 'Salé',
+          postalCode: '11000',
+          latitude: 34.064,
+          longitude: -6.8055,
+          status: 'APPROVED',
+        },
+      },
+    },
+  });
+
+  const saleOpt3 = await prisma.user.upsert({
+    where: { email: 'espace.visuel.sale@example.com' },
+    update: {},
+    create: {
+      email: 'espace.visuel.sale@example.com',
+      password: opticianPassword,
+      role: 'OPTICIAN',
+      optician: {
+        create: {
+          businessName: 'Espace Visuel',
+          firstName: 'Nadia',
+          lastName: 'El Fassi',
+          phone: '+212 537 777 888',
+          whatsapp: '+212600112233',
+          address: '43B Boulevard Mohammed V, C.5, Sala Al Jadida',
+          city: 'Salé',
+          postalCode: '11015',
+          latitude: 34.062,
+          longitude: -6.7754,
+          status: 'APPROVED',
+        },
+      },
+    },
+  });
+
+  const saleOpt4 = await prisma.user.upsert({
+    where: { email: 'audio.optique.sale@example.com' },
+    update: {},
+    create: {
+      email: 'audio.optique.sale@example.com',
+      password: opticianPassword,
+      role: 'OPTICIAN',
+      optician: {
+        create: {
+          businessName: 'Audio Optique Salé',
+          firstName: 'Youssef',
+          lastName: 'Zenfari',
+          phone: '+212 537 888 999',
+          whatsapp: '+212601223344',
+          address: 'Boulevard Hassan II, Lotissement Zenfari N°5, Bettana',
+          city: 'Salé',
+          postalCode: '11020',
+          latitude: 34.0582,
+          longitude: -6.8199,
+          status: 'APPROVED',
+        },
+      },
+    },
+  });
+
+  const saleOpt5 = await prisma.user.upsert({
+    where: { email: 'belle.optique.sale@example.com' },
+    update: {},
+    create: {
+      email: 'belle.optique.sale@example.com',
+      password: opticianPassword,
+      role: 'OPTICIAN',
+      optician: {
+        create: {
+          businessName: 'Belle Optique',
+          firstName: 'Bouchra',
+          lastName: 'Ouazzani',
+          phone: '+212 537 222 333',
+          whatsapp: '+212602334455',
+          address: '1361 Rue Fkih Ben Salah, angle Boulevard Ibn Al Haytam, Mag. 2',
+          city: 'Salé',
+          postalCode: '11010',
+          latitude: 34.05,
+          longitude: -6.8,
+          status: 'APPROVED',
+        },
+      },
+    },
+  });
+
   console.log('✅ Opticians created');
 
   console.log('\n🎉 Seeding completed successfully!');
