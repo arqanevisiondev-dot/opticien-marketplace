@@ -22,7 +22,7 @@ export async function GET() {
 
     // Extract and filter out null values
     const cities = opticians
-      .map((o) => o.city)
+      .map((o: { city: string | null }) => o.city)
       .filter((city): city is string => city !== null)
       .sort();
 
