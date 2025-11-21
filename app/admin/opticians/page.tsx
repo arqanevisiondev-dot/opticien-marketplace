@@ -185,6 +185,7 @@ export default function AdminOpticiansPage() {
                         </>
                       )}
                       <button
+                        onClick={() => router.push(`/admin/opticians/${optician.id}`)}
                         className="text-blue-600 hover:text-blue-900"
                         title={t.viewDetails}
                       >

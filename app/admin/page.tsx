@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Users, Package, Mail, TrendingUp, FolderTree, Settings } from 'lucide-react';
+import { Users, Package, Mail, TrendingUp, FolderTree, Settings, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
             {/* Quick Actions */}
             <div className="bg-white p-6 shadow-lg mb-8">
               <h2 className="text-2xl font-bold text-abyssal mb-6">{t.quickActions}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                 <Link href="/admin/opticians">
                   <Button variant="primary" className="w-full flex items-center justify-center">
                     <Users className="mr-2 h-4 w-4" />
@@ -126,6 +126,18 @@ export default function AdminDashboard() {
                   <Button variant="secondary" className="w-full flex items-center justify-center">
                     <Package className="mr-2 h-4 w-4" />
                     {t.newProduct}
+                  </Button>
+                </Link>
+                <Link href="/admin/orders/new">
+                  <Button variant="secondary" className="w-full flex items-center justify-center">
+                    <ClipboardList className="mr-2 h-4 w-4" />
+                    {t.newOrder}
+                  </Button>
+                </Link>
+                <Link href="/admin/products">
+                  <Button variant="secondary" className="w-full flex items-center justify-center">
+                    <Package className="mr-2 h-4 w-4" />
+                    {t.editProducts}
                   </Button>
                 </Link>
                 <Link href="/admin/settings">

@@ -130,9 +130,6 @@ export default function Home() {
             <h2 className="text-2xl font-bold text-abyssal mb-4">
               {t.opticianPromptTitle}
             </h2>
-            <p className="text-gray-600 mb-6">
-              {t.opticianPromptMessage}
-            </p>
             <div className="flex gap-4">
               <Button
                 onClick={handleYes}

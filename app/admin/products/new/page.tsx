@@ -37,13 +37,15 @@ export default function NewProductPage() {
     shape: '',
     color: '',
     price: '',
+    salePrice: '',
+    stockQty: '',
+    firstOrderRemisePct: '',
     images: '',
     inStock: true,
+    isNewCollection: false,
   });
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [colors, setColors] = useState<string[]>([]);
-  const [colorInput, setColorInput] = useState('');
 
   // Protection admin
   useEffect(() => {
@@ -85,27 +87,7 @@ export default function NewProductPage() {
     }
   }, [session]);
 
-  const handleAddColor = () => {
-    if (colorInput.trim() && !colors.includes(colorInput.trim())) {
-      const newColors = [...colors, colorInput.trim()];
-      setColors(newColors);
-      setFormData({ ...formData, color: newColors.join(', ') });
-      setColorInput('');
-    }
-  };
-
-  const handleRemoveColor = (colorToRemove: string) => {
-    const newColors = colors.filter(c => c !== colorToRemove);
-    setColors(newColors);
-    setFormData({ ...formData, color: newColors.join(', ') });
-  };
-
-  const handleColorKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddColor();
-    }
-  };
+  // Single color only: each color has its own reference
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -132,8 +114,35 @@ export default function NewProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+
+    // Validation (instead of HTML required attributes)
+    const errors: string[] = [];
+    if (!formData.name.trim()) errors.push('Le nom du produit est requis.');
+    if (!formData.reference.trim()) errors.push('La référence est requise.');
+    if (!formData.color.trim()) errors.push('La couleur est requise.');
+    const priceNum = parseFloat(formData.price);
+    if (Number.isNaN(priceNum) || priceNum <= 0) errors.push('Le prix doit être un nombre positif.');
+    if (formData.salePrice.trim()) {
+      const saleNum = parseFloat(formData.salePrice);
+      if (Number.isNaN(saleNum) || saleNum <= 0) errors.push('Le prix soldé doit être un nombre positif.');
+    }
+    if (formData.stockQty.trim()) {
+      const stockNum = parseInt(formData.stockQty, 10);
+      if (Number.isNaN(stockNum) || stockNum < 0) errors.push('La quantité doit être un entier positif ou nul.');
+    }
+    if (formData.firstOrderRemisePct.trim()) {
+      const remiseNum = parseFloat(formData.firstOrderRemisePct);
+      if (Number.isNaN(remiseNum) || remiseNum < 0 || remiseNum > 100) {
+        errors.push('La remise doit être comprise entre 0 et 100%.');
+      }
+    }
+    if (errors.length) {
+      setError(errors.join(' '));
+      return;
+    }
+
+    setLoading(true);
 
     try {
       let imagesArray: string[] = [];
@@ -162,6 +171,9 @@ export default function NewProductPage() {
       const payload = {
         ...formData,
         price: parseFloat(formData.price),
+        salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
+        stockQty: formData.stockQty ? parseInt(formData.stockQty, 10) : 0,
+        firstOrderRemisePct: formData.firstOrderRemisePct ? parseFloat(formData.firstOrderRemisePct) : null,
         images: JSON.stringify(imagesArray),
       };
 
@@ -215,7 +227,6 @@ export default function NewProductPage() {
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
@@ -228,7 +239,6 @@ export default function NewProductPage() {
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.reference}
                   onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
@@ -321,68 +331,80 @@ export default function NewProductPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t.productColor} (plusieurs couleurs)
+                  {t.productColor}
                 </label>
-                
-                {/* Color Tags */}
-                {colors.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {colors.map((color, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                      >
-                        {color}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveColor(color)}
-                          className="hover:text-blue-900"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Color Input */}
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={colorInput}
-                    onChange={(e) => setColorInput(e.target.value)}
-                    onKeyPress={handleColorKeyPress}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
-                    placeholder="Noir, Écaille, Transparent..."
-                  />
-                  <Button
-                    type="button"
-                    onClick={handleAddColor}
-                    variant="secondary"
-                    className="whitespace-nowrap"
-                  >
-                    Ajouter
-                  </Button>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Appuyez sur Entrée ou cliquez sur Ajouter pour ajouter une couleur
-                </p>
+                <input
+                  type="text"
+                  value={formData.color}
+                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                  placeholder="Noir, Écaille, Transparent..."
+                />
+                <p className="text-xs text-gray-500 mt-1">Une seule couleur par produit (chaque couleur a sa propre référence).</p>
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t.price} (€) *
+                {t.price} (DH) *
               </label>
               <input
                 type="number"
                 step="0.01"
-                required
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
                 placeholder="99.99"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Prix soldé (DH)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.salePrice}
+                onChange={(e) => setFormData({ ...formData, salePrice: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                placeholder="89.99"
+              />
+              <p className="text-xs text-gray-500 mt-1">Laissez vide si aucune promotion n&apos;est active.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Stock disponible
+                </label>
+                <input
+                  type="number"
+                  step="1"
+                  min="0"
+                  value={formData.stockQty}
+                  onChange={(e) => setFormData({ ...formData, stockQty: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                  placeholder="0"
+                />
+                <p className="text-xs text-gray-500 mt-1">Ce champ permet d&apos;afficher le stock actuel avant validation des commandes.</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Remise 1er achat (%)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  value={formData.firstOrderRemisePct}
+                  onChange={(e) => setFormData({ ...formData, firstOrderRemisePct: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                  placeholder="10"
+                />
+                <p className="text-xs text-gray-500 mt-1">Appliquée automatiquement lorsque l&apos;opticien commande ce produit pour la première fois.</p>
+              </div>
             </div>
 
             {/* Image Upload */}
@@ -450,16 +472,27 @@ export default function NewProductPage() {
               </div>
             </div>
 
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="inStock"
-                checked={formData.inStock}
-                onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
-                className="h-4 w-4 text-blue-fantastic focus:ring-blue-fantastic border-gray-300"
-              />
-              <label htmlFor="inStock" className="ml-2 text-sm text-gray-700">
-                {t.inStock}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-3 sm:space-y-0">
+              <label className="inline-flex items-center">
+                <input
+                  type="checkbox"
+                  id="inStock"
+                  checked={formData.inStock}
+                  onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
+                  className="h-4 w-4 text-blue-fantastic focus:ring-blue-fantastic border-gray-300"
+                />
+                <span className="ml-2 text-sm text-gray-700">{t.inStock}</span>
+              </label>
+
+              <label className="inline-flex items-center">
+                <input
+                  type="checkbox"
+                  id="isNewCollection"
+                  checked={formData.isNewCollection}
+                  onChange={(e) => setFormData({ ...formData, isNewCollection: e.target.checked })}
+                  className="h-4 w-4 text-burning-flame focus:ring-burning-flame border-gray-300"
+                />
+                <span className="ml-2 text-sm text-gray-700">{t.markNewCollection}</span>
               </label>
             </div>
 

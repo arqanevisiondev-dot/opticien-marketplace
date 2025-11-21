@@ -40,9 +40,17 @@ export async function GET(
     }
 
     // Parse images JSON
+    let images: string[] = [];
+    try {
+      images = Array.isArray((product as unknown as { images: unknown }).images)
+        ? ((product as unknown as { images: string[] }).images)
+        : JSON.parse(product.images || '[]');
+    } catch {
+      images = [];
+    }
     const formattedProduct = {
       ...product,
-      images: JSON.parse(product.images),
+      images,
     };
 
     return NextResponse.json(formattedProduct);

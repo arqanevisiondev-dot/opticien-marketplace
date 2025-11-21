@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const products = await prisma.product.findMany({
       include: {
@@ -26,10 +26,20 @@ export async function GET(request: NextRequest) {
     });
 
     // Parse images JSON string to array
-    const productsWithImages = products.map((product) => ({
-      ...product,
-      images: product.images ? JSON.parse(product.images) : [],
-    }));
+    const productsWithImages = products.map((product) => {
+      let images: string[] = [];
+      try {
+        const raw = (product as unknown as { images: unknown }).images;
+        if (Array.isArray(raw)) {
+          images = raw as string[];
+        } else if (typeof raw === 'string' && raw.length > 0) {
+          images = JSON.parse(raw) as string[];
+        }
+      } catch {
+        images = [];
+      }
+      return { ...product, images };
+    });
 
     return NextResponse.json(productsWithImages);
   } catch (error) {
@@ -40,3 +50,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

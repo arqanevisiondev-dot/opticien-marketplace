@@ -5,6 +5,8 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import SessionProvider from '@/components/providers/SessionProvider';
 import { LanguageProvider } from '@/contexts/LanguageContext';
+import { CartProvider } from '@/contexts/CartContext';
+import CartBar from '@/components/cart/CartBar';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,9 +35,12 @@ export default function RootLayout({
       >
         <SessionProvider>
           <LanguageProvider>
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
+            <CartProvider>
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+              <CartBar />
+            </CartProvider>
           </LanguageProvider>
         </SessionProvider>
       </body>

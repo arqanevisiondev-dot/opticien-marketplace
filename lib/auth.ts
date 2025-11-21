@@ -40,15 +40,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email: user.email,
           role: user.role,
           opticianStatus: user.optician?.status,
-        };
+          opticianBusinessName: user.optician?.businessName,
+        } as unknown as User;
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
-        token.opticianStatus = user.opticianStatus;
+        token.role = (user as unknown as Record<string, unknown>).role as UserRole;
+        token.opticianStatus = (user as unknown as Record<string, unknown>).opticianStatus as OpticianStatus;
+        token.opticianBusinessName = (user as unknown as Record<string, unknown>).opticianBusinessName as string | undefined;
       }
       return token;
     },
@@ -57,6 +59,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.sub!;
         session.user.role = token.role as UserRole;
         session.user.opticianStatus = token.opticianStatus as OpticianStatus;
+        session.user.opticianBusinessName = (token as unknown as Record<string, unknown>).opticianBusinessName as string | undefined;
       }
       return session;
     },

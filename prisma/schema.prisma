@@ -52,6 +52,7 @@ model Optician {
   status          OpticianStatus  @default(PENDING)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  orders          Order[]
   
   @@index([status])
   @@index([latitude, longitude])
@@ -103,17 +104,70 @@ model Product {
   shape       String?
   color       String?
   price       Float
-  images      String    @db.Text // JSON array of image URLs
+  salePrice   Float?
+  stockQty    Int       @default(0)
+  firstOrderRemisePct Float?
+  images      String    @db.LongText // JSON array of image URLs
   inStock     Boolean   @default(true)
+  isNewCollection Boolean @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  
+  orderItems  OrderItem[]
+    
   @@index([supplierId])
   @@index([categoryId])
   @@index([material])
   @@index([gender])
   @@index([inStock])
   @@index([slug])
+}
+
+model Order {
+  id              String         @id @default(cuid()) @db.VarChar(191)
+  opticianId      String         @db.VarChar(191)
+  optician        Optician       @relation(fields: [opticianId], references: [id], onDelete: Cascade)
+  status          OrderStatus    @default(PENDING)
+  source          OrderSource    @default(WHATSAPP)
+  whatsappMessageId String?      @db.VarChar(191)
+  whatsappFrom    String?        @db.VarChar(191)
+  totalAmount     Float          @default(0)
+  currency        String         @default("EUR") @db.VarChar(16)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  validatedAt     DateTime?
+
+  items           OrderItem[]
+
+  @@index([opticianId])
+  @@index([status])
+  @@index([source])
+}
+
+model OrderItem {
+  id           String   @id @default(cuid()) @db.VarChar(191)
+  orderId      String   @db.VarChar(191)
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String   @db.VarChar(191)
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productName  String
+  productReference String @db.VarChar(191)
+  quantity     Int      @default(1)
+  unitPrice    Float
+  salePrice    Float?
+  remisePct    Float?
+  totalLine    Float
+}
+
+enum OrderStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum OrderSource {
+  WHATSAPP
+  MANUAL
 }
 
 model ProductOption {

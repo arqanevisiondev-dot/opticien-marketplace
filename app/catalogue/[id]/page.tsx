@@ -8,12 +8,7 @@ import { ArrowLeft, Phone, MessageCircle, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import dynamic from 'next/dynamic';
-
-// Dynamically import map component to avoid SSR issues
-const MapComponent = dynamic(() => import('@/components/map/OpticianMap'), {
-  ssr: false,
-  loading: () => <div className="h-64 bg-gray-200 animate-pulse flex items-center justify-center">Chargement de la carte...</div>,
-});
+import { useCart } from '@/contexts/CartContext';
 
 // Dynamically import nearest optician finder
 const NearestOpticianFinder = dynamic(() => import('@/components/opticians/NearestOpticianFinder'), {
@@ -23,6 +18,7 @@ const NearestOpticianFinder = dynamic(() => import('@/components/opticians/Neare
 interface Product {
   id: string;
   name: string;
+  slug: string;
   reference: string;
   description: string;
   material: string;
@@ -30,6 +26,7 @@ interface Product {
   shape: string;
   color: string;
   price: number;
+  salePrice?: number;
   images: string[];
   inStock: boolean;
   supplier: {
@@ -49,6 +46,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const { data: session } = useSession();
   const { t } = useLanguage();
   const resolvedParams = use(params);
+  const { add, isInCart } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -63,6 +61,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const canSeePrices = 
     (session?.user?.role === 'OPTICIAN' && session?.user?.opticianStatus === 'APPROVED') || 
     session?.user?.role === 'ADMIN';
+  const isOptician = session?.user?.role === 'OPTICIAN';
 
   // Debug: afficher les informations de session
   console.log('Session:', {
@@ -167,20 +166,47 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               {/* Price */}
               <div className="bg-palladian p-6 mb-6">
                 <div className="text-sm text-gray-600 mb-1">{t.priceOnRequest}</div>
-                <div className="text-3xl font-bold text-burning-flame">
-                  {canSeePrices ? (
-                    `${product.price.toFixed(2)} €`
+                {canSeePrices ? (
+                  product.salePrice ? (
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xs text-gray-500 line-through">
+                        {product.price.toFixed(2)} DH
+                      </span>
+                      <span className="text-gray-500">/</span>
+                      <span className="text-3xl font-bold text-burning-flame">
+                        {product.salePrice.toFixed(2)} DH
+                      </span>
+                    </div>
                   ) : (
-                    <button
-                      onClick={scrollToSupplier}
-                      className="text-base text-blue-fantastic hover:text-blue-600 underline cursor-pointer text-left"
-                    >
-                      {t.contactForPrice}
-                    </button>
-                  )}
-                </div>
+                    <div className="text-3xl font-bold text-burning-flame">
+                      {product.price.toFixed(2)} DH
+                    </div>
+                  )
+                ) : (
+                  <button
+                    onClick={scrollToSupplier}
+                    className="text-base text-blue-fantastic hover:text-blue-600 underline cursor-pointer text-left"
+                  >
+                    {t.contactForPrice}
+                  </button>
+                )}
               </div>
-
+              {isOptician && (
+                <div className="mt-4">
+                  <Button
+                    variant={isInCart(product.id) ? 'outline' : 'primary'}
+                    size="sm"
+                    onClick={() => {
+                      if (!isInCart(product.id)) {
+                        const url = `/catalogue/${product.slug || product.id}`;
+                        add({ id: product.id, name: product.name, reference: product.reference, url });
+                      }
+                    }}
+                  >
+                    {isInCart(product.id) ? 'Dans le panier' : 'Ajouter au panier'}
+                  </Button>
+                </div>
+              )}
               {/* Specifications */}
               <div className="space-y-3 mb-6">
                 <h2 className="text-xl font-bold text-abyssal">{t.description}</h2>
@@ -250,26 +276,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   )}
                 </div>
 
-                {/* Map */}
-                {product.supplier.latitude && product.supplier.longitude && (
-                  <div className="bg-white shadow-lg">
-                    <MapComponent 
-                      opticians={[{
-                        id: product.supplier.name,
-                        businessName: product.supplier.name,
-                        firstName: '',
-                        lastName: '',
-                        phone: product.supplier.phone,
-                        whatsapp: product.supplier.whatsapp,
-                        address: product.supplier.address,
-                        city: product.supplier.city,
-                        postalCode: product.supplier.postalCode,
-                        latitude: product.supplier.latitude,
-                        longitude: product.supplier.longitude,
-                      }]}
-                    />
-                  </div>
-                )}
               </div>
             </div>
           </div>

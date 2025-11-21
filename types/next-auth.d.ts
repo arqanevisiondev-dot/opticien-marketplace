@@ -7,6 +7,7 @@ declare module 'next-auth' {
     email: string;
     role: UserRole;
     opticianStatus?: OpticianStatus;
+    opticianBusinessName?: string;
   }
 
   interface Session {
@@ -15,6 +16,7 @@ declare module 'next-auth' {
       email: string;
       role: UserRole;
       opticianStatus?: OpticianStatus;
+      opticianBusinessName?: string;
     };
   }
 }
@@ -23,5 +25,6 @@ declare module 'next-auth/jwt' {
   interface JWT {
     role: UserRole;
     opticianStatus?: OpticianStatus;
+    opticianBusinessName?: string;
   }
 }

@@ -1,6 +1,96 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { OrderStatus } from '@prisma/client';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth();
+    
+    if (!session || session.user?.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: 'Accès non autorisé' },
+        { status: 403 }
+      );
+    }
+
+    const { id } = await params;
+
+    const optician = await prisma.optician.findUnique({
+      where: { id },
+      include: {
+        user: { select: { email: true } },
+      },
+    });
+
+    if (!optician) {
+      return NextResponse.json(
+        { error: 'Opticien introuvable' },
+        { status: 404 }
+      );
+    }
+
+    const statusApproved = 'APPROVED' as unknown as OrderStatus;
+    const statusPending = 'PENDING' as unknown as OrderStatus;
+    const statusRejected = 'REJECTED' as unknown as OrderStatus;
+    const statusCancelled = 'CANCELLED' as unknown as OrderStatus;
+
+    const [totalOrders, approvedOrders, pendingOrders, rejectedOrders, cancelledOrders, totalItemsApproved, lastOrder] = await Promise.all([
+      prisma.order.count({ where: { opticianId: id } }),
+      prisma.order.count({ where: { opticianId: id, status: statusApproved } }),
+      prisma.order.count({ where: { opticianId: id, status: statusPending } }),
+      prisma.order.count({ where: { opticianId: id, status: statusRejected } }),
+      prisma.order.count({ where: { opticianId: id, status: statusCancelled } }),
+      prisma.orderItem.aggregate({
+        where: { order: { opticianId: id, status: statusApproved } },
+        _sum: { quantity: true },
+      }),
+      prisma.order.findFirst({
+        where: { opticianId: id },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true, status: true },
+      }),
+    ]);
+
+    const totalItemsValidated = totalItemsApproved?._sum?.quantity ?? 0;
+
+    return NextResponse.json({
+      id: optician.id,
+      businessName: optician.businessName,
+      firstName: optician.firstName,
+      lastName: optician.lastName,
+      phone: optician.phone,
+      whatsapp: optician.whatsapp ?? null,
+      address: optician.address ?? null,
+      city: optician.city ?? null,
+      postalCode: optician.postalCode ?? null,
+      latitude: optician.latitude ?? null,
+      longitude: optician.longitude ?? null,
+      email: optician.user.email,
+      status: optician.status,
+      createdAt: optician.createdAt.toISOString(),
+      analytics: {
+        totalOrders,
+        pendingOrders,
+        approvedOrders,
+        rejectedOrders,
+        cancelledOrders,
+        totalItemsValidated,
+        lastOrderAt: lastOrder?.createdAt?.toISOString() ?? null,
+        lastOrderStatus: lastOrder?.status ?? null,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching optician:', error);
+    return NextResponse.json(
+      { error: 'Erreur lors de la récupération de l\'opticien' },
+      { status: 500 }
+    );
+  }
+}
 
 export async function PATCH(
   request: NextRequest,
