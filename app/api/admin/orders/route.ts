@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
@@ -195,7 +196,7 @@ export async function POST(request: NextRequest) {
       products.map((product: ProductRecord) => [product.id, product])
     );
 
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const createdOrder = await tx.order.create({
         data: {
           opticianId,
