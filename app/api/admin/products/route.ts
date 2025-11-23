@@ -57,7 +57,7 @@ async function requireAdminSession() {
 
 async function getDefaultSupplier() {
   const supplier = await prisma.supplier.findUnique({
-    where: { email: 'admin@optimarket.com' },
+    where: { email: 'admin@Arqane Vitionet.com' },
   });
   return supplier;
 }
@@ -73,7 +73,7 @@ async function buildUniqueSlug(name: string, productId?: string) {
     },
     select: { slug: true },
   });
-  const existingSlugs = existingWithSlug.map((p) => p.slug);
+  const existingSlugs = existingWithSlug.map((p: { slug: string }) => p.slug);
   let finalSlug = baseSlug;
   let counter = 1;
   while (existingSlugs.includes(finalSlug)) {
@@ -83,14 +83,14 @@ async function buildUniqueSlug(name: string, productId?: string) {
   return finalSlug;
 }
 
-function parseNumber(value: number | string | undefined) {
+function parseNumber(value: number | string | null | undefined) {
   if (value === undefined || value === null || value === '') {
     return null;
   }
   return typeof value === 'number' ? value : parseFloat(String(value));
 }
 
-function parseInteger(value: number | string | undefined) {
+function parseInteger(value: number | string | null | undefined) {
   if (value === undefined || value === null || value === '') {
     return null;
   }

@@ -1,92 +1,83 @@
-'use client'
+"use client"
 
-import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
+import { createContext, useContext, useState, type ReactNode } from "react"
 
-export type CartItem = {
-  id: string;
-  name: string;
-  reference: string;
-  url?: string;
-  qty: number;
-};
+interface CartItem {
+  id: string
+  name: string
+  reference: string
+  url: string
+  quantity: number
+}
 
-type CartContextValue = {
-  items: CartItem[];
-  add: (item: Omit<CartItem, 'qty'>, qty?: number) => void;
-  remove: (id: string) => void;
-  clear: () => void;
-  isInCart: (id: string) => boolean;
-  updateQty: (id: string, qty: number) => void;
-  increase: (id: string) => void;
-  decrease: (id: string) => void;
-};
+interface CartContextType {
+  items: CartItem[]
+  add: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void
+  remove: (id: string) => void
+  clear: () => void
+  increase: (id: string) => void
+  decrease: (id: string) => void
+  isInCart: (id: string) => boolean
+}
 
-const CartContext = createContext<CartContextValue | undefined>(undefined);
+const CartContext = createContext<CartContextType | undefined>(undefined)
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(() => {
-    try {
-      const raw = typeof window !== 'undefined' ? localStorage.getItem('cart-items') : null;
-      if (!raw) return [];
-      const parsed = JSON.parse(raw) as Partial<CartItem>[];
-      return parsed.map((i) => ({
-        id: i.id as string,
-        name: i.name as string,
-        reference: i.reference as string,
-        url: i.url,
-        qty: typeof i.qty === 'number' && i.qty > 0 ? i.qty : 1,
-      }));
-    } catch {
-      return [];
-    }
-  });
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<CartItem[]>([])
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('cart-items', JSON.stringify(items));
-    } catch {}
-  }, [items]);
-
-  const add = useCallback((item: Omit<CartItem, 'qty'>, qty: number = 1) => {
+  const add = (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
     setItems((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
+      const existing = prev.find((i) => i.id === item.id)
       if (existing) {
-        return prev.map((i) => (i.id === item.id ? { ...i, qty: i.qty + qty } : i));
+        const increment = item.quantity && item.quantity > 0 ? item.quantity : 1
+        return prev.map((i) =>
+          i.id === item.id ? { ...i, quantity: i.quantity + increment } : i
+        )
       }
-      return [...prev, { ...item, qty }];
-    });
-  }, []);
+      const initialQuantity = item.quantity && item.quantity > 0 ? item.quantity : 1
+      return [...prev, { ...item, quantity: initialQuantity }]
+    })
+  }
 
-  const remove = useCallback((id: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
-  }, []);
+  const remove = (id: string) => {
+    setItems((prev) => prev.filter((i) => i.id !== id))
+  }
 
-  const clear = useCallback(() => setItems([]), []);
+  const increase = (id: string) => {
+    setItems((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, quantity: i.quantity + 1 } : i))
+    )
+  }
 
-  const isInCart = useCallback((id: string) => items.some((i) => i.id === id), [items]);
+  const decrease = (id: string) => {
+    setItems((prev) =>
+      prev.flatMap((i) => {
+        if (i.id !== id) return i
+        const nextQuantity = i.quantity - 1
+        return nextQuantity > 0 ? { ...i, quantity: nextQuantity } : []
+      })
+    )
+  }
 
-  const updateQty = useCallback((id: string, qty: number) => {
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, qty: Math.max(1, qty) } : i)));
-  }, []);
+  const clear = () => {
+    setItems([])
+  }
 
-  const increase = useCallback((id: string) => {
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, qty: i.qty + 1 } : i)));
-  }, []);
+  const isInCart = (id: string) => {
+    return items.some((i) => i.id === id)
+  }
 
-  const decrease = useCallback((id: string) => {
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, qty: Math.max(1, i.qty - 1) } : i)));
-  }, []);
-
-  const value = useMemo(
-    () => ({ items, add, remove, clear, isInCart, updateQty, increase, decrease }),
-    [items, add, remove, clear, isInCart, updateQty, increase, decrease]
-  );
-
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={{ items, add, remove, clear, increase, decrease, isInCart }}>
+      {children}
+    </CartContext.Provider>
+  )
 }
 
 export function useCart() {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error('useCart must be used within CartProvider');
-  return ctx;
+  const context = useContext(CartContext)
+  if (!context) {
+    throw new Error("useCart must be used within a CartProvider")
+  }
+  return context
 }

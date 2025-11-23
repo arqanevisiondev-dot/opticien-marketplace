@@ -51,7 +51,7 @@ export default function AdminNewOrderPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('/api/admin/orders');
+        const res = await fetch('/api/admin/orders?mode=form');
         if (!res.ok) {
           throw new Error('Failed to load data');
         }

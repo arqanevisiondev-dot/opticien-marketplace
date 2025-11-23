@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
 
 // Haversine formula to calculate distance between two coordinates
 function calculateDistance(
@@ -31,15 +30,14 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
 
     // Fetch approved opticians
-    const whereClause: Prisma.OpticianWhereInput = {
-      status: 'APPROVED',
-    };
-
-    if (city) {
-      whereClause.city = {
-        contains: city,
-      };
-    }
+    const whereClause = city
+      ? {
+          status: 'APPROVED' as const,
+          city: { contains: city },
+        }
+      : {
+          status: 'APPROVED' as const,
+        };
 
     const opticians = await prisma.optician.findMany({
       where: whereClause,
@@ -64,8 +62,8 @@ export async function GET(request: NextRequest) {
       const userLon = parseFloat(longitude);
 
       const opticiansWithDistance = opticians
-        .filter((o) => o.latitude && o.longitude)
-        .map((optician) => ({
+        .filter((o: typeof opticians[number]) => o.latitude && o.longitude)
+        .map((optician: typeof opticians[number]) => ({
           ...optician,
           distance: calculateDistance(
             userLat,
@@ -74,7 +72,7 @@ export async function GET(request: NextRequest) {
             optician.longitude!
           ),
         }))
-        .sort((a, b) => a.distance - b.distance)
+        .sort((a: { distance: number }, b: { distance: number }) => a.distance - b.distance)
         .slice(0, limit);
 
       return NextResponse.json(opticiansWithDistance);

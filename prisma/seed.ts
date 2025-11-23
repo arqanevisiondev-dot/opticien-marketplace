@@ -9,26 +9,26 @@ async function main() {
   // Create admin user
   const adminPassword = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@optimarket.com' },
+    where: { email: 'admin@Arqane Vitionet.com' },
     update: {},
     create: {
-      email: 'admin@optimarket.com',
+      email: 'admin@Arqane Vitionet.com',
       password: adminPassword,
       role: 'ADMIN',
     },
   });
   console.log('✅ Admin user created');
 
-  // Create default supplier (OptiMarket Admin)
+  // Create default supplier (Arqane Vitionet Admin)
   const adminSupplier = await prisma.supplier.upsert({
-    where: { email: 'admin@optimarket.com' },
+    where: { email: 'admin@Arqane Vitionet.com' },
     update: {},
     create: {
-      name: 'OptiMarket',
-      email: 'admin@optimarket.com',
+      name: 'Arqane Vitionet',
+      email: 'admin@Arqane Vitionet.com',
       phone: '+33 1 23 45 67 89',
       whatsapp: '+33612345678',
-      description: 'Plateforme OptiMarket - Fournisseur principal',
+      description: 'Plateforme Arqane Vitionet - Fournisseur principal',
       address: '10 Rue de Rivoli',
       city: 'Paris',
       postalCode: '75001',
@@ -333,7 +333,7 @@ async function main() {
 
   console.log('\n🎉 Seeding completed successfully!');
   console.log('\n📝 Test credentials:');
-  console.log('Admin: admin@optimarket.com / admin123');
+  console.log('Admin: admin@Arqane Vitionet.com / admin123');
   console.log('Optician: optique.paris@example.com / optician123');
 }
 

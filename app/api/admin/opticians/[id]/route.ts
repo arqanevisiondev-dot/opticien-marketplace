@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { OrderStatus } from '@prisma/client';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
@@ -33,19 +32,14 @@ export async function GET(
       );
     }
 
-    const statusApproved = 'APPROVED' as unknown as OrderStatus;
-    const statusPending = 'PENDING' as unknown as OrderStatus;
-    const statusRejected = 'REJECTED' as unknown as OrderStatus;
-    const statusCancelled = 'CANCELLED' as unknown as OrderStatus;
-
     const [totalOrders, approvedOrders, pendingOrders, rejectedOrders, cancelledOrders, totalItemsApproved, lastOrder] = await Promise.all([
       prisma.order.count({ where: { opticianId: id } }),
-      prisma.order.count({ where: { opticianId: id, status: statusApproved } }),
-      prisma.order.count({ where: { opticianId: id, status: statusPending } }),
-      prisma.order.count({ where: { opticianId: id, status: statusRejected } }),
-      prisma.order.count({ where: { opticianId: id, status: statusCancelled } }),
+      prisma.order.count({ where: { opticianId: id, status: 'APPROVED' } }),
+      prisma.order.count({ where: { opticianId: id, status: 'PENDING' } }),
+      prisma.order.count({ where: { opticianId: id, status: 'REJECTED' } }),
+      prisma.order.count({ where: { opticianId: id, status: 'CANCELLED' } }),
       prisma.orderItem.aggregate({
-        where: { order: { opticianId: id, status: statusApproved } },
+        where: { order: { opticianId: id, status: 'APPROVED' } },
         _sum: { quantity: true },
       }),
       prisma.order.findFirst({

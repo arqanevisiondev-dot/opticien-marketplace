@@ -27,7 +27,7 @@ export const translations = {
     fastDeliveryDesc: 'Recevez vos commandes sous 48h',
     
     // CTA
-    ctaTitle: 'Prêt à rejoindre OptiMarket?',
+    ctaTitle: 'Prêt à rejoindre Arqane Vitionet?',
     ctaSubtitle: 'Inscrivez-vous dès maintenant et accédez à notre catalogue complet avec les prix professionnels.',
     createFreeAccount: 'Créer un Compte Gratuit',
     
@@ -274,7 +274,7 @@ export const translations = {
     fastDeliveryDesc: 'Receive your orders within 48h',
     
     // CTA
-    ctaTitle: 'Ready to join OptiMarket?',
+    ctaTitle: 'Ready to join Arqane Vitionet?',
     ctaSubtitle: 'Sign up now and access our complete catalog with professional prices.',
     createFreeAccount: 'Create Free Account',
     
@@ -521,7 +521,7 @@ export const translations = {
     fastDeliveryDesc: 'استلم طلباتك خلال 48 ساعة',
     
     // CTA
-    ctaTitle: 'هل أنت مستعد للانضمام إلى OptiMarket؟',
+    ctaTitle: 'هل أنت مستعد للانضمام إلى Arqane Vitionet؟',
     ctaSubtitle: 'سجل الآن واحصل على كتالوجنا الكامل بأسعار احترافية.',
     createFreeAccount: 'إنشاء حساب مجاني',
     

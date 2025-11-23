@@ -26,7 +26,8 @@ export async function GET() {
     });
 
     // Parse images JSON string to array
-    const productsWithImages = products.map((product) => {
+    type ProductRecord = (typeof products)[number];
+    const productsWithImages = products.map((product: ProductRecord) => {
       let images: string[] = [];
       try {
         const raw = (product as unknown as { images: unknown }).images;

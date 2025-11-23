@@ -44,9 +44,9 @@ export default function CartBar() {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const lines = items.map((i, idx) => {
       const url = i.url?.startsWith('http') ? i.url : `${origin}${i.url ?? ''}`;
-      return `${idx + 1}. ${i.name} (ref: ${i.reference}) x ${i.qty}${url ? ` - ${url}` : ''}`;
+      return `${idx + 1}. ${i.name} (ref: ${i.reference}) x ${i.quantity}${url ? ` - ${url}` : ''}`;
     });
-    const total = items.reduce((sum, it) => sum + it.qty, 0);
+    const total = items.reduce((sum, it) => sum + it.quantity, 0);
     const header = `Bonjour, je suis ${fetchedBusinessName || businessName || 'opticien'} et je souhaite ces ${total} produits:`;
     const text = `${header}\n\n${lines.join('\n')}`;
     return `https://wa.me/${adminWhatsDigits}?text=${encodeURIComponent(text)}`;
@@ -94,7 +94,7 @@ export default function CartBar() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" onClick={() => decrease(i.id)}>-</Button>
-                    <div className="w-8 text-center">{i.qty}</div>
+                    <div className="w-8 text-center">{i.quantity}</div>
                     <Button variant="outline" size="sm" onClick={() => increase(i.id)}>+</Button>
                     <Button variant="outline" size="sm" onClick={() => remove(i.id)}>Supprimer</Button>
                   </div>

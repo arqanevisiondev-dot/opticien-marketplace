@@ -28,6 +28,8 @@ export async function POST(request: NextRequest) {
     }
 
     type Recipient = { id: string; whatsapp: string };
+    const isValidRecipient = (r: { id: string; whatsapp: string | null }): r is Recipient =>
+      typeof r.whatsapp === 'string' && r.whatsapp.length > 0;
     let recipients: Recipient[] = [];
 
     if (Array.isArray(recipientIds) && recipientIds.length > 0) {
@@ -42,8 +44,8 @@ export async function POST(request: NextRequest) {
         select: { id: true, whatsapp: true },
       });
       recipients = list
-        .filter((r): r is { id: string; whatsapp: string } => typeof r.whatsapp === 'string' && r.whatsapp.length > 0)
-        .map((r) => ({ id: r.id, whatsapp: r.whatsapp }));
+        .filter(isValidRecipient)
+        .map(({ id, whatsapp }: Recipient) => ({ id, whatsapp }));
     } else {
       const list = await prisma.optician.findMany({
         where: {
@@ -55,8 +57,8 @@ export async function POST(request: NextRequest) {
         select: { id: true, whatsapp: true },
       });
       recipients = list
-        .filter((r): r is { id: string; whatsapp: string } => typeof r.whatsapp === 'string' && r.whatsapp.length > 0)
-        .map((r) => ({ id: r.id, whatsapp: r.whatsapp }));
+        .filter(isValidRecipient)
+        .map(({ id, whatsapp }: Recipient) => ({ id, whatsapp }));
     }
 
     const url = `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`;

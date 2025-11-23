@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# 🚀 Script de démarrage rapide OptiMarket
+# 🚀 Script de démarrage rapide Arqane Vitionet
 # Ce script configure et lance le projet automatiquement
 
-echo "🎯 OptiMarket - Configuration Rapide"
+echo "🎯 Arqane Vitionet - Configuration Rapide"
 echo "===================================="
 echo ""
 
@@ -40,7 +40,7 @@ then
         pnpm db:seed
         echo ""
         echo "✅ Données de test ajoutées!"
-        echo "📧 Admin: admin@optimarket.com / admin123"
+        echo "📧 Admin: admin@Arqane Vitionet.com / admin123"
         echo "👓 Opticien: optique.paris@example.com / optician123"
     fi
 fi
