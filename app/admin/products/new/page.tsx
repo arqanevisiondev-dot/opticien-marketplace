@@ -1,350 +1,512 @@
-"use client"
+'use client';
 
-import type React from "react"
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowLeft, Upload, X } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
-import { ArrowLeft, Loader2, Plus, Trash2, Check } from "lucide-react"
-import { Button } from "@/components/ui/Button"
-import { useLanguage } from "@/contexts/LanguageContext"
-
-interface Optician {
-  id: string
-  businessName: string
+interface Category {
+  id: string;
+  name: string;
 }
 
-interface Product {
-  id: string
-  name: string
-  reference: string
-  stockQty: number
-  price: number
+interface ProductOption {
+  id: string;
+  value: string;
 }
 
-interface OrderItem {
-  productId: string
-  quantity: number
-}
+export default function NewProductPage() {
+  const { t } = useLanguage();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [materials, setMaterials] = useState<ProductOption[]>([]);
+  const [genders, setGenders] = useState<ProductOption[]>([]);
+  const [formData, setFormData] = useState({
+    name: '',
+    reference: '',
+    description: '',
+    categoryId: '',
+    material: '',
+    gender: '',
+    shape: '',
+    color: '',
+    price: '',
+    salePrice: '',
+    stockQty: '',
+    firstOrderRemisePct: '',
+    images: '',
+    inStock: true,
+    isNewCollection: false,
+  });
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
-export default function NewOrderPage() {
-  const router = useRouter()
-  const { t } = useLanguage()
-  const { data: session, status } = useSession()
-  const [opticians, setOpticians] = useState<Optician[]>([])
-  const [products, setProducts] = useState<Product[]>([])
-  const [selectedOptician, setSelectedOptician] = useState("")
-  const [orderItems, setOrderItems] = useState<OrderItem[]>([])
-  const [orderNote, setOrderNote] = useState("")
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState("")
-
+  // Protection admin
   useEffect(() => {
-    if (status === "loading") return
-    if (!session || session.user?.role !== "ADMIN") {
-      router.push("/")
+    if (status === 'loading') return;
+    if (!session || session.user?.role !== 'ADMIN') {
+      router.push('/');
     }
-  }, [session, status, router])
+  }, [session, status, router]);
 
+  // Fetch categories, materials, and genders
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchOptions = async () => {
       try {
-        const [opticiansRes, productsRes] = await Promise.all([
-          fetch("/api/admin/opticians"),
-          fetch("/api/admin/products"),
-        ])
+        const [categoriesRes, materialsRes, gendersRes] = await Promise.all([
+          fetch('/api/categories'),
+          fetch('/api/admin/product-options?type=material'),
+          fetch('/api/admin/product-options?type=gender'),
+        ]);
 
-        if (opticiansRes.ok) {
-          const data = await opticiansRes.json()
-          setOpticians(data)
+        if (categoriesRes.ok) {
+          const data = await categoriesRes.json();
+          setCategories(data);
         }
-        if (productsRes.ok) {
-          const data = await productsRes.json()
-          setProducts(data.products || [])
+        if (materialsRes.ok) {
+          const data = await materialsRes.json();
+          setMaterials(data);
         }
-      } catch (err) {
-        console.error("Error fetching data:", err)
-        setError(t.orderDataLoadError)
-      } finally {
-        setLoading(false)
+        if (gendersRes.ok) {
+          const data = await gendersRes.json();
+          setGenders(data);
+        }
+      } catch (error) {
+        console.error('Error fetching options:', error);
       }
+    };
+
+    if (session?.user?.role === 'ADMIN') {
+      fetchOptions();
     }
+  }, [session]);
 
-    if (session?.user?.role === "ADMIN") {
-      fetchData()
-    }
-  }, [session, t])
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    
+    // Add new files to existing ones
+    const newFiles = [...imageFiles, ...files];
+    setImageFiles(newFiles);
 
-  const addOrderLine = () => {
-    setOrderItems([...orderItems, { productId: "", quantity: 1 }])
-  }
+    // Create previews for new files
+    const newPreviews = files.map(file => URL.createObjectURL(file));
+    setImagePreviews([...imagePreviews, ...newPreviews]);
+  };
 
-  const removeOrderLine = (index: number) => {
-    setOrderItems(orderItems.filter((_, i) => i !== index))
-  }
-
-  const updateOrderItem = (index: number, field: "productId" | "quantity", value: string | number) => {
-    const updated = [...orderItems]
-    if (field === "quantity") {
-      updated[index].quantity = typeof value === "number" ? value : Number.parseInt(value as string, 10)
-    } else {
-      updated[index].productId = value as string
-    }
-    setOrderItems(updated)
-  }
-
-  const getProduct = (productId: string) => products.find((p) => p.id === productId)
+  const removeImage = (index: number) => {
+    const newFiles = imageFiles.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    
+    // Revoke the URL to free memory
+    URL.revokeObjectURL(imagePreviews[index]);
+    
+    setImageFiles(newFiles);
+    setImagePreviews(newPreviews);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError('');
 
-    if (!selectedOptician) {
-      setError(t.selectOpticianRequired)
-      return
+    // Validation (instead of HTML required attributes)
+    const errors: string[] = [];
+    if (!formData.name.trim()) errors.push('Le nom du produit est requis.');
+    if (!formData.reference.trim()) errors.push('La référence est requise.');
+    if (!formData.color.trim()) errors.push('La couleur est requise.');
+    const priceNum = parseFloat(formData.price);
+    if (Number.isNaN(priceNum) || priceNum <= 0) errors.push('Le prix doit être un nombre positif.');
+    if (formData.salePrice.trim()) {
+      const saleNum = parseFloat(formData.salePrice);
+      if (Number.isNaN(saleNum) || saleNum <= 0) errors.push('Le prix soldé doit être un nombre positif.');
     }
-
-    if (orderItems.length === 0) {
-      setError(t.orderNeedsProduct)
-      return
+    if (formData.stockQty.trim()) {
+      const stockNum = parseInt(formData.stockQty, 10);
+      if (Number.isNaN(stockNum) || stockNum < 0) errors.push('La quantité doit être un entier positif ou nul.');
     }
-
-    for (const item of orderItems) {
-      if (!item.productId || item.quantity <= 0) {
-        setError(t.quantityPositiveError)
-        return
-      }
-      const product = getProduct(item.productId)
-      if (!product) {
-        setError(t.unknownProductError)
-        return
-      }
-      if (product.stockQty < item.quantity) {
-        setError(t.stockInsufficient)
-        return
+    if (formData.firstOrderRemisePct.trim()) {
+      const remiseNum = parseFloat(formData.firstOrderRemisePct);
+      if (Number.isNaN(remiseNum) || remiseNum < 0 || remiseNum > 100) {
+        errors.push('La remise doit être comprise entre 0 et 100%.');
       }
     }
+    if (errors.length) {
+      setError(errors.join(' '));
+      return;
+    }
 
-    setSubmitting(true)
+    setLoading(true);
 
     try {
-      const res = await fetch("/api/admin/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          opticianId: selectedOptician,
-          items: orderItems,
-          note: orderNote,
-        }),
-      })
+      let imagesArray: string[] = [];
 
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || t.errorSavingProduct)
+      // If files were uploaded, convert to base64
+      if (imageFiles.length > 0) {
+        const base64Images = await Promise.all(
+          imageFiles.map(file => {
+            return new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+          })
+        );
+        imagesArray = base64Images;
+      } else if (formData.images) {
+        // Otherwise use URLs from textarea
+        imagesArray = formData.images
+          .split('\n')
+          .map(url => url.trim())
+          .filter(url => url.length > 0);
       }
 
-      router.push("/admin/orders")
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t.errorSavingProduct)
-    } finally {
-      setSubmitting(false)
-    }
-  }
+      const payload = {
+        ...formData,
+        price: parseFloat(formData.price),
+        salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
+        stockQty: formData.stockQty ? parseInt(formData.stockQty, 10) : 0,
+        firstOrderRemisePct: formData.firstOrderRemisePct ? parseFloat(formData.firstOrderRemisePct) : null,
+        images: JSON.stringify(imagesArray),
+      };
 
-  if (status === "loading" || !session) {
-    return null
+      const res = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || t.creating);
+      }
+
+      router.push('/admin');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.loading);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (status === 'loading' || !session) {
+    return null;
   }
 
   return (
-    <div className="min-h-screen bg-palladian py-8 sm:py-12">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Link
-          href="/admin/orders"
-          className="mb-6 inline-flex items-center text-sm font-medium text-burning-flame hover:text-orange-700 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          {t.backToDashboard}
+    <div className="min-h-screen bg-palladian py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Link href="/admin">
+          <Button variant="outline" size="sm" className="mb-6 flex items-center">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {t.backToDashboard}
+          </Button>
         </Link>
 
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-abyssal mb-2">{t.newOrder}</h1>
-          <p className="text-sm sm:text-base text-gray-600">{t.manualOrderSubtitle}</p>
-        </div>
+        <div className="bg-white shadow-lg p-8">
+          <h1 className="text-3xl font-bold text-abyssal mb-6">{t.newProductTitle}</h1>
 
-        {error && (
-          <div className="mb-6 rounded-lg border-l-4 border-red-500 bg-red-50 p-4 text-sm text-red-700">
-            <p className="font-medium">{t.error}</p>
-            <p className="mt-1">{error}</p>
-          </div>
-        )}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 mb-6">
+              {error}
+            </div>
+          )}
 
-        {loading ? (
-          <div className="flex items-center justify-center gap-3 text-gray-500 py-12">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            <span>{t.loading}</span>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="p-6 sm:p-8 space-y-8">
-              {/* Optician Selection */}
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <div className="w-1 h-6 bg-burning-flame rounded-full"></div>
-                  {t.selectOptician}
-                </h2>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t.productName} *
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                />
+              </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t.productReference} *
+                </label>
+                <input
+                  type="text"
+                  value={formData.reference}
+                  onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                  placeholder="SP-001"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t.productDescription}
+              </label>
+              <textarea
+                rows={3}
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t.category}
+              </label>
+              <select
+                value={formData.categoryId}
+                onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+              >
+                <option value="">{t.categories || 'Sélectionnez une catégorie'}</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t.productMaterial}
+                </label>
                 <select
-                  value={selectedOptician}
-                  onChange={(e) => setSelectedOptician(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burning-flame focus:border-transparent transition text-base"
+                  value={formData.material}
+                  onChange={(e) => setFormData({ ...formData, material: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
                 >
-                  <option value="">{t.selectOptician}</option>
-                  {opticians.map((optician) => (
-                    <option key={optician.id} value={optician.id}>
-                      {optician.businessName}
+                  <option value="">Sélectionnez un matériau</option>
+                  {materials.map((material) => (
+                    <option key={material.id} value={material.value}>
+                      {material.value}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Order Items */}
-              <div className="border-t pt-8 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <div className="w-1 h-6 bg-burning-flame rounded-full"></div>
-                    {t.orderItems}
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={addOrderLine}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-burning-flame text-white rounded-lg hover:bg-orange-700 transition font-medium text-sm"
-                  >
-                    <Plus className="h-4 w-4" />
-                    {t.addOrderLine}
-                  </button>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-100 border-b-2 border-gray-300">
-                      <tr>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-900">{t.productLabel}</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-900">{t.currentStock}</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-900">{t.quantityLabel}</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-900">{t.actions}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {orderItems.length === 0 ? (
-                        <tr>
-                          <td colSpan={4} className="px-4 py-6 text-center text-gray-500">
-                            {t.noProductsAvailable}
-                          </td>
-                        </tr>
-                      ) : (
-                        orderItems.map((item, index) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="px-4 py-3">
-                              <select
-                                value={item.productId}
-                                onChange={(e) => updateOrderItem(index, "productId", e.target.value)}
-                                className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-burning-flame focus:border-transparent"
-                              >
-                                <option value="">{t.selectGender}</option>
-                                {products.map((product) => (
-                                  <option key={product.id} value={product.id}>
-                                    {product.name} ({product.reference})
-                                  </option>
-                                ))}
-                              </select>
-                            </td>
-                            <td className="px-4 py-3">
-                              {item.productId ? (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                                  {getProduct(item.productId)?.stockQty ?? 0}
-                                </span>
-                              ) : (
-                                <span className="text-gray-400">-</span>
-                              )}
-                            </td>
-                            <td className="px-4 py-3">
-                              <input
-                                type="number"
-                                min="1"
-                                value={item.quantity}
-                                onChange={(e) => updateOrderItem(index, "quantity", e.target.value)}
-                                className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-burning-flame focus:border-transparent"
-                              />
-                            </td>
-                            <td className="px-4 py-3">
-                              <button
-                                type="button"
-                                onClick={() => removeOrderLine(index)}
-                                className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 font-medium text-sm transition"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                {t.removeLine}
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-
-                <p className="text-xs text-gray-500 bg-blue-50 p-3 rounded">{t.manualOrderHelper}</p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t.productGender}
+                </label>
+                <select
+                  value={formData.gender}
+                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                >
+                  <option value="">Sélectionnez un genre</option>
+                  {genders.map((gender) => (
+                    <option key={gender.id} value={gender.value}>
+                      {gender.value}
+                    </option>
+                  ))}
+                </select>
               </div>
+            </div>
 
-              {/* Order Note */}
-              <div className="border-t pt-8 space-y-4">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <div className="w-1 h-6 bg-burning-flame rounded-full"></div>
-                  {t.orderNoteLabel}
-                </h2>
-
-                <textarea
-                  rows={3}
-                  value={orderNote}
-                  onChange={(e) => setOrderNote(e.target.value)}
-                  placeholder={t.orderNotePlaceholder}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burning-flame focus:border-transparent transition resize-none"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t.productShape}
+                </label>
+                <input
+                  type="text"
+                  value={formData.shape}
+                  onChange={(e) => setFormData({ ...formData, shape: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                  placeholder="Rectangulaire, Ronde, Aviateur..."
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t.productColor}
+                </label>
+                <input
+                  type="text"
+                  value={formData.color}
+                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                  placeholder="Noir, Écaille, Transparent..."
+                />
+                <p className="text-xs text-gray-500 mt-1">Une seule couleur par produit (chaque couleur a sa propre référence).</p>
+              </div>
             </div>
 
-            <div className="border-t bg-gray-50 px-6 sm:px-8 py-4 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
-              <Button
-                type="button"
-                onClick={() => router.push("/admin/orders")}
-                variant="outline"
-                className="w-full sm:w-auto"
-              >
-                {t.cancel}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t.price} (DH) *
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                placeholder="99.99"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Prix soldé (DH)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.salePrice}
+                onChange={(e) => setFormData({ ...formData, salePrice: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                placeholder="89.99"
+              />
+              <p className="text-xs text-gray-500 mt-1">Laissez vide si aucune promotion n&apos;est active.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Stock disponible
+                </label>
+                <input
+                  type="number"
+                  step="1"
+                  min="0"
+                  value={formData.stockQty}
+                  onChange={(e) => setFormData({ ...formData, stockQty: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                  placeholder="0"
+                />
+                <p className="text-xs text-gray-500 mt-1">Ce champ permet d&apos;afficher le stock actuel avant validation des commandes.</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Remise 1er achat (%)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  value={formData.firstOrderRemisePct}
+                  onChange={(e) => setFormData({ ...formData, firstOrderRemisePct: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                  placeholder="10"
+                />
+                <p className="text-xs text-gray-500 mt-1">Appliquée automatiquement lorsque l&apos;opticien commande ce produit pour la première fois.</p>
+              </div>
+            </div>
+
+            {/* Image Upload */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Images du produit
+              </label>
+              
+              {/* File Upload Button */}
+              <div className="mb-4">
+                <label className="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-fantastic hover:bg-blue-50 transition-colors">
+                  <div className="text-center">
+                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                    <p className="mt-2 text-sm text-gray-600">
+                      <span className="font-semibold text-blue-fantastic">Cliquez pour uploader</span> ou glissez-déposez
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP jusqu&apos;à 10MB (plusieurs images)</p>
+                  </div>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* Image Previews */}
+              {imagePreviews.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  {imagePreviews.map((preview, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={preview}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Alternative: URL Input */}
+              <div className="mt-4">
+                <p className="text-sm text-gray-600 mb-2">Ou entrez des URLs d&apos;images:</p>
+                <textarea
+                  rows={3}
+                  value={formData.images}
+                  onChange={(e) => setFormData({ ...formData, images: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                  placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
+                  disabled={imageFiles.length > 0}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {imageFiles.length > 0 ? 'Désactivé car des fichiers sont uploadés' : 'Une URL par ligne'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-3 sm:space-y-0">
+              <label className="inline-flex items-center">
+                <input
+                  type="checkbox"
+                  id="inStock"
+                  checked={formData.inStock}
+                  onChange={(e) => setFormData({ ...formData, inStock: e.target.checked })}
+                  className="h-4 w-4 text-blue-fantastic focus:ring-blue-fantastic border-gray-300"
+                />
+                <span className="ml-2 text-sm text-gray-700">{t.inStock}</span>
+              </label>
+
+              <label className="inline-flex items-center">
+                <input
+                  type="checkbox"
+                  id="isNewCollection"
+                  checked={formData.isNewCollection}
+                  onChange={(e) => setFormData({ ...formData, isNewCollection: e.target.checked })}
+                  className="h-4 w-4 text-burning-flame focus:ring-burning-flame border-gray-300"
+                />
+                <span className="ml-2 text-sm text-gray-700">{t.markNewCollection}</span>
+              </label>
+            </div>
+
+            <div className="flex gap-4">
+              <Button type="submit" disabled={loading} className="flex-1">
+                {loading ? t.creating : t.createProduct}
               </Button>
-              <Button
-                type="submit"
-                disabled={submitting}
-                className="w-full sm:w-auto bg-burning-flame hover:bg-orange-700 text-white"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    {t.submitting}
-                  </>
-                ) : (
-                  <>
-                    <Check className="h-4 w-4 mr-2" />
-                    {t.submitOrder}
-                  </>
-                )}
-              </Button>
+              <Link href="/admin" className="flex-1">
+                <Button type="button" variant="outline" className="w-full">
+                  {t.cancel}
+                </Button>
+              </Link>
             </div>
           </form>
-        )}
+        </div>
       </div>
     </div>
-  )
+  );
 }
