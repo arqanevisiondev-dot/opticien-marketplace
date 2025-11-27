@@ -1,18 +1,41 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Simplified middleware - authentication is handled in route handlers
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow all requests to pass through
-  // Authentication will be checked in individual route handlers
+  // Get session token from cookies
+  const sessionToken = request.cookies.get('authjs.session-token') || 
+                       request.cookies.get('__Secure-authjs.session-token');
+
+  // Protected admin routes
+  if (pathname.startsWith('/admin')) {
+    if (!sessionToken) {
+      // Redirect to signin with callback URL
+      const url = new URL('/auth/signin', request.url);
+      url.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(url);
+    }
+    // Note: Role check will be done in the actual pages/APIs
+  }
+
+  // Protected API routes - admin endpoints
+  if (pathname.startsWith('/api/admin')) {
+    if (!sessionToken) {
+      return NextResponse.json(
+        { error: 'Accès non autorisé' },
+        { status: 401 }
+      );
+    }
+    // Note: Role check will be done in the API routes
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    // Match all routes except static files and API routes
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/admin/:path*',
+    '/api/admin/:path*',
   ],
 };
