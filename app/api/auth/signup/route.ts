@@ -61,13 +61,38 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Send WhatsApp notification to admin
+    // Send email notification to admin (automatic in background)
     try {
       const admin = await prisma.user.findFirst({
         where: { role: 'ADMIN' },
-        select: { whatsapp: true },
+        select: { email: true, whatsapp: true },
       });
 
+      if (admin?.email) {
+        // Send email notification automatically
+        const { sendEmailWithNodemailer } = await import('@/lib/email');
+        
+        const emailHtml = `
+          <h2>🆕 Nouvelle Inscription Opticien</h2>
+          <p><strong>👤 Nom:</strong> ${validatedData.firstName} ${validatedData.lastName}</p>
+          <p><strong>🏢 Entreprise:</strong> ${validatedData.businessName}</p>
+          <p><strong>📧 Email:</strong> ${validatedData.email}</p>
+          <p><strong>📱 Téléphone:</strong> ${validatedData.phone}</p>
+          <p><strong>📍 Ville:</strong> ${validatedData.city || 'N/A'}</p>
+          <p><strong>📮 Code Postal:</strong> ${validatedData.postalCode || 'N/A'}</p>
+          <hr>
+          <p>✅ <a href="${process.env.NEXTAUTH_URL}/admin/opticians">Approuver ce compte dans le dashboard</a></p>
+        `;
+
+        // Send email in background (non-blocking)
+        sendEmailWithNodemailer(
+          admin.email,
+          '🆕 Nouvelle Inscription Opticien',
+          emailHtml
+        ).catch(err => console.error('Email send failed:', err));
+      }
+
+      // Also generate WhatsApp link for manual notification if needed
       if (admin?.whatsapp) {
         const message = `🆕 *Nouvelle Inscription Opticien*\n\n` +
           `👤 Nom: ${validatedData.firstName} ${validatedData.lastName}\n` +
@@ -78,18 +103,22 @@ export async function POST(request: NextRequest) {
           `📮 Code Postal: ${validatedData.postalCode || 'N/A'}\n\n` +
           `✅ Veuillez approuver ce compte dans le dashboard admin.`;
 
-        // Note: In production, you would send this via WhatsApp API
-        // For now, we just generate the URL
         const encodedMessage = encodeURIComponent(message);
         const whatsappPhone = admin.whatsapp.replace(/\D/g, '');
         const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodedMessage}`;
         
-        console.log('WhatsApp notification URL generated:', whatsappUrl);
-        // In production: await sendWhatsAppMessage(whatsappPhone, message);
+        // Return with WhatsApp URL (optional manual notification)
+        return NextResponse.json(
+          { 
+            message: 'Inscription réussie. Votre compte sera vérifié par notre équipe.',
+            userId: user.id,
+            whatsappNotificationUrl: whatsappUrl
+          },
+          { status: 201 }
+        );
       }
     } catch (notificationError) {
-      // Log but don't fail the registration if notification fails
-      console.error('Failed to send WhatsApp notification:', notificationError);
+      console.error('Failed to send notification:', notificationError);
     }
 
     return NextResponse.json(

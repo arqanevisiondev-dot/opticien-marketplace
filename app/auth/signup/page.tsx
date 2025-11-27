@@ -49,6 +49,11 @@ export default function SignUpPage() {
         throw new Error(data.error || 'Erreur lors de l\'inscription');
       }
 
+      // Open WhatsApp notification if URL is provided
+      if (data.whatsappNotificationUrl) {
+        window.open(data.whatsappNotificationUrl, '_blank');
+      }
+
       // Redirect to success page instead of signin
       router.push('/auth/signup/success');
     } catch (err: unknown) {
