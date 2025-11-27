@@ -17,9 +17,9 @@ export async function GET(
         ]
       },
       include: {
-        supplier: {
+        user: {
           select: {
-            name: true,
+            businessName: true,
             phone: true,
             whatsapp: true,
             address: true,

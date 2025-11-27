@@ -49,7 +49,8 @@ export default function SignUpPage() {
         throw new Error(data.error || 'Erreur lors de l\'inscription');
       }
 
-      router.push('/auth/signin?registered=true');
+      // Redirect to success page instead of signin
+      router.push('/auth/signup/success');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
     } finally {

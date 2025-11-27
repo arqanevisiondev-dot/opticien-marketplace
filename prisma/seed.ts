@@ -9,34 +9,15 @@ async function main() {
   // Create admin user
   const adminPassword = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@Arqane Vitionet.com' },
+    where: { email: 'admin@Arqane Vision.com' },
     update: {},
     create: {
-      email: 'admin@Arqane Vitionet.com',
+      email: 'admin@Arqane Vision.com',
       password: adminPassword,
       role: 'ADMIN',
     },
   });
   console.log('✅ Admin user created');
-
-  // Create default supplier (Arqane Vitionet Admin)
-  const adminSupplier = await prisma.supplier.upsert({
-    where: { email: 'admin@Arqane Vitionet.com' },
-    update: {},
-    create: {
-      name: 'Arqane Vitionet',
-      email: 'admin@Arqane Vitionet.com',
-      phone: '+33 1 23 45 67 89',
-      whatsapp: '+33612345678',
-      description: 'Plateforme Arqane Vitionet - Fournisseur principal',
-      address: '10 Rue de Rivoli',
-      city: 'Paris',
-      postalCode: '75001',
-      latitude: 48.8566,
-      longitude: 2.3522,
-    },
-  });
-  console.log('✅ Default supplier created');
 
   // Create products
   const products = [
@@ -53,7 +34,7 @@ async function main() {
       images: JSON.stringify([
         'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400',
       ]),
-      supplierId: adminSupplier.id,
+      userId: admin.id,
     },
     {
       name: 'Wayfarer Modern',
@@ -68,7 +49,7 @@ async function main() {
       images: JSON.stringify([
         'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=400',
       ]),
-      supplierId: adminSupplier.id,
+      userId: admin.id,
     },
     {
       name: 'Round Vintage',
@@ -83,7 +64,7 @@ async function main() {
       images: JSON.stringify([
         'https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=400',
       ]),
-      supplierId: adminSupplier.id,
+      userId: admin.id,
     },
     {
       name: 'Cat Eye Elegance',
@@ -98,7 +79,7 @@ async function main() {
       images: JSON.stringify([
         'https://images.unsplash.com/photo-1577803645773-f96470509666?w=400',
       ]),
-      supplierId: adminSupplier.id,
+      userId: admin.id,
     },
     {
       name: 'Sport Pro',
@@ -113,7 +94,7 @@ async function main() {
       images: JSON.stringify([
         'https://images.unsplash.com/photo-1509695507497-903c140c43b0?w=400',
       ]),
-      supplierId: adminSupplier.id,
+      userId: admin.id,
     },
   ];
 
@@ -333,7 +314,7 @@ async function main() {
 
   console.log('\n🎉 Seeding completed successfully!');
   console.log('\n📝 Test credentials:');
-  console.log('Admin: admin@Arqane Vitionet.com / admin123');
+  console.log('Admin: admin@Arqane Vision.com / admin123');
   console.log('Optician: optique.paris@example.com / optician123');
 }
 

@@ -20,7 +20,7 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { name, description } = body;
+    const { name, description, imageUrl } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -74,6 +74,7 @@ export async function PUT(
         name,
         slug: finalSlug,
         description: description || null,
+        imageUrl: imageUrl || null,
       },
       include: {
         _count: {

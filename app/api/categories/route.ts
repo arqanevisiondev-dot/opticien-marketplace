@@ -11,6 +11,13 @@ export async function GET() {
         id: true,
         name: true,
         slug: true,
+        description: true,
+        imageUrl: true,
+        _count: {
+          select: {
+            products: true,
+          },
+        },
       },
     });
 

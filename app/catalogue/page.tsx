@@ -15,6 +15,7 @@ interface Product {
   reference: string
   material: string
   gender: string
+  marque: string
   color: string
   price: number
   salePrice?: number
@@ -51,6 +52,7 @@ export default function CataloguePage() {
     category: "",
     material: "",
     gender: "",
+    marque: "",
     color: "",
   })
 
@@ -103,6 +105,7 @@ export default function CataloguePage() {
   const safeProducts = Array.isArray(products) ? products : []
   const uniqueMaterials = Array.from(new Set(safeProducts.map((p) => p.material).filter(Boolean)))
   const uniqueGenders = Array.from(new Set(safeProducts.map((p) => p.gender).filter(Boolean)))
+  const uniqueMarques = Array.from(new Set(safeProducts.map((p) => p.marque).filter(Boolean)))
   const newCollectionProducts = safeProducts.filter((product) => product.isNewCollection)
   const featuredNewCollection = newCollectionProducts[0]
   const additionalNewCollection = newCollectionProducts.slice(1)
@@ -110,13 +113,15 @@ export default function CataloguePage() {
   const filteredProducts = safeProducts.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.reference.toLowerCase().includes(searchTerm.toLowerCase())
+      product.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.marque.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = !filters.category || product.category?.id === filters.category
     const matchesMaterial = !filters.material || product.material === filters.material
     const matchesGender = !filters.gender || product.gender === filters.gender
+    const matchesMarque = !filters.marque || product.marque === filters.marque
     const matchesColor = !filters.color || product.color === filters.color
 
-    return matchesSearch && matchesCategory && matchesMaterial && matchesGender && matchesColor
+    return matchesSearch && matchesCategory && matchesMaterial && matchesGender && matchesMarque && matchesColor
   })
 
   return (
@@ -157,9 +162,16 @@ export default function CataloguePage() {
                     {t.newCollection}
                   </span>
                   <h2 className="text-4xl font-bold text-[#1B2632]">{featuredNewCollection.name}</h2>
-                  <p className="text-gray-600">
-                    <strong>{t.reference}:</strong> {featuredNewCollection.reference}
-                  </p>
+                  <div className="space-y-2 text-gray-600">
+                    <p>
+                      <strong>{t.reference}:</strong> {featuredNewCollection.reference}
+                    </p>
+                    {featuredNewCollection.marque && (
+                      <p>
+                        <strong>Marque:</strong> {featuredNewCollection.marque}
+                      </p>
+                    )}
+                  </div>
                   <div className="flex items-center gap-3 text-sm text-gray-600">
                     <span>{featuredNewCollection.material}</span>
                     <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
@@ -222,7 +234,7 @@ export default function CataloguePage() {
             <h3 className="text-lg font-bold text-[#1B2632]">Filter Products</h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <div className="md:col-span-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -274,6 +286,19 @@ export default function CataloguePage() {
                 </option>
               ))}
             </select>
+
+            <select
+              value={filters.marque}
+              onChange={(e) => setFilters({ ...filters, marque: e.target.value })}
+              className="px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#f56a24] transition-colors"
+            >
+              <option value="">All Brands</option>
+              {uniqueMarques.map((marque) => (
+                <option key={marque} value={marque}>
+                  {marque}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -317,9 +342,16 @@ export default function CataloguePage() {
                     <h3 className="font-bold text-lg text-[#1B2632] mb-1 group-hover:text-[#f56a24] transition-colors line-clamp-2">
                       {product.name}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-3">
-                      {t.reference}: {product.reference}
-                    </p>
+                    <div className="text-sm text-gray-600 mb-3 space-y-1">
+                      <p>
+                        <strong>Réf:</strong> {product.reference}
+                      </p>
+                      {product.marque && (
+                        <p>
+                          <strong>Marque:</strong> {product.marque}
+                        </p>
+                      )}
+                    </div>
                     <div className="flex items-center justify-between mb-4 flex-grow">
                       <div className="text-xs text-gray-500">
                         <span>{product.material}</span>

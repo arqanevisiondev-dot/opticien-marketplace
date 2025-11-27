@@ -18,7 +18,7 @@ export async function GET() {
       prisma.optician.count(),
       prisma.optician.count({ where: { status: 'PENDING' } }),
       prisma.product.count(),
-      prisma.supplier.count(),
+      prisma.user.count({ where: { role: 'ADMIN' } }),
     ]);
 
     return NextResponse.json({

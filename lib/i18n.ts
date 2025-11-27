@@ -27,7 +27,7 @@ export const translations = {
     fastDeliveryDesc: 'Recevez vos commandes sous 48h',
     
     // CTA
-    ctaTitle: 'Prêt à rejoindre Arqane Vitionet?',
+    ctaTitle: 'Prêt à rejoindre Arqane Vision?',
     ctaSubtitle: 'Inscrivez-vous dès maintenant et accédez à notre catalogue complet avec les prix professionnels.',
     createFreeAccount: 'Créer un Compte Gratuit',
     
@@ -193,8 +193,25 @@ export const translations = {
     // Optician Prompt Modal
     opticianPromptTitle: 'Êtes-vous un opticien ?',
     opticianPromptMessage: 'Rejoignez notre plateforme pour accéder à des prix professionnels et un catalogue exclusif.',
+    welcomeOptician: 'Bienvenue !',
+    authOptionsMessage: 'Connectez-vous ou créez un compte pour accéder à notre catalogue professionnel.',
     yes: 'Oui',
     no: 'Non',
+    
+    // Registration Success
+    registrationSuccess: 'Inscription réussie !',
+    registrationSuccessMessage: 'Votre demande d\'inscription a été envoyée avec succès. Nous sommes ravis de vous accueillir !',
+    pendingApproval: 'En attente d\'approbation',
+    pendingApprovalMessage: 'Votre compte est en cours de vérification par notre équipe. Vous recevrez un email dès que votre compte sera approuvé.',
+    adminNotified: 'Admin notifié',
+    adminNotifiedMessage: 'Notre équipe a été informée de votre inscription et examinera votre demande dans les plus brefs délais.',
+    whatHappensNext: 'Et maintenant ?',
+    step1AdminReview: 'Notre équipe examine votre demande d\'inscription',
+    step2EmailNotification: 'Vous recevez un email de confirmation une fois votre compte approuvé',
+    step3AccessCatalog: 'Vous pouvez accéder au catalogue complet avec les prix professionnels',
+    backToHome: 'Retour à l\'accueil',
+    browseCatalog: 'Parcourir le catalogue',
+    questionsContact: 'Des questions ?',
     
     // Categories
     categories: 'Catégories',
@@ -274,7 +291,7 @@ export const translations = {
     fastDeliveryDesc: 'Receive your orders within 48h',
     
     // CTA
-    ctaTitle: 'Ready to join Arqane Vitionet?',
+    ctaTitle: 'Ready to join Arqane Vision?',
     ctaSubtitle: 'Sign up now and access our complete catalog with professional prices.',
     createFreeAccount: 'Create Free Account',
     
@@ -440,8 +457,25 @@ export const translations = {
     // Optician Prompt Modal
     opticianPromptTitle: 'Are you an optician?',
     opticianPromptMessage: 'Join our platform to access professional prices and an exclusive catalog.',
+    welcomeOptician: 'Welcome!',
+    authOptionsMessage: 'Sign in or create an account to access our professional catalog.',
     yes: 'Yes',
     no: 'No',
+    
+    // Registration Success
+    registrationSuccess: 'Registration Successful!',
+    registrationSuccessMessage: 'Your registration request has been submitted successfully. We are excited to welcome you!',
+    pendingApproval: 'Pending Approval',
+    pendingApprovalMessage: 'Your account is being reviewed by our team. You will receive an email as soon as your account is approved.',
+    adminNotified: 'Admin Notified',
+    adminNotifiedMessage: 'Our team has been informed of your registration and will review your request shortly.',
+    whatHappensNext: 'What happens next?',
+    step1AdminReview: 'Our team reviews your registration request',
+    step2EmailNotification: 'You receive a confirmation email once your account is approved',
+    step3AccessCatalog: 'You can access the complete catalog with professional prices',
+    backToHome: 'Back to home',
+    browseCatalog: 'Browse catalog',
+    questionsContact: 'Questions?',
     
     // Categories
     categories: 'Categories',
@@ -521,7 +555,7 @@ export const translations = {
     fastDeliveryDesc: 'استلم طلباتك خلال 48 ساعة',
     
     // CTA
-    ctaTitle: 'هل أنت مستعد للانضمام إلى Arqane Vitionet؟',
+    ctaTitle: 'هل أنت مستعد للانضمام إلى Arqane Vision؟',
     ctaSubtitle: 'سجل الآن واحصل على كتالوجنا الكامل بأسعار احترافية.',
     createFreeAccount: 'إنشاء حساب مجاني',
     
@@ -687,8 +721,25 @@ export const translations = {
     // Optician Prompt Modal
     opticianPromptTitle: 'هل أنت أخصائي بصريات؟',
     opticianPromptMessage: 'انضم إلى منصتنا للوصول إلى الأسعار المهنية والكتالوج الحصري.',
+    welcomeOptician: 'مرحباً!',
+    authOptionsMessage: 'سجل الدخول أو أنشئ حساباً للوصول إلى كتالوجنا المهني.',
     yes: 'نعم',
     no: 'لا',
+    
+    // Registration Success
+    registrationSuccess: 'تم التسجيل بنجاح!',
+    registrationSuccessMessage: 'تم إرسال طلب التسجيل بنجاح. نحن متحمسون لاستقبالك!',
+    pendingApproval: 'بانتظار الموافقة',
+    pendingApprovalMessage: 'يتم مراجعة حسابك من قبل فريقنا. ستتلقى بريداً إلكترونياً بمجرد الموافقة على حسابك.',
+    adminNotified: 'تم إخطار المسؤول',
+    adminNotifiedMessage: 'تم إبلاغ فريقنا بتسجيلك وسيراجع طلبك قريباً.',
+    whatHappensNext: 'ماذا يحدث بعد ذلك؟',
+    step1AdminReview: 'يراجع فريقنا طلب التسجيل الخاص بك',
+    step2EmailNotification: 'ستتلقى بريداً إلكترونياً للتأكيد بمجرد الموافقة على حسابك',
+    step3AccessCatalog: 'يمكنك الوصول إلى الكتالوج الكامل بأسعار محترفة',
+    backToHome: 'العودة إلى الصفحة الرئيسية',
+    browseCatalog: 'تصفح الكتالوج',
+    questionsContact: 'أسئلة؟',
     
     // Categories
     categories: 'الفئات',

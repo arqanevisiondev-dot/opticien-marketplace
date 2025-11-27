@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Plus, Edit, Trash2, Search, Package, Tag } from "lucide-react"
+import { ArrowLeft, Plus, Edit, Trash2, Search, Package, Tag, Upload, X } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { useLanguage } from "@/contexts/LanguageContext"
 
@@ -15,6 +15,7 @@ interface Category {
   name: string
   slug: string
   description: string | null
+  imageUrl: string | null
   createdAt: string
   _count: {
     products: number
@@ -35,7 +36,11 @@ export default function CategoriesPage() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
+    imageUrl: "",
   })
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string>("")
+  const [uploadMethod, setUploadMethod] = useState<"url" | "file">("url")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
@@ -56,6 +61,24 @@ export default function CategoriesPage() {
     )
     setFilteredCategories(filtered)
   }, [searchQuery, categories])
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImageFile(file)
+      const preview = URL.createObjectURL(file)
+      setImagePreview(preview)
+      setFormData({ ...formData, imageUrl: "" })
+    }
+  }
+
+  const removeImage = () => {
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview)
+    }
+    setImageFile(null)
+    setImagePreview("")
+  }
 
   const fetchCategories = async () => {
     try {
@@ -78,11 +101,16 @@ export default function CategoriesPage() {
       setFormData({
         name: category.name,
         description: category.description || "",
+        imageUrl: category.imageUrl || "",
       })
+      setImagePreview(category.imageUrl || "")
     } else {
       setEditingCategory(null)
-      setFormData({ name: "", description: "" })
+      setFormData({ name: "", description: "", imageUrl: "" })
+      setImagePreview("")
     }
+    setImageFile(null)
+    setUploadMethod("url")
     setShowModal(true)
     setError("")
   }
@@ -90,7 +118,12 @@ export default function CategoriesPage() {
   const handleCloseModal = () => {
     setShowModal(false)
     setEditingCategory(null)
-    setFormData({ name: "", description: "" })
+    setFormData({ name: "", description: "", imageUrl: "" })
+    if (imagePreview && imageFile) {
+      URL.revokeObjectURL(imagePreview)
+    }
+    setImageFile(null)
+    setImagePreview("")
     setError("")
   }
 
@@ -100,6 +133,18 @@ export default function CategoriesPage() {
     setSuccess("")
 
     try {
+      let finalImageUrl = formData.imageUrl
+
+      // If file was uploaded, convert to base64
+      if (imageFile) {
+        finalImageUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onloadend = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(imageFile)
+        })
+      }
+
       const url = editingCategory ? `/api/admin/categories/${editingCategory.id}` : "/api/admin/categories"
 
       const method = editingCategory ? "PUT" : "POST"
@@ -107,7 +152,7 @@ export default function CategoriesPage() {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, imageUrl: finalImageUrl }),
       })
 
       const data = await res.json()
@@ -229,6 +274,7 @@ export default function CategoriesPage() {
                 <thead className="bg-gradient-to-r from-abyssal to-blue-fantastic text-white">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold">{t.categoryName}</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold">Image</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold">{t.categoryDescription}</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold">{t.productCount}</th>
                     <th className="px-6 py-4 text-right text-sm font-semibold">{t.actions}</th>
@@ -243,6 +289,19 @@ export default function CategoriesPage() {
                       <td className="px-6 py-4">
                         <div className="font-semibold text-abyssal">{category.name}</div>
                         <div className="text-sm text-gray-500 mt-1">{category.slug}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {category.imageUrl ? (
+                          <img
+                            src={category.imageUrl}
+                            alt={category.name}
+                            className="w-16 h-16 object-cover rounded-lg"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <Tag className="h-6 w-6 text-gray-400" />
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-700 max-w-xs truncate">{category.description || "-"}</div>
@@ -310,6 +369,108 @@ export default function CategoriesPage() {
                   className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-burning-flame resize-none"
                   placeholder="Description de la catégorie..."
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-abyssal mb-3">Image de la catégorie</label>
+                
+                {/* Upload method selector */}
+                <div className="flex gap-4 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUploadMethod("file")
+                      setFormData({ ...formData, imageUrl: "" })
+                    }}
+                    className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
+                      uploadMethod === "file"
+                        ? "border-burning-flame bg-burning-flame/10 text-burning-flame font-semibold"
+                        : "border-gray-200 text-gray-600 hover:border-gray-300"
+                    }`}
+                  >
+                    <Upload className="h-4 w-4 inline mr-2" />
+                    Upload fichier
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUploadMethod("url")
+                      removeImage()
+                    }}
+                    className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
+                      uploadMethod === "url"
+                        ? "border-burning-flame bg-burning-flame/10 text-burning-flame font-semibold"
+                        : "border-gray-200 text-gray-600 hover:border-gray-300"
+                    }`}
+                  >
+                    URL
+                  </button>
+                </div>
+
+                {uploadMethod === "file" ? (
+                  <div>
+                    {/* File Upload */}
+                    {!imagePreview ? (
+                      <label className="block cursor-pointer">
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-burning-flame transition-colors">
+                          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-600">
+                            <span className="font-semibold text-burning-flame">Cliquez pour uploader</span> ou glissez-déposez
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF jusqu'à 10MB</p>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    ) : (
+                      <div className="relative">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="w-full h-48 object-cover rounded-lg border-2 border-gray-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    {/* URL Input */}
+                    <input
+                      type="url"
+                      value={formData.imageUrl}
+                      onChange={(e) => {
+                        setFormData({ ...formData, imageUrl: e.target.value })
+                        setImagePreview(e.target.value)
+                      }}
+                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-burning-flame"
+                      placeholder="https://example.com/image.jpg"
+                    />
+                    {imagePreview && (
+                      <div className="mt-3">
+                        <p className="text-sm text-gray-600 mb-2">Aperçu:</p>
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="w-full h-48 object-cover rounded-lg border-2 border-gray-200"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none"
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-4 pt-4">

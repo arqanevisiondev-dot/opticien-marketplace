@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Arqane Vitionet - Marketplace de Montures de Lunettes",
+  title: "Arqane Vision - Marketplace de Montures de Lunettes",
   description: "Plateforme de marché pour montures de lunettes à destination des opticiens professionnels",
 };
 

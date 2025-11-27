@@ -22,14 +22,15 @@ interface Product {
   description: string
   material: string
   gender: string
+  marque?: string
   shape: string
   color: string
   price: number
   salePrice?: number
   images: string[]
   inStock: boolean
-  supplier: {
-    name: string
+  user: {
+    businessName: string
     phone: string
     whatsapp: string
     address?: string
@@ -227,15 +228,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <p className="text-xl font-bold text-[#1B2632] mb-4">{product.supplier.name}</p>
+              <p className="text-xl font-bold text-[#1B2632] mb-4">{product.user.businessName}</p>
 
-              {product.supplier.address && (
+              {product.user.address && (
                 <div className="flex items-start gap-3 mb-6 text-gray-700">
                   <MapPin className="h-5 w-5 text-[#f56a24] flex-shrink-0 mt-1" />
                   <div>
-                    <div className="font-medium">{product.supplier.address}</div>
+                    <div className="font-medium">{product.user.address}</div>
                     <div className="text-sm text-gray-600">
-                      {product.supplier.postalCode} {product.supplier.city}
+                      {product.user.postalCode} {product.user.city}
                     </div>
                   </div>
                 </div>
@@ -243,15 +244,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             <div className="flex flex-col gap-3">
-              <a href={`tel:${product.supplier.phone}`}>
+              <a href={`tel:${product.user.phone}`}>
                 <Button variant="primary" size="lg" className="w-full flex items-center justify-center">
                   <Phone className="h-5 w-5 mr-2" />
-                  {product.supplier.phone}
+                  {product.user.phone}
                 </Button>
               </a>
-              {product.supplier.whatsapp && (
+              {product.user.whatsapp && (
                 <a
-                  href={`https://wa.me/${product.supplier.whatsapp.replace(/[^0-9]/g, "")}`}
+                  href={`https://wa.me/${product.user.whatsapp.replace(/[^0-9]/g, "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

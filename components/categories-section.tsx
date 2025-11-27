@@ -9,6 +9,11 @@ interface Category {
   id: string
   name: string
   slug: string
+  description: string | null
+  imageUrl: string | null
+  _count: {
+    products: number
+  }
 }
 
 export default function CategoriesSection() {
@@ -57,47 +62,84 @@ export default function CategoriesSection() {
   }
 
   return (
-    <section className="py-20 bg-[#1B2632] text-white">
+    <section className="py-20 bg-gradient-to-b from-[#1B2632] to-[#0f161f] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 text-pretty">
-          {t.categories || "Our Categories"}
-        </h2>
-        <p className="text-lg text-gray-300 mb-16 max-w-2xl">
-          {t.categoriesDescription || "Discover our wide range of eyewear organized by category"}
-        </p>
+        <div className="text-center mb-16">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 text-pretty">
+            {t.categories || "Nos Catégories"}
+          </h2>
+          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+            {t.categoriesDescription || "Découvrez notre large gamme de lunettes organisée par catégorie"}
+          </p>
+        </div>
 
         {categories.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categories.map((category) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {categories.slice(0, 6).map((category) => (
               <Link
                 key={category.id}
-                href={`/catalogue?category=${category.slug}`}
-                className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#2C3B4D] to-[#1B2632] border border-[#80827f]/20 hover:border-[#f56a24]/50 transition-all duration-300 p-8 flex flex-col justify-between min-h-64"
+                href={`/categories?category=${category.slug}`}
+                className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#2C3B4D] to-[#1B2632] border border-[#80827f]/20 hover:border-[#f56a24]/60 transition-all duration-500 hover:shadow-2xl hover:shadow-[#f56a24]/20 transform hover:-translate-y-2"
               >
-                {/* Background accent */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#f56a24]/10 rounded-full blur-3xl group-hover:bg-[#f56a24]/20 transition-colors duration-300" />
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#80827f]/5 rounded-full blur-2xl" />
+                {/* Image Background */}
+                {category.imageUrl ? (
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={category.imageUrl}
+                      alt={category.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1B2632] via-[#1B2632]/50 to-transparent" />
+                  </div>
+                ) : (
+                  <div className="relative h-48 bg-gradient-to-br from-[#f56a24]/20 to-[#80827f]/10">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-6xl font-bold text-[#f56a24]/30">{category.name.charAt(0)}</div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Content */}
-                <div className="relative z-10">
-                  <h3 className="text-2xl sm:text-3xl font-bold mb-3 group-hover:text-[#f56a24] transition-colors duration-300">
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold mb-2 group-hover:text-[#f56a24] transition-colors duration-300">
                     {category.name}
                   </h3>
-                  <p className="text-gray-400 text-sm mb-4 group-hover:text-gray-200 transition-colors duration-300">
-                    Browse our exclusive collection
-                  </p>
+                  
+                  {category.description && (
+                    <p className="text-gray-400 text-sm mb-3 line-clamp-2 group-hover:text-gray-200 transition-colors duration-300">
+                      {category.description}
+                    </p>
+                  )}
+
+                  {/* Product count badge */}
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center gap-2">
+                      <div className="px-3 py-1 bg-[#f56a24]/20 text-[#f56a24] rounded-full text-xs font-semibold">
+                        {category._count.products} {category._count.products === 1 ? 'produit' : 'produits'}
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-[#f56a24] transform group-hover:translate-x-2 transition-transform duration-300" />
+                  </div>
                 </div>
 
-                {/* Accent bar and arrow */}
-                <div className="relative z-10 flex items-center justify-between">
-                  <div className="h-1 w-8 bg-[#f56a24] transform group-hover:w-16 transition-all duration-300" />
-                  <ChevronRight className="h-6 w-6 text-[#f56a24] transform group-hover:translate-x-2 transition-transform duration-300" />
-                </div>
+                {/* Hover effect overlay */}
+                <div className="absolute inset-0 border-2 border-[#f56a24] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl pointer-events-none" />
               </Link>
             ))}
           </div>
         ) : (
-          <div className="text-center text-gray-400 py-12">No categories available at this time.</div>
+          <div className="text-center text-gray-400 py-12">Aucune catégorie disponible pour le moment.</div>
+        )}
+
+        {/* View All Button */}
+        {categories.length > 6 && (
+          <div className="text-center mt-12">
+            <Link href="/categories">
+              <button className="px-8 py-4 bg-[#f56a24] hover:bg-[#f56a24]/90 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                Voir toutes les catégories ({categories.length})
+              </button>
+            </Link>
+          </div>
         )}
       </div>
     </section>

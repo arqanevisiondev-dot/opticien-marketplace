@@ -15,6 +15,7 @@ export default function Home() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const [showModal, setShowModal] = useState(false)
+  const [showAuthOptions, setShowAuthOptions] = useState(false)
 
   useEffect(() => {
     if (status === "loading") return
@@ -29,11 +30,25 @@ export default function Home() {
 
   const handleYes = () => {
     setShowModal(false)
-    router.push("/auth/signup")
+    setShowAuthOptions(true)
   }
 
   const handleNo = () => {
     setShowModal(false)
+  }
+
+  const handleLogin = () => {
+    setShowAuthOptions(false)
+    router.push("/auth/signin")
+  }
+
+  const handleSignup = () => {
+    setShowAuthOptions(false)
+    router.push("/auth/signup")
+  }
+
+  const handleCloseAuthModal = () => {
+    setShowAuthOptions(false)
   }
 
   return (
@@ -73,51 +88,55 @@ export default function Home() {
       <CatalogueSection />
 
       {/* Features Section - Updated background with palladian color for contrast */}
-      <section className="py-16 md:py-24 bg-[#EEE9DF]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-8 md:mb-12 text-[#1B2632]">
-            {t.features}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            <div className="bg-white p-6 md:p-8 shadow-lg rounded-lg hover:shadow-xl transition-shadow">
-              <div className="bg-[#f56a24] w-16 h-16 flex items-center justify-center mb-4 rounded-lg">
-                <Eye className="h-8 w-8 text-white" />
+      {!session && (
+        <section className="py-16 md:py-24 bg-[#EEE9DF]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-8 md:mb-12 text-[#1B2632]">
+              {t.features}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              <div className="bg-white p-6 md:p-8 shadow-lg rounded-lg hover:shadow-xl transition-shadow">
+                <div className="bg-[#f56a24] w-16 h-16 flex items-center justify-center mb-4 rounded-lg">
+                  <Eye className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-[#1B2632]">{t.exclusiveCatalog}</h3>
+                <p className="text-gray-600">{t.exclusiveCatalogDesc}</p>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-[#1B2632]">{t.exclusiveCatalog}</h3>
-              <p className="text-gray-600">{t.exclusiveCatalogDesc}</p>
-            </div>
 
-            <div className="bg-white p-6 md:p-8 shadow-lg rounded-lg hover:shadow-xl transition-shadow">
-              <div className="bg-[#f56a24] w-16 h-16 flex items-center justify-center mb-4 rounded-lg">
-                <MapPin className="h-8 w-8 text-white" />
+              <div className="bg-white p-6 md:p-8 shadow-lg rounded-lg hover:shadow-xl transition-shadow">
+                <div className="bg-[#f56a24] w-16 h-16 flex items-center justify-center mb-4 rounded-lg">
+                  <MapPin className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-[#1B2632]">{t.fastDelivery}</h3>
+                <p className="text-gray-600">{t.fastDeliveryDesc}</p>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-[#1B2632]">{t.fastDelivery}</h3>
-              <p className="text-gray-600">{t.fastDeliveryDesc}</p>
-            </div>
 
-            <div className="bg-white p-6 md:p-8 shadow-lg rounded-lg hover:shadow-xl transition-shadow">
-              <div className="bg-[#f56a24] w-16 h-16 flex items-center justify-center mb-4 rounded-lg">
-                <Users className="h-8 w-8 text-white" />
+              <div className="bg-white p-6 md:p-8 shadow-lg rounded-lg hover:shadow-xl transition-shadow">
+                <div className="bg-[#f56a24] w-16 h-16 flex items-center justify-center mb-4 rounded-lg">
+                  <Users className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-[#1B2632]">{t.professionalPrices}</h3>
+                <p className="text-gray-600">{t.professionalPricesDesc}</p>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-[#1B2632]">{t.professionalPrices}</h3>
-              <p className="text-gray-600">{t.professionalPricesDesc}</p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-r from-[#2C3B4D] to-[#1B2632] text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-pretty">{t.ctaTitle}</h2>
-          <p className="text-lg sm:text-xl md:text-2xl mb-8 text-gray-200">{t.ctaSubtitle}</p>
-          <Link href="/auth/signup">
-            <Button variant="secondary" size="lg">
-              {t.createFreeAccount}
-            </Button>
-          </Link>
-        </div>
-      </section>
+      {/* CTA Section - Only shown when user is not connected */}
+      {!session && (
+        <section className="py-16 md:py-24 bg-gradient-to-r from-[#2C3B4D] to-[#1B2632] text-white">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-pretty">{t.ctaTitle}</h2>
+            <p className="text-lg sm:text-xl md:text-2xl mb-8 text-gray-200">{t.ctaSubtitle}</p>
+            <Link href="/auth/signup">
+              <Button variant="secondary" size="lg">
+                {t.createFreeAccount}
+              </Button>
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* Optician Prompt Modal */}
       {showModal && (
@@ -135,6 +154,37 @@ export default function Home() {
                 className="flex-1 border-[#f56a24] text-[#f56a24] bg-transparent"
               >
                 {t.no}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Auth Options Modal */}
+      {showAuthOptions && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
+          <div className="bg-white max-w-md w-full p-8 shadow-2xl rounded-lg animate-fade-in">
+            <h2 className="text-2xl font-bold text-[#1B2632] mb-4">{t.welcomeOptician}</h2>
+            <p className="text-gray-600 mb-6">{t.authOptionsMessage}</p>
+            <div className="flex flex-col gap-4">
+              <Button onClick={handleLogin} variant="primary" size="lg" className="w-full">
+                {t.login}
+              </Button>
+              <Button
+                onClick={handleSignup}
+                variant="secondary"
+                size="lg"
+                className="w-full"
+              >
+                {t.signup}
+              </Button>
+              <Button
+                onClick={handleCloseAuthModal}
+                variant="outline"
+                size="sm"
+                className="w-full mt-2 border-gray-300 text-gray-600"
+              >
+                {t.cancel}
               </Button>
             </div>
           </div>

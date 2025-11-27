@@ -31,13 +31,13 @@ export default async function TestDbPage() {
 
   if (pingOk) {
     try {
-      const [users, suppliers, products, categories] = await Promise.all([
+      const [users, opticians, products, categories] = await Promise.all([
         prisma.user.count(),
-        prisma.supplier.count(),
+        prisma.optician.count(),
         prisma.product.count(),
         prisma.category.count(),
       ]);
-      counts = { users, suppliers, products, categories };
+      counts = { users, suppliers: opticians, products, categories };
     } catch (e) {
       pingOk = false;
       pingError = e instanceof Error ? e.message : String(e);

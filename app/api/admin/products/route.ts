@@ -11,6 +11,7 @@ type ProductPayload = {
   categoryId?: string;
   material?: string;
   gender?: string;
+  marque?: string;
   shape?: string;
   color?: string;
   price?: number | string;
@@ -53,13 +54,6 @@ async function requireAdminSession() {
     return null;
   }
   return session;
-}
-
-async function getDefaultSupplier() {
-  const supplier = await prisma.supplier.findUnique({
-    where: { email: 'admin@Arqane Vitionet.com' },
-  });
-  return supplier;
 }
 
 async function buildUniqueSlug(name: string, productId?: string) {
@@ -149,6 +143,7 @@ export async function POST(request: NextRequest) {
       categoryId,
       material,
       gender,
+      marque,
       shape,
       color,
       price,
@@ -199,15 +194,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const defaultSupplier = await getDefaultSupplier();
-    if (!defaultSupplier) {
-      console.error('Default supplier not found. Please run: pnpm db:seed');
-      return NextResponse.json(
-        { error: 'Fournisseur par défaut introuvable. Veuillez exécuter: pnpm db:seed' },
-        { status: 500 }
-      );
-    }
-
     const baseSlug = await buildUniqueSlug(name);
 
     const existing = await prisma.product.findUnique({ where: { reference } });
@@ -222,7 +208,7 @@ export async function POST(request: NextRequest) {
 
     const product = await prisma.product.create({
       data: {
-        supplierId: defaultSupplier.id,
+        userId: session.user.id,
         categoryId: categoryId || null,
         name,
         slug: baseSlug,
@@ -230,6 +216,7 @@ export async function POST(request: NextRequest) {
         description: description || null,
         material: material || null,
         gender: gender || null,
+        marque: marque || null,
         shape: shape || null,
         color: color || null,
         price: parsedPrice,
@@ -241,7 +228,6 @@ export async function POST(request: NextRequest) {
         isNewCollection: typeof isNewCollection === 'boolean' ? isNewCollection : false,
       },
       include: {
-        supplier: true,
         category: true,
       },
     });
@@ -273,6 +259,7 @@ export async function PUT(request: NextRequest) {
       categoryId,
       material,
       gender,
+      marque,
       shape,
       color,
       price,
@@ -356,6 +343,7 @@ export async function PUT(request: NextRequest) {
         categoryId: normalizedCategoryId ?? existingProduct.categoryId,
         material: material ?? existingProduct.material,
         gender: gender ?? existingProduct.gender,
+        marque: marque ?? existingProduct.marque,
         shape: shape ?? existingProduct.shape,
         color: color ?? existingProduct.color,
         price: parsedPrice,

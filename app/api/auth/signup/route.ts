@@ -56,7 +56,41 @@ export async function POST(request: NextRequest) {
           },
         },
       },
+      include: {
+        optician: true,
+      },
     });
+
+    // Send WhatsApp notification to admin
+    try {
+      const admin = await prisma.user.findFirst({
+        where: { role: 'ADMIN' },
+        select: { whatsapp: true },
+      });
+
+      if (admin?.whatsapp) {
+        const message = `🆕 *Nouvelle Inscription Opticien*\n\n` +
+          `👤 Nom: ${validatedData.firstName} ${validatedData.lastName}\n` +
+          `🏢 Entreprise: ${validatedData.businessName}\n` +
+          `📧 Email: ${validatedData.email}\n` +
+          `📱 Téléphone: ${validatedData.phone}\n` +
+          `📍 Ville: ${validatedData.city || 'N/A'}\n` +
+          `📮 Code Postal: ${validatedData.postalCode || 'N/A'}\n\n` +
+          `✅ Veuillez approuver ce compte dans le dashboard admin.`;
+
+        // Note: In production, you would send this via WhatsApp API
+        // For now, we just generate the URL
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappPhone = admin.whatsapp.replace(/\D/g, '');
+        const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodedMessage}`;
+        
+        console.log('WhatsApp notification URL generated:', whatsappUrl);
+        // In production: await sendWhatsAppMessage(whatsappPhone, message);
+      }
+    } catch (notificationError) {
+      // Log but don't fail the registration if notification fails
+      console.error('Failed to send WhatsApp notification:', notificationError);
+    }
 
     return NextResponse.json(
       { 

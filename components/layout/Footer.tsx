@@ -12,7 +12,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {/* About */}
           <div>
-            <h3 className="text-lg font-bold mb-4 text-[#f56a24]">Arqane Vitionet</h3>
+            <h3 className="text-lg font-bold mb-4 text-[#f56a24]">Arqane Vision</h3>
             <p className="text-sm text-gray-300">{t.platformDescription}</p>
           </div>
 
@@ -66,7 +66,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-gray-300">
               <li className="flex items-center space-x-2 hover:text-[#f56a24] transition-colors">
                 <Mail className="h-4 w-4" />
-                <span>contact@Arqane Vitionet.com</span>
+                <span>contact@Arqane Vision.com</span>
               </li>
               <li className="flex items-center space-x-2 hover:text-[#f56a24] transition-colors">
                 <Phone className="h-4 w-4" />
@@ -82,7 +82,7 @@ export default function Footer() {
 
         <div className="mt-8 pt-8 border-t border-white/20 text-center text-sm text-gray-400">
           <p>
-            &copy; {new Date().getFullYear()} Arqane Vitionet. {t.allRightsReserved}.
+            &copy; {new Date().getFullYear()} Arqane Vision. {t.allRightsReserved}.
           </p>
         </div>
       </div>

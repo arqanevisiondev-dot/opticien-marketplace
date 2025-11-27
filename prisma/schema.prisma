@@ -29,10 +29,23 @@ model User {
   email         String          @unique @db.VarChar(191)
   password      String
   role          UserRole        @default(OPTICIAN)
+  // Supplier fields (for ADMIN users)
+  businessName  String?
+  phone         String?
+  whatsapp      String?
+  description   String?         @db.Text
+  address       String?
+  city          String?
+  postalCode    String?
+  latitude      Float?
+  longitude     Float?
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   optician      Optician?
+  products      Product[]       @relation("UserProducts")
   emailCampaigns EmailCampaign[] @relation("CampaignCreator")
+  
+  @@index([latitude, longitude])
 }
 
 model Optician {
@@ -58,30 +71,12 @@ model Optician {
   @@index([latitude, longitude])
 }
 
-model Supplier {
-  id          String    @id @default(cuid()) @db.VarChar(191)
-  name        String
-  email       String    @unique @db.VarChar(191)
-  phone       String
-  whatsapp    String?
-  description String?  @db.Text
-  address     String?
-  city        String?
-  postalCode  String?
-  latitude    Float?
-  longitude   Float?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  products    Product[]
-  
-  @@index([latitude, longitude])
-}
-
 model Category {
   id          String    @id @default(cuid()) @db.VarChar(191)
   name        String    @unique @db.VarChar(191)
   slug        String    @unique @db.VarChar(191)
   description String?
+  imageUrl    String?   @db.LongText
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   products    Product[]
@@ -91,8 +86,8 @@ model Category {
 
 model Product {
   id          String    @id @default(cuid()) @db.VarChar(191)
-  supplierId  String    @db.VarChar(191)
-  supplier    Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  userId      String    @db.VarChar(191)
+  user        User      @relation("UserProducts", fields: [userId], references: [id], onDelete: Cascade)
   categoryId  String?   @db.VarChar(191)
   category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   name        String
@@ -101,6 +96,7 @@ model Product {
   description String?  @db.Text
   material    String?   @db.VarChar(191)
   gender      String?   @db.VarChar(191)
+  marque      String?   @db.VarChar(191)
   shape       String?
   color       String?
   price       Float
@@ -114,10 +110,11 @@ model Product {
   updatedAt   DateTime  @updatedAt
   orderItems  OrderItem[]
     
-  @@index([supplierId])
+  @@index([userId])
   @@index([categoryId])
   @@index([material])
   @@index([gender])
+  @@index([marque])
   @@index([inStock])
   @@index([slug])
 }
@@ -156,6 +153,19 @@ model OrderItem {
   salePrice    Float?
   remisePct    Float?
   totalLine    Float
+  status       OrderItemStatus @default(PENDING)
+  confirmedAt  DateTime?
+  confirmedBy  String?  @db.VarChar(191)
+  createdAt    DateTime @default(now())
+  
+  @@index([orderId])
+  @@index([status])
+}
+
+enum OrderItemStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
 }
 
 enum OrderStatus {
@@ -178,6 +188,14 @@ model ProductOption {
   
   @@unique([type, value])
   @@index([type])
+}
+
+model Brand {
+  id        String   @id @default(cuid()) @db.VarChar(191)
+  name      String   @unique @db.VarChar(191)
+  createdAt DateTime @default(now())
+  
+  @@index([name])
 }
 
 model EmailCampaign {

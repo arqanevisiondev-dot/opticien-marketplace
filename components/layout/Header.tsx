@@ -18,10 +18,10 @@ export default function Header() {
 
   const navigation = [
     { name: t.home, href: "/" },
+    { name: t.categories || "Catégories", href: "/categories" },
     { name: t.catalog, href: "/catalogue" },
-    { name: t.opticians, href: "/opticiens" },
     { name: t.contact, href: "/contact" },
-  ]
+  ];
 
   return (
     <header className="bg-gradient-to-r from-[#1B2632] to-[#2C3B4D] text-white sticky top-0 z-50 shadow-lg">
@@ -106,12 +106,26 @@ export default function Header() {
             ) : session ? (
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-300">{session.user?.email}</span>
-                {session.user?.role === "ADMIN" && (
-                  <Link href="/admin">
+                {session.user?.role === "OPTICIAN" && (
+                  <Link href="/profile">
                     <Button variant="secondary" size="sm">
-                      Admin
+                      Mon Profil
                     </Button>
                   </Link>
+                )}
+                {session.user?.role === "ADMIN" && (
+                  <>
+                    <Link href="/admin">
+                      <Button variant="secondary" size="sm">
+                        Admin
+                      </Button>
+                    </Link>
+                    <Link href="/admin/orders/confirm">
+                      <Button variant="secondary" size="sm">
+                        Commandes
+                      </Button>
+                    </Link>
+                  </>
                 )}
                 <Button
                   variant="outline"

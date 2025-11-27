@@ -15,6 +15,18 @@ interface DashboardStats {
   totalSuppliers: number;
 }
 
+interface RecentRegistration {
+  id: string;
+  businessName: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  city: string | null;
+  status: string;
+  createdAt: string;
+}
+
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -25,6 +37,7 @@ export default function AdminDashboard() {
     totalProducts: 0,
     totalSuppliers: 0,
   });
+  const [recentRegistrations, setRecentRegistrations] = useState<RecentRegistration[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Protection: Vérifier que l'utilisateur est admin
@@ -37,6 +50,7 @@ export default function AdminDashboard() {
     }
     
     fetchStats();
+    fetchRecentRegistrations();
   }, [session, status, router]);
 
   const fetchStats = async () => {
@@ -49,6 +63,27 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchRecentRegistrations = async () => {
+    try {
+      const res = await fetch('/api/admin/opticians/recent');
+      const data = await res.json();
+      setRecentRegistrations(data.recentRegistrations || []);
+    } catch (error) {
+      console.error('Error fetching recent registrations:', error);
+    }
+  };
+
+  const getTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Il y a quelques minutes';
+    if (diffInHours < 24) return `Il y a ${diffInHours} heure${diffInHours > 1 ? 's' : ''}`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `Il y a ${diffInDays} jour${diffInDays > 1 ? 's' : ''}`;
   };
 
   const statCards = [
@@ -128,10 +163,10 @@ export default function AdminDashboard() {
                     {t.newProduct}
                   </Button>
                 </Link>
-                <Link href="/admin/orders/new">
+                <Link href="/admin/orders/confirm">
                   <Button variant="secondary" className="w-full flex items-center justify-center">
                     <ClipboardList className="mr-2 h-4 w-4" />
-                    {t.newOrder}
+                    Confirmer Commandes
                   </Button>
                 </Link>
                 <Link href="/admin/products">
@@ -158,36 +193,72 @@ export default function AdminDashboard() {
             {/* Recent Activity */}
             <div className="bg-white p-6 shadow-lg">
               <h2 className="text-2xl font-bold text-abyssal mb-6">{t.recentActivity}</h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                  <div className="flex items-center">
-                    <div className="bg-burning-flame w-10 h-10 flex items-center justify-center mr-4">
-                      <Users className="h-5 w-5 text-white" />
+              
+              {recentRegistrations.length > 0 ? (
+                <div className="space-y-4">
+                  {recentRegistrations.map((registration) => (
+                    <div key={registration.id} className="flex items-center justify-between py-3 border-b border-gray-200">
+                      <div className="flex items-center">
+                        <div className={`${registration.status === 'PENDING' ? 'bg-burning-flame' : 'bg-blue-fantastic'} w-10 h-10 flex items-center justify-center mr-4 rounded-full`}>
+                          <Users className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-abyssal">
+                            {registration.businessName}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {registration.firstName} {registration.lastName} - {registration.city || 'N/A'}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {getTimeAgo(registration.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {registration.status === 'PENDING' && (
+                          <span className="px-3 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full">
+                            {t.pending}
+                          </span>
+                        )}
+                        <Link href={`/admin/opticians?filter=${registration.status.toLowerCase()}`}>
+                          <Button variant="outline" size="sm">{t.view}</Button>
+                        </Link>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-abyssal">{t.newOpticianRegistration}</p>
-                      <p className="text-sm text-gray-500">{t.hoursAgo}</p>
-                    </div>
-                  </div>
-                  <Link href="/admin/opticians?status=pending">
-                    <Button variant="outline" size="sm">{t.view}</Button>
-                  </Link>
+                  ))}
                 </div>
-                <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                  <div className="flex items-center">
-                    <div className="bg-blue-fantastic w-10 h-10 flex items-center justify-center mr-4">
-                      <Package className="h-5 w-5 text-white" />
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                    <div className="flex items-center">
+                      <div className="bg-burning-flame w-10 h-10 flex items-center justify-center mr-4">
+                        <Users className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-abyssal">{t.newOpticianRegistration}</p>
+                        <p className="text-sm text-gray-500">{t.hoursAgo}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-abyssal">{t.newProductAdded}</p>
-                      <p className="text-sm text-gray-500">{t.hoursAgo}</p>
-                    </div>
+                    <Link href="/admin/opticians?status=pending">
+                      <Button variant="outline" size="sm">{t.view}</Button>
+                    </Link>
                   </div>
-                  <Link href="/admin/products/new">
-                    <Button variant="outline" size="sm">{t.view}</Button>
-                  </Link>
+                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                    <div className="flex items-center">
+                      <div className="bg-blue-fantastic w-10 h-10 flex items-center justify-center mr-4">
+                        <Package className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-abyssal">{t.newProductAdded}</p>
+                        <p className="text-sm text-gray-500">{t.hoursAgo}</p>
+                      </div>
+                    </div>
+                    <Link href="/admin/products/new">
+                      <Button variant="outline" size="sm">{t.view}</Button>
+                    </Link>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </>
         )}
