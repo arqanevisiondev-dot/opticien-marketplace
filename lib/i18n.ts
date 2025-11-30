@@ -56,6 +56,254 @@ export const translations = {
     
     // Admin
     adminDashboard: 'Dashboard Administrateur',
+    dashboard: 'Tableau de bord',
+    allProducts: 'Tous les produits',
+    addProduct: 'Ajouter un produit',
+    editProduct: 'Modifier les produits',
+    allOpticians: 'Tous les opticiens',
+    pendingOpticians: 'En attente',
+    approvedOpticians: 'Approuvés',
+    orders: 'Commandes',
+    allCampaigns: 'Toutes les campagnes',
+    newCampaign: 'Nouvelle campagne',
+    settings: 'Paramètres',
+    adminPanel: 'Panneau Admin',
+    expandSidebar: 'Étendre la barre latérale',
+    collapseSidebar: 'Réduire la barre latérale',
+    productManagement: 'Gestion des Produits',
+    noProductsFound: 'Aucun produit trouvé',
+    createFirstProduct: 'Commencez par créer votre premier produit',
+    createProduct: 'Créer le produit',
+    noRecentActivity: 'Aucune activité récente',
+    categoriesAvailable: 'catégories disponibles',
+    uploadFile: 'Télécharger un fichier',
+    clickToUpload: 'Cliquez pour uploader',
+    orDragDrop: 'ou glissez-déposez',
+    fileTypesLimit: 'PNG, JPG, GIF jusqu\'à 10MB',
+    categoryImage: 'Image de la catégorie',
+    deleteCategoryConfirm: 'Êtes-vous sûr de vouloir supprimer cette catégorie ?',
+    deleteProductConfirm: 'Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.',
+    sliderDescription: 'Gérer les diapositives de la page d\'accueil',
+    noSlidesFound: 'Aucune diapositive trouvée',
+    adminCampaigns: 'Campagnes',
+    
+    // Common UI elements
+    common: {
+      or: 'Ou',
+      ref: 'Réf:',
+      brand: 'Marque:',
+      stock: 'Stock:',
+      notAvailable: 'N/A',
+      uncategorized: 'Non catégorisé',
+      characters: 'caractères',
+      close: 'Fermer',
+      details: 'Détails',
+      seeDetails: 'Voir détails',
+      update: 'Mettre à jour',
+      create: 'Créer',
+      activate: 'Activer',
+      deactivate: 'Désactiver',
+      start: 'Début:',
+      end: 'Fin:',
+      noImage: 'Aucune image',
+      total: 'Total',
+      product: 'produit',
+      products: 'produits',
+    },
+    
+    // Time expressions
+    time: {
+      fewMinutesAgo: 'Il y a quelques minutes',
+      hoursAgo: 'Il y a {count} heure{plural}',
+      daysAgo: 'Il y a {count} jour{plural}',
+    },
+    
+    // Badges
+    badges: {
+      new: 'Nouveau',
+      outOfStock: 'Rupture de stock',
+    },
+    
+    // Auth & Account
+    auth: {
+      createNewAccount: 'créez un nouveau compte',
+      rememberMe: 'Se souvenir de moi',
+      forgotPassword: 'Mot de passe oublié ?',
+      signingIn: 'Connexion...',
+      signInButton: 'Se connecter',
+      createOpticianAccount: 'Créer un compte opticien',
+      signInExisting: 'connectez-vous à votre compte existant',
+      acceptTerms: 'J\'accepte les',
+      signingUp: 'Inscription...',
+      createAccount: 'Créer mon compte',
+      accountVerificationMessage: 'Votre compte sera vérifié par notre équipe avant activation. Vous recevrez un email de confirmation.',
+    },
+    
+    // Errors
+    errors: {
+      invalidCredentials: 'Email ou mot de passe incorrect',
+      passwordsDoNotMatch: 'Les mots de passe ne correspondent pas',
+      signUpError: 'Erreur lors de l\'inscription',
+      whatsappNotConfigured: 'Numéro WhatsApp non configuré',
+    },
+    
+    // Forms
+    forms: {
+      firstName: 'Prénom *',
+      lastName: 'Nom *',
+      businessName: 'Nom de l\'entreprise *',
+      professionalEmail: 'Email professionnel *',
+      whatsappOptional: 'WhatsApp (optionnel)',
+      address: 'Adresse',
+      city: 'Ville',
+      postalCode: 'Code postal',
+      confirmPassword: 'Confirmer le mot de passe *',
+      fullName: 'Nom complet *',
+      subject: 'Sujet *',
+      selectSubject: 'Sélectionnez un sujet',
+      buttonText: 'Texte du bouton',
+      backgroundColor: 'Couleur de fond',
+      textColor: 'Couleur du texte',
+      buttonColor: 'Couleur du bouton',
+      order: 'Ordre',
+      startDate: 'Date de début',
+      endDate: 'Date de fin',
+      activateSlide: 'Activer la diapositive',
+      subtitle: 'Sous-titre',
+      imageUrl: 'URL de l\'image',
+      linkUrl: 'URL du lien',
+    },
+    
+    // Contact subjects
+    contactSubjects: {
+      information: 'Demande d\'information',
+      order: 'Question sur une commande',
+      account: 'Problème de compte',
+      partnership: 'Partenariat',
+      other: 'Autre',
+    },
+    
+    // Contact page
+    contactPage: {
+      title: 'Contactez-nous',
+      subtitle: 'Une question ? Besoin d\'aide ? Notre équipe est là pour vous répondre',
+      phone: 'Téléphone',
+      address: 'Adresse',
+      addressLine1: 'Rue de l\'Ain Sbaa',
+      addressLine2: 'Casablanca 20250',
+      addressLine3: 'Maroc',
+      openingHours: 'Horaires d\'ouverture',
+      available247: 'Disponible tous les jours',
+      clickToContact: 'Cliquez pour nous contacter',
+      formTitle: 'Envoyez-nous un message',
+      successMessage: 'Message envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.',
+      backToHome: '← Retour à l\'accueil',
+      sendMessage: 'Envoyer le message',
+      sending: 'Envoi...',
+    },
+    
+    // Placeholders
+    placeholders: {
+      searchProducts: 'Rechercher un produit...',
+      describeRequest: 'Décrivez votre demande...',
+      categoryDescription: 'Description de la catégorie...',
+      categoryName: 'Montures de soleil',
+    },
+    
+    // Filter labels
+    filters: {
+      allCategories: 'Toutes les catégories',
+      allMaterials: 'Tous les matériaux',
+      allGenders: 'Tous les genres',
+      allBrands: 'Toutes les marques',
+      allStock: 'Tous les stocks',
+      inStock: 'En stock',
+      outOfStock: 'Rupture de stock',
+    },
+    
+    // Cart
+    cart: {
+      inCart: 'Dans le panier',
+      addToCart: 'Ajouter au panier',
+      selection: 'Sélection:',
+      empty: 'Vider',
+      contactWhatsApp: 'Contacter via WhatsApp',
+      noProductsSelected: 'Aucun produit sélectionné.',
+      myCart: 'Mon Panier',
+      orderSummary: 'Résumé de la commande',
+      items: 'Articles',
+      totalQuantity: 'Quantité totale',
+      emptyCart: 'Votre panier est vide',
+      browseCatalogue: 'Parcourir le catalogue',
+      confirmOrder: 'Confirmer la commande',
+      sendingOrder: 'Envoi en cours...',
+    },
+    
+    // Profile
+    profile: {
+      myProfile: 'Mon Profil',
+      manageCart: 'Gérez votre panier et suivez vos commandes',
+      information: 'Informations',
+      loading: 'Chargement...',
+    },
+    
+    // Campaigns
+    campaigns: {
+      composeMessage: 'Composer un message',
+      sendResults: 'Résultats d\'envoi',
+    },
+    
+    // Slide types
+    slideTypes: {
+      news: 'Actualité',
+      product: 'Produit',
+      promotion: 'Promotion',
+      announcement: 'Annonce',
+    },
+    
+    // Languages
+    languages: {
+      french: 'Français',
+      english: 'English',
+      arabic: 'العربية',
+    },
+    
+    // Metadata
+    metadata: {
+      title: 'Arqane Vision - Marketplace de Montures de Lunettes',
+      description: 'Plateforme de marché pour montures de lunettes à destination des opticiens professionnels',
+    },
+    
+    // Company info
+    company: {
+      name: 'Arqane Vision',
+      phone: '+212 657 435 204',
+      email: 'arqanevision@gmail.com',
+      location: 'Casablanca, Maroc',
+    },
+    
+    sliderManagement: 'Gestion du Slider',
+    manageSlider: 'Gérer le Slider',
+    newSlide: 'Nouvelle Diapositive',
+    editSlide: 'Modifier la Diapositive',
+    slideTitle: 'Titre',
+    slideSubtitle: 'Sous-titre',
+    slideDescription: 'Description',
+    slideType: 'Type',
+    slideImage: 'Image',
+    slideLink: 'Lien',
+    slideLinkText: 'Texte du bouton',
+    slideOrder: 'Ordre',
+    slideActive: 'Activer',
+    slideStartDate: 'Date de début',
+    slideEndDate: 'Date de fin',
+    slideBackgroundColor: 'Couleur de fond',
+    slideTextColor: 'Couleur du texte',
+    slideButtonColor: 'Couleur du bouton',
+    slideTypeNews: 'Actualité',
+    slideTypeProduct: 'Produit',
+    slideTypePromotion: 'Promotion',
+    slideTypeAnnouncement: 'Annonce',
     manageOpticians: 'Gérer Opticiens',
     newProduct: 'Nouveau Produit',
     newSupplier: 'Nouveau Fournisseur',
@@ -177,7 +425,7 @@ export const translations = {
     imageUrls: 'URLs des images (une par ligne)',
     oneUrlPerLine: 'Une URL par ligne',
     creating: 'Création...',
-    createProduct: 'Créer le produit',
+    adminCreateProduct: 'Créer le produit',
     editProducts: 'Modifier les produits',
     editProductTitle: 'Modifier le produit',
     editProductSubtitle: 'Mettre à jour le prix, le stock et les images existantes.',
@@ -320,7 +568,233 @@ export const translations = {
     
     // Admin
     adminDashboard: 'Admin Dashboard',
-    manageOpticians: 'Manage Opticians',
+    dashboard: 'Dashboard',
+    allProducts: 'All products',
+    addProduct: 'Add product',
+    editProduct: 'Edit products',
+    allOpticians: 'All opticians',
+    pendingOpticians: 'Pending',
+    approvedOpticians: 'Approved',
+    orders: 'Orders',
+    allCampaigns: 'All campaigns',
+    newCampaign: 'New campaign',
+    settings: 'Settings',
+    adminPanel: 'Admin Panel',
+    expandSidebar: 'Expand sidebar',
+    collapseSidebar: 'Collapse sidebar',
+    productManagement: 'Product Management',
+    noProductsFound: 'No products found',
+    createFirstProduct: 'Start by creating your first product',
+    adminCreateProduct: 'Create product',
+    noRecentActivity: 'No recent activity',
+    categoriesAvailable: 'categories available',
+    uploadFile: 'Upload file',
+    clickToUpload: 'Click to upload',
+    orDragDrop: 'or drag and drop',
+    fileTypesLimit: 'PNG, JPG, GIF up to 10MB',
+    categoryImage: 'Category image',
+    deleteCategoryConfirm: 'Are you sure you want to delete this category?',
+    deleteProductConfirm: 'Are you sure you want to delete this product? This action is irreversible.',
+    sliderDescription: 'Manage homepage slides',
+    noSlidesFound: 'No slides found',
+    adminCampaigns: 'Campaigns',
+    
+    // Common UI elements
+    common: {
+      or: 'Or',
+      ref: 'Ref:',
+      brand: 'Brand:',
+      stock: 'Stock:',
+      notAvailable: 'N/A',
+      uncategorized: 'Uncategorized',
+      characters: 'characters',
+      close: 'Close',
+      details: 'Details',
+      seeDetails: 'See details',
+      update: 'Update',
+      create: 'Create',
+      activate: 'Activate',
+      deactivate: 'Deactivate',
+      start: 'Start:',
+      end: 'End:',
+      noImage: 'No image',
+      total: 'Total',
+      product: 'product',
+      products: 'products',
+    },
+    
+    // Time expressions
+    time: {
+      fewMinutesAgo: 'A few minutes ago',
+      hoursAgo: '{count} hour{plural} ago',
+      daysAgo: '{count} day{plural} ago',
+    },
+    
+    // Badges
+    badges: {
+      new: 'New',
+      outOfStock: 'Out of stock',
+    },
+    
+    // Auth & Account
+    auth: {
+      createNewAccount: 'create a new account',
+      rememberMe: 'Remember me',
+      forgotPassword: 'Forgot password?',
+      signingIn: 'Signing in...',
+      signInButton: 'Sign in',
+      createOpticianAccount: 'Create optician account',
+      signInExisting: 'sign in to your existing account',
+      acceptTerms: 'I accept the',
+      signingUp: 'Signing up...',
+      createAccount: 'Create my account',
+      accountVerificationMessage: 'Your account will be verified by our team before activation. You will receive a confirmation email.',
+    },
+    
+    // Errors
+    errors: {
+      invalidCredentials: 'Invalid email or password',
+      passwordsDoNotMatch: 'Passwords do not match',
+      signUpError: 'Sign up error',
+      whatsappNotConfigured: 'WhatsApp number not configured',
+    },
+    
+    // Forms
+    forms: {
+      firstName: 'First name *',
+      lastName: 'Last name *',
+      businessName: 'Business name *',
+      professionalEmail: 'Professional email *',
+      whatsappOptional: 'WhatsApp (optional)',
+      address: 'Address',
+      city: 'City',
+      postalCode: 'Postal code',
+      confirmPassword: 'Confirm password *',
+      fullName: 'Full name *',
+      subject: 'Subject *',
+      selectSubject: 'Select a subject',
+      buttonText: 'Button text',
+      backgroundColor: 'Background color',
+      textColor: 'Text color',
+      buttonColor: 'Button color',
+      order: 'Order',
+      startDate: 'Start date',
+      endDate: 'End date',
+      activateSlide: 'Activate slide',
+      subtitle: 'Subtitle',
+      imageUrl: 'Image URL',
+      linkUrl: 'Link URL',
+    },
+    
+    // Contact subjects
+    contactSubjects: {
+      information: 'Information request',
+      order: 'Question about an order',
+      account: 'Account issue',
+      partnership: 'Partnership',
+      other: 'Other',
+    },
+    
+    // Contact page
+    contactPage: {
+      title: 'Contact us',
+      subtitle: 'A question? Need help? Our team is here to answer you',
+      phone: 'Phone',
+      address: 'Address',
+      addressLine1: 'Ain Sbaa Street',
+      addressLine2: 'Casablanca 20250',
+      addressLine3: 'Morocco',
+      openingHours: 'Opening hours',
+      available247: 'Available every day',
+      clickToContact: 'Click to contact us',
+      formTitle: 'Send us a message',
+      successMessage: 'Message sent successfully! We will reply as soon as possible.',
+      backToHome: '← Back to home',
+      sendMessage: 'Send message',
+      sending: 'Sending...',
+    },
+    
+    // Placeholders
+    placeholders: {
+      searchProducts: 'Search for a product...',
+      describeRequest: 'Describe your request...',
+      categoryDescription: 'Category description...',
+      categoryName: 'Sunglasses frames',
+    },
+    
+    // Filter labels
+    filters: {
+      allCategories: 'All categories',
+      allMaterials: 'All materials',
+      allGenders: 'All genders',
+      allBrands: 'All brands',
+      allStock: 'All stock',
+      inStock: 'In stock',
+      outOfStock: 'Out of stock',
+    },
+    
+    // Cart
+    cart: {
+      inCart: 'In cart',
+      addToCart: 'Add to cart',
+      selection: 'Selection:',
+      empty: 'Empty',
+      contactWhatsApp: 'Contact via WhatsApp',
+      noProductsSelected: 'No products selected.',
+      myCart: 'My Cart',
+      orderSummary: 'Order summary',
+      items: 'Items',
+      totalQuantity: 'Total quantity',
+      emptyCart: 'Your cart is empty',
+      browseCatalogue: 'Browse catalog',
+      confirmOrder: 'Confirm order',
+      sendingOrder: 'Sending...',
+    },
+    
+    // Profile
+    profile: {
+      myProfile: 'My Profile',
+      manageCart: 'Manage your cart and track your orders',
+      information: 'Information',
+      loading: 'Loading...',
+    },
+    
+    // Campaigns
+    campaigns: {
+      composeMessage: 'Compose message',
+      sendResults: 'Send results',
+    },
+    
+    // Slide types
+    slideTypes: {
+      news: 'News',
+      product: 'Product',
+      promotion: 'Promotion',
+      announcement: 'Announcement',
+    },
+    
+    // Languages
+    languages: {
+      french: 'Français',
+      english: 'English',
+      arabic: 'العربية',
+    },
+    
+    // Metadata
+    metadata: {
+      title: 'Arqane Vision - Eyewear Frames Marketplace',
+      description: 'Marketplace platform for eyewear frames for professional opticians',
+    },
+    
+    // Company info
+    company: {
+      name: 'Arqane Vision',
+      phone: '+212 657 435 204',
+      email: 'arqanevision@gmail.com',
+      location: 'Casablanca, Morocco',
+    },
+    
+    sliderManagement: 'Slider Management',
     newProduct: 'New Product',
     newSupplier: 'New Supplier',
     emailCampaigns: 'WhatsApp Campaigns',
@@ -584,7 +1058,233 @@ export const translations = {
     
     // Admin
     adminDashboard: 'لوحة تحكم المسؤول',
-    manageOpticians: 'إدارة أخصائيي البصريات',
+    dashboard: 'لوحة التحكم',
+    allProducts: 'جميع المنتجات',
+    addProduct: 'إضافة منتج',
+    editProduct: 'تعديل المنتجات',
+    allOpticians: 'جميع الأخصائيين',
+    pendingOpticians: 'قيد الانتظار',
+    approvedOpticians: 'موافق عليهم',
+    orders: 'الطلبات',
+    allCampaigns: 'جميع الحملات',
+    newCampaign: 'حملة جديدة',
+    settings: 'الإعدادات',
+    adminPanel: 'لوحة الإدارة',
+    expandSidebar: 'توسيع الشريط الجانبي',
+    collapseSidebar: 'طي الشريط الجانبي',
+    productManagement: 'إدارة المنتجات',
+    noProductsFound: 'لم يتم العثور على منتجات',
+    createFirstProduct: 'ابدأ بإنشاء منتجك الأول',
+    adminCreateProduct: 'إنشاء المنتج',
+    noRecentActivity: 'لا يوجد نشاط حديث',
+    categoriesAvailable: 'الفئات المتاحة',
+    uploadFile: 'تحميل ملف',
+    clickToUpload: 'انقر للتحميل',
+    orDragDrop: 'أو اسحب وأفلت',
+    fileTypesLimit: 'PNG، JPG، GIF حتى 10 ميجابايت',
+    categoryImage: 'صورة الفئة',
+    deleteCategoryConfirm: 'هل أنت متأكد من حذف هذه الفئة؟',
+    deleteProductConfirm: 'هل أنت متأكد من حذف هذا المنتج؟ هذا الإجراء لا رجعة فيه.',
+    sliderDescription: 'إدارة شرائح الصفحة الرئيسية',
+    noSlidesFound: 'لم يتم العثور على شرائح',
+    adminCampaigns: 'الحملات',
+    
+    // Common UI elements
+    common: {
+      or: 'أو',
+      ref: 'المرجع:',
+      brand: 'الماركة:',
+      stock: 'المخزون:',
+      notAvailable: 'غير متوفر',
+      uncategorized: 'غير مصنف',
+      characters: 'حرف',
+      close: 'إغلاق',
+      details: 'التفاصيل',
+      seeDetails: 'عرض التفاصيل',
+      update: 'تحديث',
+      create: 'إنشاء',
+      activate: 'تفعيل',
+      deactivate: 'إلغاء التفعيل',
+      start: 'البداية:',
+      end: 'النهاية:',
+      noImage: 'لا توجد صورة',
+      total: 'المجموع',
+      product: 'منتج',
+      products: 'منتجات',
+    },
+    
+    // Time expressions
+    time: {
+      fewMinutesAgo: 'منذ دقائق قليلة',
+      hoursAgo: 'منذ {count} ساعة{plural}',
+      daysAgo: 'منذ {count} يوم{plural}',
+    },
+    
+    // Badges
+    badges: {
+      new: 'جديد',
+      outOfStock: 'غير متوفر',
+    },
+    
+    // Auth & Account
+    auth: {
+      createNewAccount: 'إنشاء حساب جديد',
+      rememberMe: 'تذكرني',
+      forgotPassword: 'هل نسيت كلمة المرور؟',
+      signingIn: 'جارٍ تسجيل الدخول...',
+      signInButton: 'تسجيل الدخول',
+      createOpticianAccount: 'إنشاء حساب أخصائي بصريات',
+      signInExisting: 'تسجيل الدخول إلى حسابك الموجود',
+      acceptTerms: 'أوافق على',
+      signingUp: 'جارٍ التسجيل...',
+      createAccount: 'إنشاء حسابي',
+      accountVerificationMessage: 'سيتم التحقق من حسابك من قبل فريقنا قبل التفعيل. ستتلقى بريداً إلكترونياً للتأكيد.',
+    },
+    
+    // Errors
+    errors: {
+      invalidCredentials: 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+      passwordsDoNotMatch: 'كلمات المرور غير متطابقة',
+      signUpError: 'خطأ في التسجيل',
+      whatsappNotConfigured: 'رقم واتساب غير مُعد',
+    },
+    
+    // Forms
+    forms: {
+      firstName: 'الاسم الأول *',
+      lastName: 'اسم العائلة *',
+      businessName: 'اسم الشركة *',
+      professionalEmail: 'البريد الإلكتروني المهني *',
+      whatsappOptional: 'واتساب (اختياري)',
+      address: 'العنوان',
+      city: 'المدينة',
+      postalCode: 'الرمز البريدي',
+      confirmPassword: 'تأكيد كلمة المرور *',
+      fullName: 'الاسم الكامل *',
+      subject: 'الموضوع *',
+      selectSubject: 'اختر موضوعاً',
+      buttonText: 'نص الزر',
+      backgroundColor: 'لون الخلفية',
+      textColor: 'لون النص',
+      buttonColor: 'لون الزر',
+      order: 'الترتيب',
+      startDate: 'تاريخ البداية',
+      endDate: 'تاريخ النهاية',
+      activateSlide: 'تفعيل الشريحة',
+      subtitle: 'العنوان الفرعي',
+      imageUrl: 'رابط الصورة',
+      linkUrl: 'رابط الوجهة',
+    },
+    
+    // Contact subjects
+    contactSubjects: {
+      information: 'طلب معلومات',
+      order: 'سؤال حول طلب',
+      account: 'مشكلة في الحساب',
+      partnership: 'شراكة',
+      other: 'آخر',
+    },
+    
+    // Contact page
+    contactPage: {
+      title: 'اتصل بنا',
+      subtitle: 'سؤال؟ تحتاج مساعدة؟ فريقنا هنا للإجابة عليك',
+      phone: 'الهاتف',
+      address: 'العنوان',
+      addressLine1: 'شارع عين السبع',
+      addressLine2: 'الدار البيضاء 20250',
+      addressLine3: 'المغرب',
+      openingHours: 'ساعات العمل',
+      available247: 'متاح كل يوم',
+      clickToContact: 'انقر للاتصال بنا',
+      formTitle: 'أرسل لنا رسالة',
+      successMessage: 'تم إرسال الرسالة بنجاح! سنرد في أقرب وقت ممكن.',
+      backToHome: '← العودة إلى الصفحة الرئيسية',
+      sendMessage: 'إرسال الرسالة',
+      sending: 'جارٍ الإرسال...',
+    },
+    
+    // Placeholders
+    placeholders: {
+      searchProducts: 'البحث عن منتج...',
+      describeRequest: 'صف طلبك...',
+      categoryDescription: 'وصف الفئة...',
+      categoryName: 'إطارات النظارات الشمسية',
+    },
+    
+    // Filter labels
+    filters: {
+      allCategories: 'جميع الفئات',
+      allMaterials: 'جميع المواد',
+      allGenders: 'جميع الأجناس',
+      allBrands: 'جميع الماركات',
+      allStock: 'جميع المخزون',
+      inStock: 'متوفر',
+      outOfStock: 'غير متوفر',
+    },
+    
+    // Cart
+    cart: {
+      inCart: 'في السلة',
+      addToCart: 'أضف إلى السلة',
+      selection: 'الاختيار:',
+      empty: 'إفراغ',
+      contactWhatsApp: 'التواصل عبر واتساب',
+      noProductsSelected: 'لم يتم اختيار أي منتجات.',
+      myCart: 'سلتي',
+      orderSummary: 'ملخص الطلب',
+      items: 'العناصر',
+      totalQuantity: 'الكمية الإجمالية',
+      emptyCart: 'سلتك فارغة',
+      browseCatalogue: 'تصفح الكتالوج',
+      confirmOrder: 'تأكيد الطلب',
+      sendingOrder: 'جارٍ الإرسال...',
+    },
+    
+    // Profile
+    profile: {
+      myProfile: 'ملفي الشخصي',
+      manageCart: 'إدارة سلتك وتتبع طلباتك',
+      information: 'المعلومات',
+      loading: 'جارٍ التحميل...',
+    },
+    
+    // Campaigns
+    campaigns: {
+      composeMessage: 'إنشاء رسالة',
+      sendResults: 'نتائج الإرسال',
+    },
+    
+    // Slide types
+    slideTypes: {
+      news: 'أخبار',
+      product: 'منتج',
+      promotion: 'عرض',
+      announcement: 'إعلان',
+    },
+    
+    // Languages
+    languages: {
+      french: 'Français',
+      english: 'English',
+      arabic: 'العربية',
+    },
+    
+    // Metadata
+    metadata: {
+      title: 'Arqane Vision - سوق إطارات النظارات',
+      description: 'منصة سوق لإطارات النظارات لأخصائيي البصريات المحترفين',
+    },
+    
+    // Company info
+    company: {
+      name: 'Arqane Vision',
+      phone: '+212 657 435 204',
+      email: 'arqanevision@gmail.com',
+      location: 'الدار البيضاء، المغرب',
+    },
+    
+    sliderManagement: 'إدارة الشرائح',
     newProduct: 'منتج جديد',
     newSupplier: 'مورد جديد',
     emailCampaigns: 'حملات واتساب',

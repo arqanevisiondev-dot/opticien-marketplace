@@ -109,7 +109,7 @@ model Order {
   whatsappMessageId String?
   whatsappFrom      String?
   totalAmount       Float       @default(0)
-  currency          String      @default("EUR") @db.VarChar(16)
+  currency          String      @default("DH") @db.VarChar(16)
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   validatedAt       DateTime?
@@ -176,6 +176,29 @@ model EmailCampaign {
   @@index([sentAt])
 }
 
+model Slide {
+  id              String    @id @default(cuid())
+  title           String
+  subtitle        String?   @db.Text
+  description     String?   @db.Text
+  imageUrl        String    @db.VarChar(500)
+  type            SlideType @default(NEWS)
+  linkUrl         String?   @db.VarChar(500)
+  linkText        String?   @db.VarChar(100)
+  isActive        Boolean   @default(true)
+  order           Int       @default(0)
+  startDate       DateTime?
+  endDate         DateTime?
+  backgroundColor String?   @db.VarChar(20)
+  textColor       String?   @db.VarChar(20)
+  buttonColor     String?   @db.VarChar(20)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([isActive, order])
+  @@index([startDate, endDate])
+}
+
 enum UserRole {
   ADMIN
   OPTICIAN
@@ -203,4 +226,11 @@ enum OrderStatus {
 enum OrderSource {
   WHATSAPP
   MANUAL
+}
+
+enum SlideType {
+  NEWS
+  PRODUCT
+  PROMOTION
+  ANNOUNCEMENT
 }

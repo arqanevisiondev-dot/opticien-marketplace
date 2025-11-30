@@ -26,11 +26,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/opticiens" className="text-gray-300 hover:text-[#f56a24] transition-colors">
-                  {t.findOptician}
-                </Link>
-              </li>
-              <li>
                 <Link href="/auth/signup" className="text-gray-300 hover:text-[#f56a24] transition-colors">
                   {t.becomePartnerLink}
                 </Link>

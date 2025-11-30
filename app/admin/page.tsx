@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Users, Package, Mail, TrendingUp, FolderTree, Settings, ClipboardList } from 'lucide-react';
+import { Users, Package, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -111,112 +111,72 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-palladian">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-abyssal mb-2">{t.adminDashboard}</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">{t.adminDashboard}</h1>
           <p className="text-gray-600">{t.ctaSubtitle}</p>
         </div>
 
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-fantastic"></div>
-          </div>
-        ) : (
-          <>
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {statCards.map((card) => (
-                <Link key={card.title} href={card.link}>
-                  <div className="bg-white p-6 shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className={`${card.color} w-12 h-12 flex items-center justify-center`}>
-                        <card.icon className="h-6 w-6 text-white" />
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <>
+              {/* Enhanced Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {statCards.map((card) => (
+                  <Link key={card.title} href={card.link}>
+                    <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 hover:border-blue-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className={`${card.color} w-14 h-14 rounded-lg flex items-center justify-center shadow-lg`}>
+                          <card.icon className="h-7 w-7 text-white" />
+                        </div>
+                        <div className="text-right">
+                          <div className="text-3xl font-bold text-gray-900">{card.value}</div>
+                          <div className="text-xs text-gray-500 mt-1">Total</div>
+                        </div>
                       </div>
-                      <div className="text-3xl font-bold text-abyssal">{card.value}</div>
+                      <h3 className="text-gray-700 font-semibold text-lg">{card.title}</h3>
+                      <div className="mt-3 flex items-center text-sm text-blue-600">
+                        <span>Voir détails</span>
+                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
                     </div>
-                    <h3 className="text-gray-600 font-medium">{card.title}</h3>
-                  </div>
-                </Link>
-              ))}
-            </div>
-
-            {/* Quick Actions */}
-            <div className="bg-white p-6 shadow-lg mb-8">
-              <h2 className="text-2xl font-bold text-abyssal mb-6">{t.quickActions}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-                <Link href="/admin/opticians">
-                  <Button variant="primary" className="w-full flex items-center justify-center">
-                    <Users className="mr-2 h-4 w-4" />
-                    {t.manageOpticians}
-                  </Button>
-                </Link>
-                <Link href="/admin/categories">
-                  <Button variant="secondary" className="w-full flex items-center justify-center">
-                    <FolderTree className="mr-2 h-4 w-4" />
-                    {t.manageCategories}
-                  </Button>
-                </Link>
-                <Link href="/admin/products/new">
-                  <Button variant="secondary" className="w-full flex items-center justify-center">
-                    <Package className="mr-2 h-4 w-4" />
-                    {t.newProduct}
-                  </Button>
-                </Link>
-                <Link href="/admin/orders/confirm">
-                  <Button variant="secondary" className="w-full flex items-center justify-center">
-                    <ClipboardList className="mr-2 h-4 w-4" />
-                    Confirmer Commandes
-                  </Button>
-                </Link>
-                <Link href="/admin/products">
-                  <Button variant="secondary" className="w-full flex items-center justify-center">
-                    <Package className="mr-2 h-4 w-4" />
-                    {t.editProducts}
-                  </Button>
-                </Link>
-                <Link href="/admin/settings">
-                  <Button variant="secondary" className="w-full flex items-center justify-center">
-                    <Settings className="mr-2 h-4 w-4" />
-                    {t.productOptions}
-                  </Button>
-                </Link>
-                <Link href="/admin/campaigns">
-                  <Button variant="secondary" className="w-full flex items-center justify-center">
-                    <Mail className="mr-2 h-4 w-4" />
-                    {t.emailCampaigns}
-                  </Button>
-                </Link>
+                  </Link>
+                ))}
               </div>
-            </div>
 
-            {/* Recent Activity */}
-            <div className="bg-white p-6 shadow-lg">
-              <h2 className="text-2xl font-bold text-abyssal mb-6">{t.recentActivity}</h2>
+              {/* Recent Activity */}
+              <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">{t.recentActivity}</h2>
               
               {recentRegistrations.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {recentRegistrations.map((registration) => (
-                    <div key={registration.id} className="flex items-center justify-between py-3 border-b border-gray-200">
+                    <div key={registration.id} className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100">
                       <div className="flex items-center">
-                        <div className={`${registration.status === 'PENDING' ? 'bg-burning-flame' : 'bg-blue-fantastic'} w-10 h-10 flex items-center justify-center mr-4 rounded-full`}>
-                          <Users className="h-5 w-5 text-white" />
+                        <div className={`${registration.status === 'PENDING' ? 'bg-yellow-500' : 'bg-blue-600'} w-12 h-12 flex items-center justify-center mr-4 rounded-full shadow-md`}>
+                          <Users className="h-6 w-6 text-white" />
                         </div>
                         <div>
-                          <p className="font-medium text-abyssal">
+                          <p className="font-semibold text-gray-900">
                             {registration.businessName}
                           </p>
                           <p className="text-sm text-gray-600">
                             {registration.firstName} {registration.lastName} - {registration.city || 'N/A'}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 mt-1">
                             {getTimeAgo(registration.createdAt)}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         {registration.status === 'PENDING' && (
-                          <span className="px-3 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full">
+                          <span className="px-3 py-1.5 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full">
                             {t.pending}
                           </span>
                         )}
@@ -228,35 +188,9 @@ export default function AdminDashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                    <div className="flex items-center">
-                      <div className="bg-burning-flame w-10 h-10 flex items-center justify-center mr-4">
-                        <Users className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-abyssal">{t.newOpticianRegistration}</p>
-                        <p className="text-sm text-gray-500">{t.hoursAgo}</p>
-                      </div>
-                    </div>
-                    <Link href="/admin/opticians?status=pending">
-                      <Button variant="outline" size="sm">{t.view}</Button>
-                    </Link>
-                  </div>
-                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                    <div className="flex items-center">
-                      <div className="bg-blue-fantastic w-10 h-10 flex items-center justify-center mr-4">
-                        <Package className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-abyssal">{t.newProductAdded}</p>
-                        <p className="text-sm text-gray-500">{t.hoursAgo}</p>
-                      </div>
-                    </div>
-                    <Link href="/admin/products/new">
-                      <Button variant="outline" size="sm">{t.view}</Button>
-                    </Link>
-                  </div>
+                <div className="text-center py-12 text-gray-500">
+                  <Users className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                  <p>Aucune activité récente</p>
                 </div>
               )}
             </div>

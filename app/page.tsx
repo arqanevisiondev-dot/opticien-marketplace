@@ -9,6 +9,7 @@ import { Eye, MapPin, ShoppingBag, Users } from "lucide-react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import CategoriesSection from "@/components/categories-section"
 import CatalogueSection from "@/components/catalogue-section"
+import HeroSlider from "@/components/HeroSlider"
 
 export default function Home() {
   const { t } = useLanguage()
@@ -53,6 +54,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      {/* Hero Slider - NEW */}
+      <HeroSlider />
+
       {/* Hero Section - Updated gradient with burning flame accent color */}
       <section className="bg-gradient-to-br from-[#2C3B4D] via-[#1B2632] to-[#0f161f] text-white py-16 md:py-24 lg:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

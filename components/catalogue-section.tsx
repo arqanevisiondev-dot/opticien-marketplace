@@ -50,15 +50,15 @@ export default function CatalogueSection() {
         <div className="flex justify-between items-end mb-12">
           <div>
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-[#1B2632] mb-4 text-pretty">
-              Featured Products
+              {t.featuredProducts}
             </h2>
             <p className="text-lg text-gray-600 max-w-xl">
-              Explore our handpicked selection of premium eyewear and accessories
+              {t.featuredProductsDesc}
             </p>
           </div>
           <Link href="/catalogue">
             <Button variant="secondary" className="hidden sm:flex items-center gap-2">
-              View All
+              {t.viewAll}
               <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
@@ -83,11 +83,11 @@ export default function CatalogueSection() {
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">No image</div>
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">{t.noImage}</div>
                       )}
                       {product.isNewCollection && (
                         <div className="absolute top-4 right-4 bg-[#f56a24] text-white px-3 py-1 text-xs font-bold rounded-full">
-                          NEW
+                          {t.newBadge}
                         </div>
                       )}
                     </div>
@@ -122,7 +122,7 @@ export default function CatalogueSection() {
             <div className="text-center sm:hidden">
               <Link href="/catalogue">
                 <Button variant="secondary" className="w-full flex items-center justify-center gap-2">
-                  View All Products
+                  {t.viewAllProducts}
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>

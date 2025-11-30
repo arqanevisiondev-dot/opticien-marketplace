@@ -53,7 +53,7 @@ export default function AdminOrdersPage() {
   const [summary, setSummary] = useState<OrdersSummary>(INITIAL_SUMMARY)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [currency, setCurrency] = useState("EUR")
+  const [currency, setCurrency] = useState("DH")
 
   const locale = useMemo(() => {
     if (language === "fr") return "fr-FR"
@@ -85,7 +85,7 @@ export default function AdminOrdersPage() {
       })
 
       const firstCurrency = fetchedOrders.find((order) => order.currency)?.currency
-      setCurrency(firstCurrency ?? "EUR")
+      setCurrency(firstCurrency ?? "DH")
     } catch (err) {
       console.error(err)
       setError(t.orderDataLoadError)
@@ -109,10 +109,10 @@ export default function AdminOrdersPage() {
     try {
       return new Intl.NumberFormat(locale, {
         style: "currency",
-        currency: currencyCode || "EUR",
+        currency: currencyCode || "DH",
       }).format(amount)
     } catch {
-      return `${amount.toFixed(2)} ${currencyCode || "EUR"}`
+      return `${amount.toFixed(2)} ${currencyCode || "DH"}`
     }
   }
 
