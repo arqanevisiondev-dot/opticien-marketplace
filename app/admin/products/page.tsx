@@ -156,20 +156,20 @@ export default function ProductsListPage() {
           <Link href="/admin">
             <Button variant="outline" size="sm" className="mb-4 flex items-center">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour au tableau de bord
+              {t.backToDashboard}
             </Button>
           </Link>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-[#2C3B4D] mb-2">Gestion des Produits</h1>
+              <h1 className="text-4xl font-bold text-[#2C3B4D] mb-2">{t.productsManagementTitle}</h1>
               <p className="text-gray-600">
-                {filteredProducts.length} produit{filteredProducts.length !== 1 ? 's' : ''}
+                {filteredProducts.length} {filteredProducts.length !== 1 ? t.productsCountPlural : t.productsCount}
               </p>
             </div>
             <Link href="/admin/products/new">
               <Button className="bg-[#f56a24] hover:bg-[#d45a1e] text-white flex items-center">
                 <Plus className="h-5 w-5 mr-2" />
-                Nouveau produit
+                {t.newProduct}
               </Button>
             </Link>
           </div>
@@ -183,7 +183,7 @@ export default function ProductsListPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Rechercher par nom, référence, marque..."
+                placeholder={t.searchByNameRefBrand}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent"
@@ -198,7 +198,7 @@ export default function ProductsListPage() {
                 onChange={(e) => setFilterCategory(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent appearance-none"
               >
-                <option value="">Toutes les catégories</option>
+                <option value="">{t.allCategories}</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}
@@ -215,9 +215,9 @@ export default function ProductsListPage() {
                 onChange={(e) => setFilterStock(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent appearance-none"
               >
-                <option value="all">Tous les stocks</option>
-                <option value="in-stock">En stock</option>
-                <option value="out-of-stock">Rupture de stock</option>
+                <option value="all">{t.allStock}</option>
+                <option value="in-stock">{t.inStock}</option>
+                <option value="out-of-stock">{t.outOfStock}</option>
               </select>
             </div>
           </div>
@@ -231,12 +231,12 @@ export default function ProductsListPage() {
         ) : filteredProducts.length === 0 ? (
           <div className="bg-white shadow-lg rounded-lg p-12 text-center">
             <Package className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Aucun produit trouvé</h3>
-            <p className="text-gray-500 mb-6">Commencez par créer votre premier produit</p>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">{t.noProductsFound}</h3>
+            <p className="text-gray-500 mb-6">{t.startByCreatingProduct}</p>
             <Link href="/admin/products/new">
               <Button className="bg-[#f56a24] hover:bg-[#d45a1e] text-white">
                 <Plus className="h-5 w-5 mr-2" />
-                Créer un produit
+                {t.createProduct}
               </Button>
             </Link>
           </div>
@@ -256,12 +256,12 @@ export default function ProductsListPage() {
                   />
                   {product.isNewCollection && (
                     <div className="absolute top-2 right-2 bg-[#f56a24] text-white px-3 py-1 rounded-full text-xs font-semibold">
-                      Nouveau
+                      {t.newBadge}
                     </div>
                   )}
                   {!product.inStock && (
                     <div className="absolute top-2 left-2 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                      Rupture
+                      {t.outOfStockBadge}
                     </div>
                   )}
                 </div>
@@ -274,25 +274,25 @@ export default function ProductsListPage() {
 
                   <div className="space-y-1 mb-4">
                     <p className="text-sm text-gray-600">
-                      <span className="font-medium">Réf:</span> {product.reference}
+                      <span className="font-medium">{t.ref}</span> {product.reference}
                     </p>
                     {product.marque && (
                       <p className="text-sm text-gray-600">
-                        <span className="font-medium">Marque:</span> {product.marque}
+                        <span className="font-medium">{t.brand}</span> {product.marque}
                       </p>
                     )}
                     <p className="text-sm text-gray-600">
-                      <span className="font-medium">Catégorie:</span>{' '}
-                      {product.category?.name || 'Non catégorisé'}
+                      <span className="font-medium">{t.category}:</span>{' '}
+                      {product.category?.name || t.notCategorized}
                     </p>
                     <p className="text-sm text-gray-600">
-                      <span className="font-medium">Matériau:</span> {product.material || 'N/A'}
+                      <span className="font-medium">{t.material}:</span> {product.material || 'N/A'}
                     </p>
                     <p className="text-sm text-gray-600">
-                      <span className="font-medium">Genre:</span> {product.gender || 'N/A'}
+                      <span className="font-medium">{t.gender}:</span> {product.gender || 'N/A'}
                     </p>
                     <p className="text-sm text-gray-600">
-                      <span className="font-medium">Couleur:</span> {product.color}
+                      <span className="font-medium">{t.color}:</span> {product.color}
                     </p>
                   </div>
 
@@ -314,7 +314,7 @@ export default function ProductsListPage() {
                       )}
                     </div>
                     <div className="text-sm text-gray-600">
-                      Stock: <span className="font-semibold">{product.stockQty}</span>
+                      {t.stock} <span className="font-semibold">{product.stockQty}</span>
                     </div>
                   </div>
 
@@ -323,7 +323,7 @@ export default function ProductsListPage() {
                     <Link href={`/catalogue/${product.id}`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full flex items-center justify-center">
                         <Eye className="h-4 w-4 mr-1" />
-                        Voir
+                        {t.view}
                       </Button>
                     </Link>
                     <Link href={`/admin/products/${product.id}`} className="flex-1">
@@ -333,7 +333,7 @@ export default function ProductsListPage() {
                         className="w-full flex items-center justify-center"
                       >
                         <Edit className="h-4 w-4 mr-1" />
-                        Modifier
+                        {t.modify}
                       </Button>
                     </Link>
                     <Button
@@ -355,9 +355,9 @@ export default function ProductsListPage() {
         {deleteConfirm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg p-6 max-w-md w-full">
-              <h3 className="text-xl font-bold text-[#2C3B4D] mb-4">Confirmer la suppression</h3>
+              <h3 className="text-xl font-bold text-[#2C3B4D] mb-4">{t.confirmDeletion}</h3>
               <p className="text-gray-600 mb-6">
-                Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.
+                {t.confirmDeleteProduct}
               </p>
               <div className="flex gap-4">
                 <Button
@@ -365,13 +365,13 @@ export default function ProductsListPage() {
                   className="flex-1"
                   onClick={() => setDeleteConfirm(null)}
                 >
-                  Annuler
+                  {t.cancel}
                 </Button>
                 <Button
                   className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                   onClick={() => handleDelete(deleteConfirm)}
                 >
-                  Supprimer
+                  {t.deleteAction}
                 </Button>
               </div>
             </div>

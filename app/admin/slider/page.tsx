@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import {
@@ -15,6 +15,7 @@ import {
   Sparkles,
   Save,
   X,
+  Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -43,6 +44,9 @@ export default function SliderManagement() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingSlide, setEditingSlide] = useState<Slide | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -158,6 +162,7 @@ export default function SliderManagement() {
       textColor: slide.textColor || '#ffffff',
       buttonColor: slide.buttonColor || '#f56a24',
     });
+    setImagePreview(null); // Clear preview when editing
     setShowForm(true);
   };
 
@@ -180,6 +185,43 @@ export default function SliderManagement() {
     });
     setEditingSlide(null);
     setShowForm(false);
+    setImagePreview(null);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to server
+    setUploadingImage(true);
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+
+      const response = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formDataUpload,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFormData({ ...formData, imageUrl: data.url });
+      } else {
+        alert('Erreur lors du téléchargement de l\'image');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Erreur lors du téléchargement de l\'image');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   if (loading) {
@@ -285,15 +327,75 @@ export default function SliderManagement() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    URL de l'image *
+                    Image *
                   </label>
+                  
+                  {/* Image Preview */}
+                  {(imagePreview || formData.imageUrl) && (
+                    <div className="mb-4 relative">
+                      <img
+                        src={imagePreview || formData.imageUrl}
+                        alt="Preview"
+                        className="w-full h-48 object-cover rounded-lg border-2 border-gray-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImagePreview(null);
+                          setFormData({ ...formData, imageUrl: '' });
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = '';
+                          }
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Upload Button */}
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingImage}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-burning-flame hover:bg-orange-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Upload className="w-5 h-5 text-gray-500" />
+                      <span className="text-sm font-medium text-gray-700">
+                        {uploadingImage ? 'Téléchargement...' : 'Télécharger une image'}
+                      </span>
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </div>
+
+                  {/* Or separator */}
+                  <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">ou</span>
+                    </div>
+                  </div>
+
+                  {/* URL Input */}
                   <input
                     type="url"
-                    required
                     value={formData.imageUrl}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, imageUrl: e.target.value });
+                      setImagePreview(null);
+                    }}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burning-flame focus:border-transparent"
-                    placeholder="https://example.com/image.jpg"
+                    placeholder="Ou entrez l'URL de l'image"
                   />
                 </div>
 

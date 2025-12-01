@@ -1,10 +1,9 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { ClipboardList, CheckCircle2, Clock3, Ban, Coins, PlusCircle, RotateCcw } from "lucide-react"
+import { ClipboardList, CheckCircle2, Clock3, Ban, Coins, RotateCcw } from "lucide-react"
 
 import { Button } from "@/components/ui/Button"
 import { useLanguage } from "@/contexts/LanguageContext"
@@ -53,7 +52,6 @@ export default function AdminOrdersPage() {
   const [summary, setSummary] = useState<OrdersSummary>(INITIAL_SUMMARY)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [currency, setCurrency] = useState("DH")
 
   const locale = useMemo(() => {
     if (language === "fr") return "fr-FR"
@@ -83,9 +81,6 @@ export default function AdminOrdersPage() {
         cancelled: summaryData.cancelled ?? 0,
         totalValue: summaryData.totalValue ?? 0,
       })
-
-      const firstCurrency = fetchedOrders.find((order) => order.currency)?.currency
-      setCurrency(firstCurrency ?? "DH")
     } catch (err) {
       console.error(err)
       setError(t.orderDataLoadError)
@@ -105,15 +100,9 @@ export default function AdminOrdersPage() {
     loadOrders()
   }, [session, status, router, loadOrders])
 
-  const formatCurrency = (amount: number, currencyCode: string) => {
-    try {
-      return new Intl.NumberFormat(locale, {
-        style: "currency",
-        currency: currencyCode || "DH",
-      }).format(amount)
-    } catch {
-      return `${amount.toFixed(2)} ${currencyCode || "DH"}`
-    }
+  const formatCurrency = (amount: number) => {
+    // Always display in DH (Moroccan Dirham)
+    return `${amount.toFixed(2)} DH`
   }
 
   const formatDateTime = (value: string) => {
@@ -173,7 +162,7 @@ export default function AdminOrdersPage() {
     },
     {
       label: t.ordersSummaryValue,
-      value: formatCurrency(summary.totalValue, currency),
+      value: formatCurrency(summary.totalValue),
       icon: Coins,
       color: "bg-burning-flame",
     },
@@ -192,12 +181,6 @@ export default function AdminOrdersPage() {
               <RotateCcw className="mr-2 h-4 w-4" />
               {t.refresh}
             </Button>
-            <Link href="/admin/orders/new">
-              <Button className="bg-burning-flame text-white hover:bg-[#f56a24]">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                {t.newOrder}
-              </Button>
-            </Link>
           </div>
         </div>
 
@@ -269,7 +252,7 @@ export default function AdminOrdersPage() {
                       </td>
                       <td className="px-6 py-4 text-gray-700">{order.itemCount.toLocaleString(locale)}</td>
                       <td className="px-6 py-4 text-gray-700">
-                        {formatCurrency(order.totalAmount, order.currency || currency)}
+                        {formatCurrency(order.totalAmount)}
                       </td>
                       <td className="px-6 py-4 text-gray-700">{formatDateTime(order.createdAt)}</td>
                       <td className="px-6 py-4">

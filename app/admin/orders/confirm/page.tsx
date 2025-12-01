@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle, XCircle, Clock, Package } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/Button';
 
 interface OrderItem {
@@ -39,6 +40,7 @@ interface Order {
 export default function ConfirmOrdersPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
@@ -95,21 +97,21 @@ export default function ConfirmOrdersPage() {
         return (
           <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-sm font-medium">
             <Clock className="h-4 w-4" />
-            En attente
+            {t.pendingStatus}
           </span>
         );
       case 'CONFIRMED':
         return (
           <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
             <CheckCircle className="h-4 w-4" />
-            Confirmé
+            {t.confirmed}
           </span>
         );
       case 'CANCELLED':
         return (
           <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-medium">
             <XCircle className="h-4 w-4" />
-            Annulé
+            {t.cancelledStatus}
           </span>
         );
       default:
@@ -122,7 +124,7 @@ export default function ConfirmOrdersPage() {
       <div className="min-h-screen bg-gradient-to-b from-[#EEE9DF] to-white flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#f56a24]"></div>
-          <p className="mt-4 text-gray-600">Chargement...</p>
+            <p className="mt-4 text-gray-600">{t.loading}</p>
         </div>
       </div>
     );
@@ -134,22 +136,22 @@ export default function ConfirmOrdersPage() {
         <Link href="/admin">
           <Button variant="outline" size="sm" className="mb-6 flex items-center">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour au tableau de bord
+            {t.backToDashboard}
           </Button>
         </Link>
 
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[#2C3B4D]">Confirmer les Commandes</h1>
+          <h1 className="text-4xl font-bold text-[#2C3B4D]">{t.confirmOrders}</h1>
           <p className="text-gray-600 mt-2">
-            Confirmez chaque produit individuellement et le stock sera automatiquement mis à jour
+            {t.confirmOrdersSubtitle}
           </p>
         </div>
 
         {orders.length === 0 ? (
           <div className="bg-white rounded-lg shadow-lg p-12 text-center">
             <Package className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Aucune commande en attente</h3>
-            <p className="text-gray-500">Toutes les commandes ont été traitées</p>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">{t.noPendingOrders}</h3>
+            <p className="text-gray-500">{t.allOrdersProcessed}</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -165,7 +167,7 @@ export default function ConfirmOrdersPage() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-gray-300">Commande #{order.id.slice(0, 8)}</p>
+                      <p className="text-sm text-gray-300">{t.orderNumber}{order.id.slice(0, 8)}</p>
                       <p className="text-lg font-bold">{order.totalAmount.toFixed(2)} DH</p>
                       <p className="text-xs text-gray-400">
                         {new Date(order.createdAt).toLocaleDateString('fr-FR', {
@@ -196,20 +198,20 @@ export default function ConfirmOrdersPage() {
                       >
                         <div className="flex-1">
                           <h3 className="font-bold text-[#2C3B4D]">{item.productName}</h3>
-                          <p className="text-sm text-gray-600">Réf: {item.productReference}</p>
+                          <p className="text-sm text-gray-600">{t.reference}: {item.productReference}</p>
                           <div className="mt-2 flex items-center gap-4">
                             <span className="text-sm">
-                              <span className="font-medium">Quantité:</span> {item.quantity}
+                              <span className="font-medium">{t.quantity}:</span> {item.quantity}
                             </span>
                             <span className="text-sm">
-                              <span className="font-medium">Prix unitaire:</span>{' '}
+                              <span className="font-medium">{t.unitPrice}:</span>{' '}
                               {(item.salePrice || item.unitPrice).toFixed(2)} DH
                             </span>
                             <span className="text-sm font-bold text-[#f56a24]">
-                              Total: {item.totalLine.toFixed(2)} DH
+                              {t.total}: {item.totalLine.toFixed(2)} DH
                             </span>
                             <span className="text-sm text-gray-600">
-                              Stock disponible: {item.product.stockQty}
+                              {t.availableStock}: {item.product.stockQty}
                             </span>
                           </div>
                         </div>
@@ -228,7 +230,7 @@ export default function ConfirmOrdersPage() {
                                 size="sm"
                               >
                                 <CheckCircle className="h-4 w-4" />
-                                {confirmingId === item.id ? 'Confirmation...' : 'Confirmer'}
+                                {confirmingId === item.id ? t.confirming : t.confirm}
                               </Button>
                               <Button
                                 onClick={() => handleConfirmItem(item.id, 'cancel')}
@@ -238,7 +240,7 @@ export default function ConfirmOrdersPage() {
                                 size="sm"
                               >
                                 <XCircle className="h-4 w-4" />
-                                Annuler
+                                {t.cancelAction}
                               </Button>
                             </div>
                           )}

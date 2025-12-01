@@ -132,8 +132,8 @@ export default function WhatsappCampaignsPage() {
         </div>
 
         {/* Message Composition */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-abyssal mb-6">Composer le message</h2>
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+          <h2 className="text-2xl font-bold text-abyssal mb-6">{t.composeMessage}</h2>
 
           <div className="mb-6">
             <label className="block text-sm font-semibold text-abyssal mb-3">{t.message}</label>
@@ -143,10 +143,8 @@ export default function WhatsappCampaignsPage() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />
-            <div className="text-right text-sm text-gray-500 mt-2">{message.length} caractères</div>
-          </div>
-
-          {/* Recipients Selection */}
+            <div className="text-right text-sm text-gray-500 mt-2">{message.length} {t.charactersCount}</div>
+          </div>          {/* Recipients Selection */}
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <label className="flex items-center gap-3 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors">
               <input
@@ -207,7 +205,7 @@ export default function WhatsappCampaignsPage() {
         {/* Result Message */}
         {result && (
           <div className="bg-white rounded-lg shadow-lg p-8 border-t-4 border-green-500">
-            <h3 className="text-xl font-bold text-abyssal mb-4">Résultats d'envoi</h3>
+            <h3 className="text-xl font-bold text-abyssal mb-4">{t.sendResults}</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-green-50 rounded-lg p-4">
                 <p className="text-gray-600 text-sm font-medium mb-1">{t.sentSuccessfully}</p>

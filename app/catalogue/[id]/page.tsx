@@ -223,49 +223,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
 
-        <div id="supplier-section" className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-12">
-          <h2 className="text-2xl font-bold text-[#1B2632] mb-6">{t.contactSupplier}</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <p className="text-xl font-bold text-[#1B2632] mb-4">{product.user.businessName}</p>
-
-              {product.user.address && (
-                <div className="flex items-start gap-3 mb-6 text-gray-700">
-                  <MapPin className="h-5 w-5 text-[#f56a24] flex-shrink-0 mt-1" />
-                  <div>
-                    <div className="font-medium">{product.user.address}</div>
-                    <div className="text-sm text-gray-600">
-                      {product.user.postalCode} {product.user.city}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <a href={`tel:${product.user.phone}`}>
-                <Button variant="primary" size="lg" className="w-full flex items-center justify-center">
-                  <Phone className="h-5 w-5 mr-2" />
-                  {product.user.phone}
-                </Button>
-              </a>
-              {product.user.whatsapp && (
-                <a
-                  href={`https://wa.me/${product.user.whatsapp.replace(/[^0-9]/g, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="secondary" size="lg" className="w-full flex items-center justify-center">
-                    <MessageCircle className="h-5 w-5 mr-2" />
-                    WhatsApp
-                  </Button>
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-
         <NearestOpticianFinder productName={product.name} />
       </div>
     </div>

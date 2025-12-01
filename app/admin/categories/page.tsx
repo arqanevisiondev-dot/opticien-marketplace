@@ -222,7 +222,7 @@ export default function CategoriesPage() {
             </div>
             <div>
               <h1 className="text-4xl font-bold text-abyssal">{t.manageCategories}</h1>
-              <p className="text-gray-600 mt-1">{filteredCategories.length} catégories disponibles</p>
+              <p className="text-gray-600 mt-1">{filteredCategories.length} {t.categoriesAvailable}</p>
             </div>
           </div>
           <Button onClick={() => handleOpenModal()} variant="primary" className="flex items-center gap-2">
@@ -372,7 +372,7 @@ export default function CategoriesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-abyssal mb-3">Image de la catégorie</label>
+                <label className="block text-sm font-semibold text-abyssal mb-3">{t.categoryImage}</label>
                 
                 {/* Upload method selector */}
                 <div className="flex gap-4 mb-4">
@@ -389,7 +389,7 @@ export default function CategoriesPage() {
                     }`}
                   >
                     <Upload className="h-4 w-4 inline mr-2" />
-                    Upload fichier
+                    {t.uploadFile}
                   </button>
                   <button
                     type="button"
@@ -415,9 +415,9 @@ export default function CategoriesPage() {
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-burning-flame transition-colors">
                           <Upload className="mx-auto h-12 w-12 text-gray-400 mb-2" />
                           <p className="text-sm text-gray-600">
-                            <span className="font-semibold text-burning-flame">Cliquez pour uploader</span> ou glissez-déposez
+                            <span className="font-semibold text-burning-flame">{t.clickToUpload}</span> {t.dragAndDrop}
                           </p>
-                          <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF jusqu'à 10MB</p>
+                          <p className="text-xs text-gray-500 mt-1">{t.fileTypeLimit}</p>
                         </div>
                         <input
                           type="file"
@@ -458,7 +458,7 @@ export default function CategoriesPage() {
                     />
                     {imagePreview && (
                       <div className="mt-3">
-                        <p className="text-sm text-gray-600 mb-2">Aperçu:</p>
+                        <p className="text-sm text-gray-600 mb-2">{t.preview}:</p>
                         <img
                           src={imagePreview}
                           alt="Preview"

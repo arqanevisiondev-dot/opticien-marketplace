@@ -124,22 +124,22 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
                   <h3 className="text-lg font-semibold text-abyssal mb-4">{t.contactInfo}</h3>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-sm text-gray-600 font-medium mb-1">Nom</p>
+                      <p className="text-sm text-gray-600 font-medium mb-1">{t.name}</p>
                       <p className="text-gray-900">
                         {optician.firstName} {optician.lastName}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 font-medium mb-1">Téléphone</p>
+                      <p className="text-sm text-gray-600 font-medium mb-1">{t.phone}</p>
                       <p className="text-gray-900">{optician.phone}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 font-medium mb-1">Email</p>
+                      <p className="text-sm text-gray-600 font-medium mb-1">{t.email}</p>
                       <p className="text-gray-900">{optician.email}</p>
                     </div>
                     {optician.whatsapp && (
                       <div>
-                        <p className="text-sm text-gray-600 font-medium mb-1">WhatsApp</p>
+                        <p className="text-sm text-gray-600 font-medium mb-1">{t.whatsapp}</p>
                         <p className="text-gray-900">{optician.whatsapp}</p>
                       </div>
                     )}
@@ -147,23 +147,23 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-abyssal mb-4">Adresse</h3>
+                  <h3 className="text-lg font-semibold text-abyssal mb-4">{t.address}</h3>
                   <div className="space-y-3">
                     {optician.address && (
                       <div>
-                        <p className="text-sm text-gray-600 font-medium mb-1">Adresse</p>
+                        <p className="text-sm text-gray-600 font-medium mb-1">{t.address}</p>
                         <p className="text-gray-900">{optician.address}</p>
                       </div>
                     )}
                     {optician.city && (
                       <div>
-                        <p className="text-sm text-gray-600 font-medium mb-1">Ville</p>
+                        <p className="text-sm text-gray-600 font-medium mb-1">{t.city}</p>
                         <p className="text-gray-900">{optician.city}</p>
                       </div>
                     )}
                     {optician.postalCode && (
                       <div>
-                        <p className="text-sm text-gray-600 font-medium mb-1">Code postal</p>
+                        <p className="text-sm text-gray-600 font-medium mb-1">{t.postalCode}</p>
                         <p className="text-gray-900">{optician.postalCode}</p>
                       </div>
                     )}
@@ -198,14 +198,14 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
                   <div className="p-3 bg-burning-flame/20 rounded-lg">
                     <BarChart3 className="h-6 w-6 text-burning-flame" />
                   </div>
-                  <h2 className="text-2xl font-bold text-abyssal">Analytics</h2>
+                  <h2 className="text-2xl font-bold text-abyssal">{t.analytics}</h2>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                   {(
                     [
                       {
-                        label: getText("totalOrders", "Total Orders"),
+                        label: t.totalOrders,
                         value: optician.analytics.totalOrders,
                         icon: Package,
                         color: "bg-blue-fantastic/20 text-blue-fantastic",
@@ -250,7 +250,7 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
                     <div className="flex items-center gap-2 mb-2">
                       <Package className="h-5 w-5 text-burning-flame" />
                       <p className="text-sm text-gray-600 font-medium">
-                        {getText("totalItems", "Total Items Validated")}
+                        {t.totalItemsValidated}
                       </p>
                     </div>
                     <p className="text-4xl font-bold text-abyssal">{optician.analytics.totalItemsValidated}</p>
@@ -258,7 +258,7 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
                   <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-fantastic">
                     <div className="flex items-center gap-2 mb-2">
                       <Clock className="h-5 w-5 text-blue-fantastic" />
-                      <p className="text-sm text-gray-600 font-medium">{getText("lastOrder", "Last Order")}</p>
+                      <p className="text-sm text-gray-600 font-medium">{t.lastOrder}</p>
                     </div>
                     {optician.analytics.lastOrderAt ? (
                       <>
@@ -266,11 +266,11 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
                           {new Date(optician.analytics.lastOrderAt).toLocaleString()}
                         </p>
                         <p className="text-sm text-gray-600 mt-2">
-                          {getText("status", "Status")}: {optician.analytics.lastOrderStatus ?? t.pending ?? "Pending"}
+                          {t.status}: {optician.analytics.lastOrderStatus ?? t.pending ?? "Pending"}
                         </p>
                       </>
                     ) : (
-                      <p className="text-gray-600">{getText("noOrders", "No Orders Yet")}</p>
+                      <p className="text-gray-600">{t.noOrdersYet}</p>
                     )}
                   </div>
                 </div>
@@ -278,7 +278,7 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
             )}
           </div>
         ) : (
-          <div className="text-center py-12 text-gray-500">{getText("noOpticianFound", "Optician not found")}</div>
+          <div className="text-center py-12 text-gray-500">{t.opticianNotFound}</div>
         )}
       </div>
     </div>

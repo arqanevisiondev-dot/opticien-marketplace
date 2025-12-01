@@ -102,11 +102,11 @@ export default function AdminDashboard() {
       link: '/admin/opticians?filter=pending',
     },
     {
-      title: t.products,
+      title: t.totalOrders,
       value: stats.totalProducts,
       icon: Package,
       color: 'bg-blue-fantastic',
-      link: '/catalogue',
+      link: '/admin/orders',
     },
   ];
 
@@ -140,7 +140,7 @@ export default function AdminDashboard() {
                       </div>
                       <h3 className="text-gray-700 font-semibold text-lg">{card.title}</h3>
                       <div className="mt-3 flex items-center text-sm text-blue-600">
-                        <span>Voir détails</span>
+                        <span>{t.seeDetails}</span>
                         <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
@@ -190,7 +190,7 @@ export default function AdminDashboard() {
               ) : (
                 <div className="text-center py-12 text-gray-500">
                   <Users className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-                  <p>Aucune activité récente</p>
+                  <p>{t.noRecentActivity}</p>
                 </div>
               )}
             </div>

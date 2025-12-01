@@ -254,10 +254,6 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
   return (
     <div className="min-h-screen bg-palladian py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Link href="/admin/products" className="mb-6 inline-flex items-center text-sm text-blue-600">
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          {t.backToDashboard}
-        </Link>
 
         <div className="bg-white shadow-lg p-8 space-y-6">
           <div>
@@ -341,7 +337,7 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
                     onChange={(e) => setFormData({ ...formData, material: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
                   >
-                    <option value="">Sélectionnez un matériau</option>
+                    <option value="">{t.selectMaterialPlaceholder}</option>
                     {materials.map((material) => (
                       <option key={material.id} value={material.value}>
                         {material.value}
@@ -358,7 +354,7 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
                     onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
                   >
-                    <option value="">Sélectionnez un genre</option>
+                    <option value="">{t.selectGenderPlaceholder}</option>
                     {genders.map((gender) => (
                       <option key={gender.id} value={gender.value}>
                         {gender.value}
@@ -392,7 +388,7 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
                     placeholder="Noir, Écaille, Transparent..."
                   />
-                  <p className="text-xs text-gray-500 mt-1">Une seule couleur par produit (chaque couleur a sa propre référence).</p>
+                  <p className="text-xs text-gray-500 mt-1">{t.oneColorPerProduct}</p>
                 </div>
               </div>
 
@@ -412,7 +408,7 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Prix soldé (DH)
+                  {t.salePriceDH}
                 </label>
                 <input
                   type="number"
@@ -422,13 +418,13 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
                   className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
                   placeholder="89.99"
                 />
-                <p className="text-xs text-gray-500 mt-1">Laissez vide si aucune promotion n&apos;est active.</p>
+                <p className="text-xs text-gray-500 mt-1">{t.leaveEmptyIfNoPromo}</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Stock disponible
+                    {t.availableStock}
                   </label>
                   <input
                     type="number"
@@ -439,11 +435,11 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
                     className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
                     placeholder="0"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Ce champ permet d&apos;afficher le stock actuel avant validation des commandes.</p>
+                  <p className="text-xs text-gray-500 mt-1">{t.stockDisplayNote}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Remise 1er achat (%)
+                    {t.firstOrderDiscount}
                   </label>
                   <input
                     type="number"
@@ -455,7 +451,7 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
                     className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
                     placeholder="10"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Appliquée automatiquement lorsque l&apos;opticien commande ce produit pour la première fois.</p>
+                  <p className="text-xs text-gray-500 mt-1">{t.firstOrderDiscountNote}</p>
                 </div>
               </div>
 
