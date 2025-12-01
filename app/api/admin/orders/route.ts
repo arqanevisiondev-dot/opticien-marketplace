@@ -112,6 +112,7 @@ export async function GET(request: NextRequest) {
 
     type Summary = {
       totalOrders: number;
+      totalArticles: number;
       pending: number;
       approved: number;
       cancelled: number;
@@ -121,6 +122,7 @@ export async function GET(request: NextRequest) {
     const summary = formatted.reduce<Summary>(
       (acc, order) => {
         acc.totalOrders += 1;
+        acc.totalArticles += order.itemCount;
         acc.totalValue += order.totalAmount;
         if (order.status === ORDER_STATUS.PENDING) {
           acc.pending += 1;
@@ -133,7 +135,7 @@ export async function GET(request: NextRequest) {
         }
         return acc;
       },
-      { totalOrders: 0, pending: 0, approved: 0, cancelled: 0, totalValue: 0 }
+      { totalOrders: 0, totalArticles: 0, pending: 0, approved: 0, cancelled: 0, totalValue: 0 }
     );
 
     return NextResponse.json({ orders: formatted, summary });

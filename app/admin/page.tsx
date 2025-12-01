@@ -13,6 +13,7 @@ interface DashboardStats {
   pendingOpticians: number;
   totalProducts: number;
   totalSuppliers: number;
+  totalArticles: number;
 }
 
 interface RecentRegistration {
@@ -36,6 +37,7 @@ export default function AdminDashboard() {
     pendingOpticians: 0,
     totalProducts: 0,
     totalSuppliers: 0,
+    totalArticles: 0,
   });
   const [recentRegistrations, setRecentRegistrations] = useState<RecentRegistration[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,7 +105,7 @@ export default function AdminDashboard() {
     },
     {
       title: t.totalOrders,
-      value: stats.totalProducts,
+      value: stats.totalArticles,
       icon: Package,
       color: 'bg-blue-fantastic',
       link: '/admin/orders',

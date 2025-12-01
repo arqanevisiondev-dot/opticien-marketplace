@@ -13,6 +13,7 @@ type OrderSource = "MANUAL" | "WHATSAPP"
 
 interface OrdersSummary {
   totalOrders: number
+  totalArticles: number
   pending: number
   approved: number
   cancelled: number
@@ -37,6 +38,7 @@ interface OrderRow {
 
 const INITIAL_SUMMARY: OrdersSummary = {
   totalOrders: 0,
+  totalArticles: 0,
   pending: 0,
   approved: 0,
   cancelled: 0,
@@ -76,6 +78,7 @@ export default function AdminOrdersPage() {
       const summaryData = data?.summary || {}
       setSummary({
         totalOrders: summaryData.totalOrders ?? 0,
+        totalArticles: summaryData.totalArticles ?? 0,
         pending: summaryData.pending ?? 0,
         approved: summaryData.approved ?? 0,
         cancelled: summaryData.cancelled ?? 0,
@@ -138,7 +141,7 @@ export default function AdminOrdersPage() {
   const summaryCards = [
     {
       label: t.ordersSummaryTotal,
-      value: summary.totalOrders.toLocaleString(locale),
+      value: summary.totalArticles.toLocaleString(locale),
       icon: ClipboardList,
       color: "bg-burning-flame",
     },
@@ -209,7 +212,7 @@ export default function AdminOrdersPage() {
             <div>
               <h2 className="text-lg font-semibold text-abyssal">{t.ordersTableTitle}</h2>
               <p className="text-sm text-gray-500">
-                {t.ordersSummaryTotal}: {summary.totalOrders.toLocaleString(locale)}
+                {t.ordersSummaryTotal}: {summary.totalArticles.toLocaleString(locale)}
               </p>
             </div>
           </div>

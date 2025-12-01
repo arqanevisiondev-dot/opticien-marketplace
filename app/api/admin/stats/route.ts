@@ -14,11 +14,17 @@ export async function GET() {
       );
     }
 
-    const [totalOpticians, pendingOpticians, totalProducts, totalSuppliers] = await Promise.all([
+    const [totalOpticians, pendingOpticians, totalProducts, totalSuppliers, totalArticles] = await Promise.all([
       prisma.optician.count(),
       prisma.optician.count({ where: { status: 'PENDING' } }),
       prisma.product.count(),
       prisma.user.count({ where: { role: 'ADMIN' } }),
+      // Calculate total articles (sum of quantities in all order items)
+      prisma.orderItem.aggregate({
+        _sum: {
+          quantity: true,
+        },
+      }),
     ]);
 
     return NextResponse.json({
@@ -26,6 +32,7 @@ export async function GET() {
       pendingOpticians,
       totalProducts,
       totalSuppliers,
+      totalArticles: totalArticles._sum.quantity || 0,
     });
   } catch (error) {
     console.error('Error fetching admin stats:', error);
