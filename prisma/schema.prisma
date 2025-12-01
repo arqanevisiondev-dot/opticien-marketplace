@@ -182,7 +182,7 @@ model Slide {
   subtitle        String?   @db.Text
   description     String?   @db.Text
   image           Bytes?
-  imageUrl        String?   @db.Text
+  imageUrl        String?   @db.LongText
   type            SlideType @default(NEWS)
   linkUrl         String?   @db.VarChar(500)
   linkText        String?   @db.VarChar(100)

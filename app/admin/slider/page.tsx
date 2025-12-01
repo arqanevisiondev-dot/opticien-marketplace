@@ -192,36 +192,37 @@ export default function SliderManagement() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Show preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Le fichier doit être une image');
+      return;
+    }
 
-    // Upload to server
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      alert('La taille du fichier doit être inférieure à 5MB');
+      return;
+    }
+
     setUploadingImage(true);
     try {
-      const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
-
-      const response = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: formDataUpload,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setFormData({ ...formData, imageUrl: data.url });
-      } else {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        console.error('Upload error:', errorData);
-        alert(`Erreur lors du téléchargement de l'image: ${errorData.error || 'Unknown error'}`);
-      }
+      // Convert to base64 directly in browser (works in production)
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setImagePreview(base64String);
+        setFormData({ ...formData, imageUrl: base64String });
+        setUploadingImage(false);
+      };
+      reader.onerror = () => {
+        alert('Erreur lors de la lecture du fichier');
+        setUploadingImage(false);
+      };
+      reader.readAsDataURL(file);
     } catch (error) {
       console.error('Error uploading image:', error);
       alert(`Erreur lors du téléchargement de l'image: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
       setUploadingImage(false);
     }
   };
