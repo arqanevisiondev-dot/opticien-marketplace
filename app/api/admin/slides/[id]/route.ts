@@ -15,7 +15,7 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
-    
+
     const slide = await prisma.slide.update({
       where: { id },
       data: {

@@ -357,47 +357,23 @@ export default function SliderManagement() {
                   )}
 
                   {/* Upload Button */}
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploadingImage}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-burning-flame hover:bg-orange-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Upload className="w-5 h-5 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-700">
-                        {uploadingImage ? 'Téléchargement...' : 'Télécharger une image'}
-                      </span>
-                    </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                  </div>
-
-                  {/* Or separator */}
-                  <div className="relative my-4">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-200"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-white text-gray-500">ou</span>
-                    </div>
-                  </div>
-
-                  {/* URL Input */}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingImage}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-burning-flame hover:bg-orange-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Upload className="w-5 h-5 text-gray-500" />
+                    <span className="text-sm font-medium text-gray-700">
+                      {uploadingImage ? 'Téléchargement...' : 'Télécharger une image'}
+                    </span>
+                  </button>
                   <input
-                    type="url"
-                    value={formData.imageUrl}
-                    onChange={(e) => {
-                      setFormData({ ...formData, imageUrl: e.target.value });
-                      setImagePreview(null);
-                    }}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burning-flame focus:border-transparent"
-                    placeholder="Ou entrez l'URL de l'image"
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
                   />
                 </div>
 

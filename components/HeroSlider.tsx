@@ -32,10 +32,14 @@ export default function HeroSlider() {
   const fetchSlides = async () => {
     try {
       const response = await fetch('/api/slides');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
-      setSlides(data);
+      setSlides(data || []);
     } catch (error) {
       console.error('Error fetching slides:', error);
+      setSlides([]);
     } finally {
       setLoading(false);
     }
@@ -64,6 +68,9 @@ export default function HeroSlider() {
   if (loading || slides.length === 0) return null;
 
   const slide = slides[currentSlide];
+  
+  if (!slide) return null;
+  
   const typeIcons = {
     NEWS: Calendar,
     PRODUCT: Tag,

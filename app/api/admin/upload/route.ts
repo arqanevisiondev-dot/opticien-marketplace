@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
 import { auth } from '@/lib/auth';
+import { writeFile, mkdir } from 'fs/promises';
+import path from 'path';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,51 +29,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'File size must be less than 5MB' }, { status: 400 });
     }
 
-    // Check if running on Vercel (read-only filesystem)
-    const isVercel = process.env.VERCEL === '1';
+    // Save file to public/uploads directory
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    
+    // Create uploads directory if it doesn't exist
+    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+    await mkdir(uploadsDir, { recursive: true });
+    
+    // Generate unique filename
+    const timestamp = Date.now();
+    const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const filename = `${timestamp}-${originalName}`;
+    const filepath = path.join(uploadsDir, filename);
+    
+    // Write file to disk
+    await writeFile(filepath, buffer);
+    
+    // Return public URL
+    const url = `/uploads/${filename}`;
 
-    if (isVercel) {
-      // On Vercel: Convert to base64 data URL
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const base64 = buffer.toString('base64');
-      const dataUrl = `data:${file.type};base64,${base64}`;
-      
-      return NextResponse.json({ 
-        url: dataUrl, 
-        filename: file.name,
-        type: 'base64'
-      });
-    } else {
-      // Local development: Save to filesystem
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      // Generate unique filename
-      const timestamp = Date.now();
-      const originalName = file.name.replace(/\s/g, '-');
-      const filename = `${timestamp}-${originalName}`;
-
-      // Create uploads directory if it doesn't exist
-      const uploadsDir = join(process.cwd(), 'public', 'uploads', 'slides');
-      try {
-        await mkdir(uploadsDir, { recursive: true });
-      } catch {
-        // Directory might already exist, ignore error
-      }
-
-      // Save file
-      const filepath = join(uploadsDir, filename);
-      await writeFile(filepath, buffer);
-
-      // Return URL
-      const url = `/uploads/slides/${filename}`;
-      return NextResponse.json({ 
-        url, 
-        filename,
-        type: 'file'
-      });
-    }
+    return NextResponse.json({ 
+      url, 
+      filename
+    });
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json(

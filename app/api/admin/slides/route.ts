@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    
+
     const slide = await prisma.slide.create({
       data: {
         title: body.title,

@@ -28,7 +28,10 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(slides);
+    // Filter out slides without imageUrl
+    const validSlides = slides.filter(slide => slide.imageUrl);
+
+    return NextResponse.json(validSlides);
   } catch (error) {
     console.error('Error fetching slides:', error);
     return NextResponse.json({ error: 'Failed to fetch slides' }, { status: 500 });
