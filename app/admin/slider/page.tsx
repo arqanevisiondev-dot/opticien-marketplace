@@ -214,11 +214,13 @@ export default function SliderManagement() {
         const data = await response.json();
         setFormData({ ...formData, imageUrl: data.url });
       } else {
-        alert('Erreur lors du téléchargement de l\'image');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Upload error:', errorData);
+        alert(`Erreur lors du téléchargement de l'image: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Erreur lors du téléchargement de l\'image');
+      alert(`Erreur lors du téléchargement de l'image: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setUploadingImage(false);
     }
