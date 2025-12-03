@@ -10,10 +10,10 @@ import ProductEditForm from "@/components/product-edit-form"
 import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function EditProductPage() {
-  const { t } = useLanguage()
   const params = useParams()
   const router = useRouter()
   const { data: session, status } = useSession()
+  const { t } = useLanguage()
   const productId = params.id as string
 
   useEffect(() => {
@@ -28,12 +28,12 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-palladian py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-[#EEE9DF] to-white py-12">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <Link href="/admin/products">
-          <Button variant="outline" size="sm" className="mb-6 flex items-center bg-transparent">
+          <Button variant="outline" size="sm" className="mb-6 flex items-center">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            {t.backToDashboard}
+            {t.backToProducts}
           </Button>
         </Link>
         <ProductEditForm productId={productId} />

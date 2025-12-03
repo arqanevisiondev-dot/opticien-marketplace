@@ -109,7 +109,7 @@ export default function AdminOpticiansPage() {
             </div>
             <div>
               <h1 className="text-4xl font-bold text-abyssal">{t.opticianManagement}</h1>
-              <p className="text-gray-600 mt-1">{opticians.length} opticiens au total</p>
+              <p className="text-gray-600 mt-1">{opticians.length} {t.opticiansTotal}</p>
             </div>
           </div>
         </div>

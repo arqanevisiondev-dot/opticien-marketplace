@@ -3,12 +3,14 @@
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/Button';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function CartBar() {
-  const { items, clear, remove, increase, decrease } = useCart();
+  const { items, regularItems, loyaltyItems, clear, remove, increase, decrease, getTotalPoints } = useCart();
   const { data: session } = useSession();
+  const router = useRouter();
   const { t } = useLanguage();
   const isOptician = session?.user?.role === 'OPTICIAN';
   const businessName = (session?.user as unknown as { opticianBusinessName?: string })?.opticianBusinessName;
@@ -16,6 +18,10 @@ export default function CartBar() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const totalPoints = getTotalPoints();
+  const hasRegularItems = regularItems.length > 0;
+  const hasLoyaltyItems = loyaltyItems.length > 0;
 
   useEffect(() => {
     let active = true;
@@ -120,7 +126,19 @@ export default function CartBar() {
         <button className="text-sm underline" onClick={() => setOpen((v) => !v)}>
           {open ? t.closeCart : t.cartDetails}
         </button>
-        <div className="text-sm">{t.cartSelection} <span className="font-semibold">{items.length}</span></div>
+        <div className="text-sm">
+          {t.cartSelection} <span className="font-semibold">{items.length}</span>
+          {hasRegularItems && hasLoyaltyItems && (
+            <span className="ml-2 text-xs text-gray-500">
+              ({regularItems.length} {t.regularProducts}, {loyaltyItems.length} {t.loyaltyProducts})
+            </span>
+          )}
+          {hasLoyaltyItems && (
+            <span className="ml-2 text-[#f56a24] font-semibold">
+              • {totalPoints} {t.points}
+            </span>
+          )}
+        </div>
         <Button
           variant="outline"
           size="sm"
@@ -132,10 +150,10 @@ export default function CartBar() {
         <Button 
           variant="primary" 
           size="sm" 
-          disabled={!items.length || loading}
-          onClick={handlePlaceOrder}
+          disabled={!items.length}
+          onClick={() => router.push('/profile')}
         >
-          {loading ? t.creatingOrder : t.placeOrder}
+          {hasLoyaltyItems && !hasRegularItems ? t.orderLoyalty : t.placeOrder}
         </Button>
       </div>
       {message && (
@@ -151,20 +169,55 @@ export default function CartBar() {
             {items.length === 0 ? (
               <div className="text-sm text-gray-500">{t.noProductsSelected}</div>
             ) : (
-              items.map((i) => (
-                <div key={i.id} className="flex items-center justify-between gap-3 text-sm">
-                  <div className="min-w-0">
-                    <div className="font-medium truncate">{i.name}</div>
-                    <div className="text-gray-500">{t.ref} {i.reference}</div>
+              <>
+                {/* Regular Products Section */}
+                {hasRegularItems && (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-bold text-gray-700 mb-2 pb-2 border-b-2 border-gray-300">{t.regularCart} ({regularItems.length})</h3>
+                    {regularItems.map((i) => (
+                      <div key={i.id} className="flex items-center justify-between gap-3 text-sm mb-2 pb-2 border-b">
+                        <div className="min-w-0">
+                          <div className="font-medium truncate">{i.name}</div>
+                          <div className="text-gray-500">{t.ref} {i.reference}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm" onClick={() => decrease(i.id)}>-</Button>
+                          <div className="w-8 text-center">{i.quantity}</div>
+                          <Button variant="outline" size="sm" onClick={() => increase(i.id)}>+</Button>
+                          <Button variant="outline" size="sm" onClick={() => remove(i.id)}>{t.removeFromCart}</Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => decrease(i.id)}>-</Button>
-                    <div className="w-8 text-center">{i.quantity}</div>
-                    <Button variant="outline" size="sm" onClick={() => increase(i.id)}>+</Button>
-                    <Button variant="outline" size="sm" onClick={() => remove(i.id)}>{t.removeFromCart}</Button>
+                )}
+
+                {/* Loyalty Products Section */}
+                {hasLoyaltyItems && (
+                  <div className={hasRegularItems ? "pt-4 border-t-2 border-gray-200" : ""}>
+                    <h3 className="text-sm font-bold text-[#f56a24] mb-2 pb-2 border-b-2 border-orange-300">{t.loyaltyCart} ({loyaltyItems.length})</h3>
+                    {loyaltyItems.map((i) => (
+                      <div key={i.id} className="flex items-center justify-between gap-3 text-sm mb-2 pb-2 border-b border-orange-200">
+                        <div className="min-w-0">
+                          <div className="font-medium truncate">{i.name}</div>
+                          <div className="text-[#f56a24] font-semibold">{i.pointsCost} {t.points} × {i.quantity} = {(i.pointsCost || 0) * i.quantity} {t.points}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm" onClick={() => decrease(i.id)}>-</Button>
+                          <div className="w-8 text-center">{i.quantity}</div>
+                          <Button variant="outline" size="sm" onClick={() => increase(i.id)}>+</Button>
+                          <Button variant="outline" size="sm" onClick={() => remove(i.id)}>×</Button>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="mt-2 pt-2 border-t border-orange-200">
+                      <div className="flex justify-between items-center text-sm font-bold">
+                        <span>{t.totalPoints}:</span>
+                        <span className="text-[#f56a24]">{totalPoints} {t.points}</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))
+                )}
+              </>
             )}
           </div>
         </div>

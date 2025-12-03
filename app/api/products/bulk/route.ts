@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
         salePrice: true,
         firstOrderRemisePct: true,
         images: true,
-        stockQty: true,
+        inStock: true,
       },
     });
 

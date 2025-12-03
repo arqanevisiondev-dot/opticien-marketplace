@@ -44,10 +44,12 @@ model Optician {
   latitude     Float?
   longitude    Float?
   status       OpticianStatus @default(PENDING)
+  loyaltyPoints Int           @default(0)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders       Order[]
+  redemptions  LoyaltyRedemption[]
 
   @@index([status])
   @@index([latitude, longitude])
@@ -81,8 +83,8 @@ model Product {
   color               String?
   price               Float
   salePrice           Float?
-  stockQty            Int         @default(0)
   firstOrderRemisePct Float?
+  loyaltyPointsReward Int?
   images              String      @db.LongText
   inStock             Boolean     @default(true)
   isNewCollection     Boolean     @default(false)
@@ -91,6 +93,7 @@ model Product {
   orderItems          OrderItem[]
   category            Category?   @relation(fields: [categoryId], references: [id])
   user                User        @relation("UserProducts", fields: [userId], references: [id], onDelete: Cascade)
+  loyaltyProducts     LoyaltyProduct[] @relation("LoyaltyProductLink")
 
   @@index([userId])
   @@index([categoryId])
@@ -200,6 +203,71 @@ model Slide {
   @@index([startDate, endDate])
 }
 
+model LoyaltyProduct {
+  id          String   @id @default(cuid())
+  productId   String?
+  name        String
+  description String?  @db.Text
+  imageUrl    String?  @db.LongText
+  pointsCost  Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  product     Product? @relation("LoyaltyProductLink", fields: [productId], references: [id], onDelete: SetNull)
+  redemptionItems LoyaltyRedemptionItem[]
+
+  @@index([isActive])
+  @@index([productId])
+}
+
+model LoyaltyRedemption {
+  id                String               @id @default(cuid())
+  opticianId        String
+  status            RedemptionStatus     @default(PENDING)
+  totalPoints       Int                  @default(0)
+  deliveryAddress   String?              @db.Text
+  notes             String?              @db.Text
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  approvedAt        DateTime?
+  approvedBy        String?
+  rejectedAt        DateTime?
+  rejectedBy        String?
+  rejectionReason   String?              @db.Text
+  optician          Optician             @relation(fields: [opticianId], references: [id], onDelete: Cascade)
+  items             LoyaltyRedemptionItem[]
+
+  @@index([opticianId])
+  @@index([status])
+}
+
+model LoyaltyRedemptionItem {
+  id              String            @id @default(cuid())
+  redemptionId    String
+  loyaltyProductId String
+  productName     String
+  quantity        Int               @default(1)
+  pointsCost      Int
+  totalPoints     Int
+  imageUrl        String?           @db.LongText
+  createdAt       DateTime          @default(now())
+  redemption      LoyaltyRedemption @relation(fields: [redemptionId], references: [id], onDelete: Cascade)
+  loyaltyProduct  LoyaltyProduct    @relation(fields: [loyaltyProductId], references: [id])
+
+  @@index([redemptionId])
+  @@index([loyaltyProductId])
+}
+
+model SystemSettings {
+  id                      String   @id @default(cuid())
+  key                     String   @unique
+  value                   String
+  description             String?  @db.Text
+  updatedAt               DateTime @updatedAt
+
+  @@index([key])
+}
+
 enum UserRole {
   ADMIN
   OPTICIAN
@@ -234,4 +302,11 @@ enum SlideType {
   PRODUCT
   PROMOTION
   ANNOUNCEMENT
+}
+
+enum RedemptionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
 }

@@ -19,6 +19,7 @@ interface Product {
   color: string
   price: number
   salePrice?: number
+  loyaltyPointsReward?: number
   images: string[]
   inStock: boolean
   isNewCollection?: boolean
@@ -231,7 +232,7 @@ export default function CataloguePage() {
         <div className="bg-white p-6 md:p-8 shadow-lg rounded-xl mb-8">
           <div className="flex items-center gap-2 mb-6">
             <Filter className="h-5 w-5 text-[#1B2632]" />
-            <h3 className="text-lg font-bold text-[#1B2632]">Filter Products</h3>
+            <h3 className="text-lg font-bold text-[#1B2632]">{t.filterProducts}</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
@@ -266,7 +267,7 @@ export default function CataloguePage() {
               onChange={(e) => setFilters({ ...filters, material: e.target.value })}
               className="px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#f56a24] transition-colors"
             >
-              <option value="">All Materials</option>
+              <option value="">{t.allMaterials}</option>
               {uniqueMaterials.map((material) => (
                 <option key={material} value={material}>
                   {material}
@@ -279,7 +280,7 @@ export default function CataloguePage() {
               onChange={(e) => setFilters({ ...filters, gender: e.target.value })}
               className="px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#f56a24] transition-colors"
             >
-              <option value="">All Genders</option>
+              <option value="">{t.allGenders}</option>
               {uniqueGenders.map((gender) => (
                 <option key={gender} value={gender}>
                   {gender}
@@ -292,7 +293,7 @@ export default function CataloguePage() {
               onChange={(e) => setFilters({ ...filters, marque: e.target.value })}
               className="px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#f56a24] transition-colors"
             >
-              <option value="">All Brands</option>
+              <option value="">{t.allBrands}</option>
               {uniqueMarques.map((marque) => (
                 <option key={marque} value={marque}>
                   {marque}
@@ -344,11 +345,11 @@ export default function CataloguePage() {
                     </h3>
                     <div className="text-sm text-gray-600 mb-3 space-y-1">
                       <p>
-                        <strong>Réf:</strong> {product.reference}
+                        <strong>{t.ref}</strong> {product.reference}
                       </p>
                       {product.marque && (
                         <p>
-                          <strong>Marque:</strong> {product.marque}
+                          <strong>{t.brand}</strong> {product.marque}
                         </p>
                       )}
                     </div>
@@ -361,6 +362,18 @@ export default function CataloguePage() {
                     </div>
 
                     <div className="border-t border-gray-200 pt-4">
+                      {isOptician && product.loyaltyPointsReward && product.loyaltyPointsReward > 0 && (
+                        <div className="mb-3 bg-gradient-to-r from-[#f56a24]/10 to-transparent px-2 py-1.5 rounded-lg">
+                          <div className="flex items-center gap-1.5">
+                            <svg className="h-4 w-4 text-[#f56a24]" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <span className="text-xs font-semibold text-[#1B2632]">
+                              +{product.loyaltyPointsReward} pts
+                            </span>
+                          </div>
+                        </div>
+                      )}
                       <div className="text-sm font-semibold mb-3">
                         {canSeePrices ? (
                           product.salePrice ? (
@@ -390,12 +403,13 @@ export default function CataloguePage() {
                                 name: product.name,
                                 reference: product.reference,
                                 url,
+                                type: 'regular'
                               })
                             }
                           }}
                           className="w-full"
                         >
-                          {isInCart(product.id) ? "In Cart" : "Add to Cart"}
+                          {isInCart(product.id) ? t.inCartBadge : t.addToCartButton}
                         </Button>
                       )}
                     </div>

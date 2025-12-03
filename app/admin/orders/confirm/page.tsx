@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle, XCircle, Clock, Package } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Clock, Package, ShoppingCart } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/Button';
 
@@ -42,6 +42,7 @@ export default function ConfirmOrdersPage() {
   const router = useRouter();
   const { t } = useLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loyaltyRedemptions, setLoyaltyRedemptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
@@ -56,10 +57,19 @@ export default function ConfirmOrdersPage() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('/api/admin/orders/pending');
-      if (response.ok) {
-        const data = await response.json();
-        setOrders(data);
+      const [ordersResponse, redemptionsResponse] = await Promise.all([
+        fetch('/api/admin/orders/pending'),
+        fetch('/api/admin/loyalty-redemptions/pending'),
+      ]);
+
+      if (ordersResponse.ok) {
+        const ordersData = await ordersResponse.json();
+        setOrders(ordersData);
+      }
+
+      if (redemptionsResponse.ok) {
+        const redemptionsData = await redemptionsResponse.json();
+        setLoyaltyRedemptions(redemptionsData);
       }
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -85,6 +95,29 @@ export default function ConfirmOrdersPage() {
       }
     } catch (error) {
       console.error('Error confirming item:', error);
+      alert('Erreur lors de la confirmation');
+    } finally {
+      setConfirmingId(null);
+    }
+  };
+
+  const handleConfirmLoyaltyItem = async (itemId: string, action: 'approve' | 'reject') => {
+    setConfirmingId(itemId);
+    try {
+      const response = await fetch(`/api/admin/loyalty-redemptions/confirm-item`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId, action }),
+      });
+
+      if (response.ok) {
+        fetchOrders(); // Refresh list
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Erreur lors de la confirmation');
+      }
+    } catch (error) {
+      console.error('Error confirming loyalty item:', error);
       alert('Erreur lors de la confirmation');
     } finally {
       setConfirmingId(null);
@@ -147,7 +180,7 @@ export default function ConfirmOrdersPage() {
           </p>
         </div>
 
-        {orders.length === 0 ? (
+        {orders.length === 0 && loyaltyRedemptions.length === 0 ? (
           <div className="bg-white rounded-lg shadow-lg p-12 text-center">
             <Package className="mx-auto h-16 w-16 text-gray-400 mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">{t.noPendingOrders}</h3>
@@ -155,7 +188,14 @@ export default function ConfirmOrdersPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {orders.map((order) => (
+            {/* Regular Orders Section */}
+            {orders.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-[#2C3B4D] mb-4 flex items-center gap-2">
+                  <ShoppingCart className="h-6 w-6" />
+                  Commandes Régulières ({orders.length})
+                </h2>
+                {orders.map((order) => (
               <div key={order.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
                 {/* Order Header */}
                 <div className="bg-gradient-to-r from-[#2C3B4D] to-[#1B2632] px-6 py-4">
@@ -251,6 +291,129 @@ export default function ConfirmOrdersPage() {
                 </div>
               </div>
             ))}
+              </div>
+            )}
+
+            {/* Loyalty Redemptions Section */}
+            {loyaltyRedemptions.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-[#f56a24] mb-4 flex items-center gap-2 mt-8">
+                  <Package className="h-6 w-6" />
+                  Commandes de Fidélité ({loyaltyRedemptions.length})
+                </h2>
+                {loyaltyRedemptions.map((redemption: any) => (
+                  <div key={redemption.id} className="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
+                    {/* Redemption Header */}
+                    <div className="bg-gradient-to-r from-[#f56a24] to-[#ff8345] px-6 py-4">
+                      <div className="flex items-center justify-between text-white">
+                        <div>
+                          <h2 className="text-xl font-bold">{redemption.optician.businessName}</h2>
+                          <p className="text-sm text-gray-100">
+                            {redemption.optician.user.email} • {redemption.optician.phone}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-100">Échange #{redemption.id.slice(0, 8)}</p>
+                          <p className="text-lg font-bold">{redemption.totalPoints} points</p>
+                          <p className="text-xs text-gray-200">
+                            {new Date(redemption.createdAt).toLocaleDateString('fr-FR', {
+                              day: '2-digit',
+                              month: 'long',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Redemption Items */}
+                    <div className="p-6">
+                      <div className="space-y-4">
+                        {redemption.items.map((item: any) => {
+                          const actualStock = item.loyaltyProduct.productId && item.loyaltyProduct.product
+                            ? item.loyaltyProduct.product.stockQty
+                            : item.loyaltyProduct.stockQty;
+
+                          return (
+                            <div
+                              key={item.id}
+                              className="flex items-center justify-between p-4 rounded-lg border-2 border-orange-200 bg-orange-50"
+                            >
+                              <div className="flex gap-4 flex-1">
+                                {item.imageUrl && (
+                                  <img
+                                    src={item.imageUrl}
+                                    alt={item.productName}
+                                    className="w-20 h-20 object-cover rounded-lg"
+                                  />
+                                )}
+                                <div className="flex-1">
+                                  <h3 className="font-bold text-[#2C3B4D]">{item.productName}</h3>
+                                  <div className="mt-2 flex items-center gap-4">
+                                    <span className="text-sm">
+                                      <span className="font-medium">Quantité:</span> {item.quantity}
+                                    </span>
+                                    <span className="text-sm">
+                                      <span className="font-medium">Points/unité:</span> {item.pointsCost}
+                                    </span>
+                                    <span className="text-sm font-bold text-[#f56a24]">
+                                      Total: {item.totalPoints} points
+                                    </span>
+                                    <span className="text-sm text-gray-600">
+                                      Stock disponible: {actualStock}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-3">
+                                {redemption.status === 'PENDING' && (
+                                  <div className="flex gap-2">
+                                    <Button
+                                      onClick={() => handleConfirmLoyaltyItem(item.id, 'approve')}
+                                      disabled={confirmingId === item.id || actualStock < item.quantity}
+                                      className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                                      size="sm"
+                                    >
+                                      <CheckCircle className="h-4 w-4" />
+                                      {confirmingId === item.id ? 'Approbation...' : 'Approuver'}
+                                    </Button>
+                                    <Button
+                                      onClick={() => handleConfirmLoyaltyItem(item.id, 'reject')}
+                                      disabled={confirmingId === item.id}
+                                      variant="outline"
+                                      className="border-red-500 text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                      size="sm"
+                                    >
+                                      <XCircle className="h-4 w-4" />
+                                      Rejeter
+                                    </Button>
+                                  </div>
+                                )}
+                                {redemption.status === 'APPROVED' && (
+                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
+                                    <CheckCircle className="h-4 w-4" />
+                                    Approuvée
+                                  </span>
+                                )}
+                                {redemption.status === 'REJECTED' && (
+                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-medium">
+                                    <XCircle className="h-4 w-4" />
+                                    Rejetée
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

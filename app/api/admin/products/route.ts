@@ -16,8 +16,8 @@ type ProductPayload = {
   color?: string;
   price?: number | string;
   salePrice?: number | string | null;
-  stockQty?: number | string;
   firstOrderRemisePct?: number | string | null;
+  loyaltyPointsReward?: number | string | null;
   images?: unknown;
   inStock?: boolean;
   isNewCollection?: boolean;
@@ -148,8 +148,8 @@ export async function POST(request: NextRequest) {
       color,
       price,
       salePrice,
-      stockQty,
       firstOrderRemisePct,
+      loyaltyPointsReward,
       images: rawImages,
       inStock,
       isNewCollection,
@@ -178,18 +178,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const parsedStockQty = parseInteger(stockQty) ?? 0;
-    if (!Number.isFinite(parsedStockQty) || parsedStockQty < 0) {
-      return NextResponse.json(
-        { error: 'La quantité en stock doit être un entier positif ou nul' },
-        { status: 400 }
-      );
-    }
-
     const parsedRemise = parseNumber(firstOrderRemisePct);
     if (parsedRemise !== null && (!Number.isFinite(parsedRemise) || parsedRemise < 0 || parsedRemise > 100)) {
       return NextResponse.json(
         { error: 'La remise doit être comprise entre 0 et 100%' },
+        { status: 400 }
+      );
+    }
+
+    const parsedLoyaltyPoints = parseInteger(loyaltyPointsReward);
+    if (parsedLoyaltyPoints !== null && (!Number.isFinite(parsedLoyaltyPoints) || parsedLoyaltyPoints < 0)) {
+      return NextResponse.json(
+        { error: 'Les points de fidélité doivent être un entier positif ou nul' },
         { status: 400 }
       );
     }
@@ -221,10 +221,9 @@ export async function POST(request: NextRequest) {
         color: color || null,
         price: parsedPrice,
         salePrice: parsedSalePrice,
-        stockQty: parsedStockQty,
         firstOrderRemisePct: parsedRemise,
         images: imagesJson,
-        inStock: typeof inStock === 'boolean' ? inStock : parsedStockQty > 0,
+        inStock: typeof inStock === 'boolean' ? inStock : true,
         isNewCollection: typeof isNewCollection === 'boolean' ? isNewCollection : false,
       },
       include: {
@@ -264,8 +263,8 @@ export async function PUT(request: NextRequest) {
       color,
       price,
       salePrice,
-      stockQty,
       firstOrderRemisePct,
+      loyaltyPointsReward,
       images: rawImages,
       inStock,
       isNewCollection,
@@ -306,20 +305,22 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const parsedStockQty = stockQty !== undefined ? parseInteger(stockQty) : existingProduct.stockQty;
-    if (parsedStockQty === null || !Number.isFinite(parsedStockQty) || parsedStockQty < 0) {
-      return NextResponse.json(
-        { error: 'La quantité en stock doit être un entier positif ou nul' },
-        { status: 400 }
-      );
-    }
-
     const parsedRemise = firstOrderRemisePct !== undefined
       ? parseNumber(firstOrderRemisePct)
       : existingProduct.firstOrderRemisePct;
     if (parsedRemise !== null && (!Number.isFinite(parsedRemise) || parsedRemise < 0 || parsedRemise > 100)) {
       return NextResponse.json(
         { error: 'La remise doit être comprise entre 0 et 100%' },
+        { status: 400 }
+      );
+    }
+
+    const parsedLoyaltyPoints = loyaltyPointsReward !== undefined
+      ? parseInteger(loyaltyPointsReward)
+      : existingProduct.loyaltyPointsReward;
+    if (parsedLoyaltyPoints !== null && (!Number.isFinite(parsedLoyaltyPoints) || parsedLoyaltyPoints < 0)) {
+      return NextResponse.json(
+        { error: 'Les points de fidélité doivent être un entier positif ou nul' },
         { status: 400 }
       );
     }
@@ -348,11 +349,11 @@ export async function PUT(request: NextRequest) {
         color: color ?? existingProduct.color,
         price: parsedPrice,
         salePrice: parsedSalePrice,
-        stockQty: parsedStockQty,
         firstOrderRemisePct: parsedRemise,
+        loyaltyPointsReward: parsedLoyaltyPoints,
         images: imagesJson,
         slug,
-        inStock: typeof inStock === 'boolean' ? inStock : parsedStockQty > 0,
+        inStock: typeof inStock === 'boolean' ? inStock : existingProduct.inStock,
         isNewCollection:
           typeof isNewCollection === 'boolean' ? isNewCollection : existingIsNewCollection,
       },

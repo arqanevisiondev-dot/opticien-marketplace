@@ -210,7 +210,7 @@ function CategoriesContent() {
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Rechercher un produit..."
+                  placeholder={t.searchProduct}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#f56a24] focus:ring-2 focus:ring-[#f56a24]/20 transition-all"
@@ -223,7 +223,7 @@ function CategoriesContent() {
                 className="flex items-center justify-center gap-2 px-6 py-3 bg-[#1B2632] text-white rounded-lg hover:bg-[#2C3B4D] transition-colors relative"
               >
                 <Filter className="h-5 w-5" />
-                Filtres
+                {t.filters}
                 {activeFiltersCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-[#f56a24] text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
                     {activeFiltersCount}
@@ -236,14 +236,14 @@ function CategoriesContent() {
             {showFilters && (
               <div className="mt-4 p-6 bg-white rounded-lg shadow-lg border-2 border-gray-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-[#1B2632]">Filtres</h3>
+                  <h3 className="text-lg font-bold text-[#1B2632]">{t.filters}</h3>
                   {activeFiltersCount > 0 && (
                     <button
                       onClick={clearFilters}
                       className="text-sm text-[#f56a24] hover:text-[#f56a24]/80 flex items-center gap-1"
                     >
                       <X className="h-4 w-4" />
-                      Effacer tout
+                      {t.clearAll}
                     </button>
                   )}
                 </div>
@@ -251,13 +251,13 @@ function CategoriesContent() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Category Filter */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Catégorie</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">{t.category}</label>
                     <select
                       value={filters.category}
                       onChange={(e) => handleFilterChange("category", e.target.value)}
                       className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#f56a24] transition-colors"
                     >
-                      <option value="">Toutes les catégories</option>
+                      <option value="">{t.allCategoriesFilter}</option>
                       {categories.map((cat) => (
                         <option key={cat.id} value={cat.slug}>
                           {cat.name} ({cat._count.products})
@@ -268,13 +268,13 @@ function CategoriesContent() {
 
                   {/* Gender Filter */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Genre</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">{t.gender}</label>
                     <select
                       value={filters.gender}
                       onChange={(e) => handleFilterChange("gender", e.target.value)}
                       className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#f56a24] transition-colors"
                     >
-                      <option value="">Tous les genres</option>
+                      <option value="">{t.allGendersFilter}</option>
                       {uniqueGenders.map((gender) => (
                         <option key={gender || 'null'} value={gender || ''}>
                           {gender}
@@ -285,13 +285,13 @@ function CategoriesContent() {
 
                   {/* Marque Filter */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Marque</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">{t.brand}</label>
                     <select
                       value={filters.marque}
                       onChange={(e) => handleFilterChange("marque", e.target.value)}
                       className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[#f56a24] transition-colors"
                     >
-                      <option value="">Toutes les marques</option>
+                      <option value="">{t.allBrandsFilter}</option>
                       {uniqueMarques.map((marque) => (
                         <option key={marque || 'null'} value={marque || ''}>
                           {marque}

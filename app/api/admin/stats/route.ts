@@ -14,7 +14,16 @@ export async function GET() {
       );
     }
 
-    const [totalOpticians, pendingOpticians, totalProducts, totalSuppliers, totalArticles] = await Promise.all([
+    const [
+      totalOpticians,
+      pendingOpticians,
+      totalProducts,
+      totalSuppliers,
+      totalArticles,
+      totalLoyaltyRedemptions,
+      pendingLoyaltyRedemptions,
+      loyaltyPointsData,
+    ] = await Promise.all([
       prisma.optician.count(),
       prisma.optician.count({ where: { status: 'PENDING' } }),
       prisma.product.count(),
@@ -25,6 +34,15 @@ export async function GET() {
           quantity: true,
         },
       }),
+      // Loyalty redemptions stats
+      prisma.loyaltyRedemption.count(),
+      prisma.loyaltyRedemption.count({ where: { status: 'PENDING' } }),
+      prisma.loyaltyRedemption.aggregate({
+        where: { status: 'APPROVED' },
+        _sum: {
+          totalPoints: true,
+        },
+      }),
     ]);
 
     return NextResponse.json({
@@ -33,6 +51,9 @@ export async function GET() {
       totalProducts,
       totalSuppliers,
       totalArticles: totalArticles._sum.quantity || 0,
+      totalLoyaltyRedemptions,
+      pendingLoyaltyRedemptions,
+      totalLoyaltyPoints: loyaltyPointsData._sum.totalPoints || 0,
     });
   } catch (error) {
     console.error('Error fetching admin stats:', error);

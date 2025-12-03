@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { ClipboardList, CheckCircle2, Clock3, Ban, Coins, RotateCcw } from "lucide-react"
+import { ClipboardList, CheckCircle2, Clock3, Ban, Coins, RotateCcw, Package, Gift } from "lucide-react"
 
 import { Button } from "@/components/ui/Button"
 import { useLanguage } from "@/contexts/LanguageContext"
 
 type OrderStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED"
 type OrderSource = "MANUAL" | "WHATSAPP"
+type RedemptionStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED"
 
 interface OrdersSummary {
   totalOrders: number
@@ -36,6 +37,39 @@ interface OrderRow {
   itemCount: number
 }
 
+interface LoyaltyRedemptionRow {
+  id: string
+  status: RedemptionStatus
+  totalPoints: number
+  createdAt: string
+  approvedAt?: string | null
+  rejectedAt?: string | null
+  optician: {
+    id: string
+    name: string
+    city: string | null
+    email: string
+  }
+  itemCount: number
+  items: Array<{
+    id: string
+    productName: string
+    quantity: number
+    pointsCost: number
+    totalPoints: number
+    imageUrl?: string | null
+  }>
+}
+
+interface LoyaltyRedemptionsSummary {
+  totalRedemptions: number
+  totalPoints: number
+  pending: number
+  approved: number
+  rejected: number
+  totalItems: number
+}
+
 const INITIAL_SUMMARY: OrdersSummary = {
   totalOrders: 0,
   totalArticles: 0,
@@ -51,9 +85,19 @@ export default function AdminOrdersPage() {
   const { t, language } = useLanguage()
 
   const [orders, setOrders] = useState<OrderRow[]>([])
+  const [loyaltyRedemptions, setLoyaltyRedemptions] = useState<LoyaltyRedemptionRow[]>([])
   const [summary, setSummary] = useState<OrdersSummary>(INITIAL_SUMMARY)
+  const [loyaltySummary, setLoyaltySummary] = useState<LoyaltyRedemptionsSummary>({
+    totalRedemptions: 0,
+    totalPoints: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+    totalItems: 0,
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [activeTab, setActiveTab] = useState<"regular" | "loyalty">("regular")
 
   const locale = useMemo(() => {
     if (language === "fr") return "fr-FR"
@@ -66,16 +110,20 @@ export default function AdminOrdersPage() {
     setError("")
 
     try {
-      const res = await fetch("/api/admin/orders")
-      if (!res.ok) {
+      const [ordersRes, redemptionsRes] = await Promise.all([
+        fetch("/api/admin/orders"),
+        fetch("/api/admin/loyalty-redemptions"),
+      ])
+
+      if (!ordersRes.ok) {
         throw new Error("Failed to load orders")
       }
 
-      const data = await res.json()
-      const fetchedOrders: OrderRow[] = Array.isArray(data.orders) ? data.orders : []
+      const ordersData = await ordersRes.json()
+      const fetchedOrders: OrderRow[] = Array.isArray(ordersData.orders) ? ordersData.orders : []
       setOrders(fetchedOrders)
 
-      const summaryData = data?.summary || {}
+      const summaryData = ordersData?.summary || {}
       setSummary({
         totalOrders: summaryData.totalOrders ?? 0,
         totalArticles: summaryData.totalArticles ?? 0,
@@ -84,6 +132,19 @@ export default function AdminOrdersPage() {
         cancelled: summaryData.cancelled ?? 0,
         totalValue: summaryData.totalValue ?? 0,
       })
+
+      if (redemptionsRes.ok) {
+        const redemptionsData = await redemptionsRes.json()
+        setLoyaltyRedemptions(redemptionsData.redemptions || [])
+        setLoyaltySummary(redemptionsData.summary || {
+          totalRedemptions: 0,
+          totalPoints: 0,
+          pending: 0,
+          approved: 0,
+          rejected: 0,
+          totalItems: 0,
+        })
+      }
     } catch (err) {
       console.error(err)
       setError(t.orderDataLoadError)
@@ -126,7 +187,21 @@ export default function AdminOrdersPage() {
     CANCELLED: t.cancelled,
   }
 
+  const redemptionStatusLabels: Record<RedemptionStatus, string> = {
+    PENDING: t.pending,
+    APPROVED: t.approved,
+    REJECTED: t.rejected,
+    CANCELLED: t.cancelled,
+  }
+
   const statusStyles: Record<OrderStatus, string> = {
+    PENDING: "bg-amber-100 text-amber-700",
+    APPROVED: "bg-green-100 text-green-700",
+    REJECTED: "bg-red-100 text-red-700",
+    CANCELLED: "bg-gray-200 text-gray-700",
+  }
+
+  const redemptionStatusStyles: Record<RedemptionStatus, string> = {
     PENDING: "bg-amber-100 text-amber-700",
     APPROVED: "bg-green-100 text-green-700",
     REJECTED: "bg-red-100 text-red-700",
@@ -171,6 +246,39 @@ export default function AdminOrdersPage() {
     },
   ]
 
+  const loyaltySummaryCards = [
+    {
+      label: "Échanges Totaux",
+      value: loyaltySummary.totalRedemptions.toLocaleString(locale),
+      icon: Gift,
+      color: "bg-burning-flame",
+    },
+    {
+      label: "Articles Fidélité",
+      value: loyaltySummary.totalItems.toLocaleString(locale),
+      icon: Package,
+      color: "bg-blue-fantastic",
+    },
+    {
+      label: "En Attente",
+      value: loyaltySummary.pending.toLocaleString(locale),
+      icon: Clock3,
+      color: "bg-truffle-trouble",
+    },
+    {
+      label: "Approuvés",
+      value: loyaltySummary.approved.toLocaleString(locale),
+      icon: CheckCircle2,
+      color: "bg-blue-fantastic",
+    },
+    {
+      label: "Points Totaux",
+      value: loyaltySummary.totalPoints.toLocaleString(locale),
+      icon: Coins,
+      color: "bg-burning-flame",
+    },
+  ]
+
   return (
     <div className="min-h-screen bg-palladian py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -194,7 +302,7 @@ export default function AdminOrdersPage() {
         )}
 
         <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-          {summaryCards.map((card) => (
+          {(activeTab === "regular" ? summaryCards : loyaltySummaryCards).map((card) => (
             <div key={card.label} className="bg-white p-5 shadow-lg">
               <div className="flex items-center justify-between">
                 <div className={`${card.color} flex h-10 w-10 items-center justify-center rounded-full`}>
@@ -207,7 +315,38 @@ export default function AdminOrdersPage() {
           ))}
         </div>
 
-        <div className="mt-10 bg-white shadow-lg">
+        {/* Tabs */}
+        <div className="mt-10 flex gap-2 border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab("regular")}
+            className={`px-6 py-3 font-semibold transition-colors ${
+              activeTab === "regular"
+                ? "text-blue-600 border-b-2 border-blue-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Commandes Régulières ({summary.totalOrders})
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab("loyalty")}
+            className={`px-6 py-3 font-semibold transition-colors ${
+              activeTab === "loyalty"
+                ? "text-[#f56a24] border-b-2 border-[#f56a24]"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Gift className="h-5 w-5" />
+              Échanges Fidélité ({loyaltySummary.totalRedemptions})
+            </div>
+          </button>
+        </div>
+
+        {activeTab === "regular" ? (
+        <div className="mt-0 bg-white shadow-lg">
           <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
             <div>
               <h2 className="text-lg font-semibold text-abyssal">{t.ordersTableTitle}</h2>
@@ -273,6 +412,72 @@ export default function AdminOrdersPage() {
             </table>
           </div>
         </div>
+        ) : (
+        <div className="mt-0 bg-white shadow-lg">
+          <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+            <div>
+              <h2 className="text-lg font-semibold text-[#f56a24]">Historique des Échanges de Fidélité</h2>
+              <p className="text-sm text-gray-500">
+                Total: {loyaltySummary.totalRedemptions.toLocaleString(locale)} échanges
+              </p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 text-sm">
+              <thead className="bg-orange-50">
+                <tr className="text-left text-xs uppercase text-gray-500">
+                  <th className="px-6 py-3">ID</th>
+                  <th className="px-6 py-3">Opticien</th>
+                  <th className="px-6 py-3">Articles</th>
+                  <th className="px-6 py-3">Points</th>
+                  <th className="px-6 py-3">Date</th>
+                  <th className="px-6 py-3">Statut</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
+                      {t.loading}
+                    </td>
+                  </tr>
+                ) : loyaltyRedemptions.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
+                      Aucun échange de fidélité
+                    </td>
+                  </tr>
+                ) : (
+                  loyaltyRedemptions.map((redemption) => (
+                    <tr key={redemption.id} className="hover:bg-orange-50/50">
+                      <td className="px-6 py-4 font-medium text-abyssal">{redemption.id.slice(0, 8)}</td>
+                      <td className="px-6 py-4 text-gray-700">
+                        <div className="font-medium">{redemption.optician.name}</div>
+                        {redemption.optician.city && (
+                          <div className="text-xs text-gray-500">{redemption.optician.city}</div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-gray-700">{redemption.itemCount.toLocaleString(locale)}</td>
+                      <td className="px-6 py-4 text-gray-700">
+                        <span className="font-semibold text-[#f56a24]">{redemption.totalPoints.toLocaleString(locale)} pts</span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-700">{formatDateTime(redemption.createdAt)}</td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${redemptionStatusStyles[redemption.status]}`}
+                        >
+                          {redemptionStatusLabels[redemption.status]}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        )}
       </div>
     </div>
   )

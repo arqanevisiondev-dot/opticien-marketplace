@@ -111,9 +111,36 @@ export async function PATCH(
       );
     }
 
+    // Check current status to award points only on first approval
+    const currentOptician = await prisma.optician.findUnique({
+      where: { id },
+      select: { status: true, loyaltyPoints: true },
+    });
+
+    const updateData: any = { status };
+
+    // Award registration bonus points when approving for the first time
+    if (status === 'APPROVED' && currentOptician?.status === 'PENDING') {
+      try {
+        const pointsSetting = await prisma.systemSettings.findUnique({
+          where: { key: 'registration_bonus_points' },
+        });
+        if (pointsSetting) {
+          const registrationPoints = parseInt(pointsSetting.value) || 0;
+          if (registrationPoints > 0) {
+            updateData.loyaltyPoints = {
+              increment: registrationPoints,
+            };
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching registration points:', error);
+      }
+    }
+
     const optician = await prisma.optician.update({
       where: { id },
-      data: { status },
+      data: updateData,
     });
 
     return NextResponse.json(optician);

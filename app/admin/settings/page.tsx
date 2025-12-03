@@ -25,6 +25,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [newMaterial, setNewMaterial] = useState("")
   const [newGender, setNewGender] = useState("")
+  const [registrationPoints, setRegistrationPoints] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
@@ -39,9 +40,10 @@ export default function SettingsPage() {
 
   const fetchOptions = async () => {
     try {
-      const [materialsRes, gendersRes] = await Promise.all([
+      const [materialsRes, gendersRes, settingsRes] = await Promise.all([
         fetch("/api/admin/product-options?type=material"),
         fetch("/api/admin/product-options?type=gender"),
+        fetch("/api/admin/settings"),
       ])
 
       if (materialsRes.ok) {
@@ -51,6 +53,10 @@ export default function SettingsPage() {
       if (gendersRes.ok) {
         const data = await gendersRes.json()
         setGenders(data)
+      }
+      if (settingsRes.ok) {
+        const data = await settingsRes.json()
+        setRegistrationPoints(data.registration_bonus_points || "0")
       }
     } catch (error) {
       console.error("Error fetching options:", error)
@@ -131,6 +137,33 @@ export default function SettingsPage() {
     }
   }
 
+  const handleUpdateRegistrationPoints = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: "registration_bonus_points",
+          value: registrationPoints,
+          description: "Points awarded to opticians upon successful registration",
+        }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error)
+      }
+
+      setSuccess("Points de fidélité d'inscription mis à jour")
+      setTimeout(() => setSuccess(""), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur")
+      setTimeout(() => setError(""), 3000)
+    }
+  }
+
   if (status === "loading" || !session) {
     return null
   }
@@ -158,6 +191,32 @@ export default function SettingsPage() {
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 mb-6 rounded-lg">{error}</div>
           )}
+
+          {/* Loyalty Points Settings */}
+          <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+            <h2 className="text-2xl font-bold text-abyssal mb-4">Points de Fidélité</h2>
+            <form onSubmit={handleUpdateRegistrationPoints} className="max-w-md">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Points attribués à l&apos;inscription
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  value={registrationPoints}
+                  onChange={(e) => setRegistrationPoints(e.target.value)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burning-flame focus:border-transparent"
+                  placeholder="Ex: 100"
+                />
+                <Button type="submit" className="bg-burning-flame hover:bg-burning-flame/90">
+                  Enregistrer
+                </Button>
+              </div>
+              <p className="mt-2 text-sm text-gray-600">
+                Ces points seront automatiquement attribués aux nouveaux opticiens lors de leur inscription.
+              </p>
+            </form>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Materials Section */}

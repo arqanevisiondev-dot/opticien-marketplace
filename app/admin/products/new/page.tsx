@@ -258,8 +258,8 @@ export default function NewProductPage() {
     color: '',
     price: '',
     salePrice: '',
-    stockQty: '',
     firstOrderRemisePct: '',
+    loyaltyPointsReward: '',
     images: '',
     inStock: true,
     isNewCollection: false,
@@ -488,7 +488,7 @@ export default function NewProductPage() {
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#EEE9DF] to-white">
-        <div className="text-lg text-gray-600">Chargement...</div>
+        <div className="text-lg text-gray-600">{t.loading}...</div>
       </div>
     );
   }
@@ -499,14 +499,14 @@ export default function NewProductPage() {
         <Link href="/admin/products">
           <Button variant="outline" size="sm" className="mb-6 flex items-center">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour aux produits
+            {t.backToProducts}
           </Button>
         </Link>
 
         <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
           <div className="bg-gradient-to-r from-[#2C3B4D] to-[#1B2632] px-8 py-6">
-            <h1 className="text-3xl font-bold text-white">Nouveau Produit</h1>
-            <p className="text-gray-300 mt-2">Ajoutez un nouveau produit à votre catalogue</p>
+            <h1 className="text-3xl font-bold text-white">{t.newProduct}</h1>
+            <p className="text-gray-300 mt-2">{t.addNewProduct}</p>
           </div>
 
           <div className="p-8">
@@ -761,21 +761,6 @@ export default function NewProductPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Stock disponible
-                    </label>
-                    <input
-                      type="number"
-                      step="1"
-                      min="0"
-                      value={formData.stockQty}
-                      onChange={(e) => setFormData({ ...formData, stockQty: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent transition-all"
-                      placeholder="0"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Remise 1ère commande (%)
                     </label>
                     <input
@@ -789,6 +774,24 @@ export default function NewProductPage() {
                       placeholder="10"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Points de Fidélité (Opticians Only)
+                  </label>
+                  <input
+                    type="number"
+                    step="1"
+                    min="0"
+                    value={formData.loyaltyPointsReward}
+                    onChange={(e) => setFormData({ ...formData, loyaltyPointsReward: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent transition-all"
+                    placeholder="0"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Points de fidélité gagnés par les opticiens lors de l&apos;achat de ce produit
+                  </p>
                 </div>
               </div>
 

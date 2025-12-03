@@ -274,7 +274,7 @@ export default function CategoriesPage() {
                 <thead className="bg-gradient-to-r from-abyssal to-blue-fantastic text-white">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold">{t.categoryName}</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold">Image</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold">{t.image}</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold">{t.categoryDescription}</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold">{t.productCount}</th>
                     <th className="px-6 py-4 text-right text-sm font-semibold">{t.actions}</th>

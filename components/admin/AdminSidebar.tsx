@@ -21,6 +21,7 @@ import {
   UserPlus,
   PanelLeftClose,
   PanelLeftOpen,
+  Gift,
 } from 'lucide-react';
 
 interface MenuItem {
@@ -40,7 +41,7 @@ export default function AdminSidebar() {
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [expandedMenus, setExpandedMenus] = useState<string[]>(['Produits', 'Opticiens']);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>(['Produits', 'Opticiens', 'Fidélité']);
 
   const toggleMenu = (title: string) => {
     setExpandedMenus(prev =>
@@ -64,6 +65,14 @@ export default function AdminSidebar() {
         { title: 'Ajouter un produit', href: '/admin/products/new', icon: Plus },
         { title: 'Modifier les produits', href: '/admin/products?tab=edit', icon: Settings },
         { title: 'Catégories', href: '/admin/categories', icon: FolderTree },
+      ],
+    },
+    {
+      title: 'Fidélité',
+      icon: Gift,
+      children: [
+        { title: 'Catalogue fidélité', href: '/admin/loyalty-products', icon: List },
+        { title: 'Nouveau produit', href: '/admin/loyalty-products/new', icon: Plus },
       ],
     },
     {

@@ -21,6 +21,11 @@ export async function POST(request: NextRequest) {
       where: { id: itemId },
       include: {
         product: true,
+        order: {
+          include: {
+            optician: true,
+          },
+        },
       },
     });
 
@@ -34,14 +39,17 @@ export async function POST(request: NextRequest) {
 
     if (action === 'confirm') {
       // Check stock availability
-      if (orderItem.product.stockQty < orderItem.quantity) {
+      if (!orderItem.product.inStock) {
         return NextResponse.json(
-          { error: `Stock insuffisant. Disponible: ${orderItem.product.stockQty}, Demandé: ${orderItem.quantity}` },
+          { error: `Produit non disponible en stock` },
           { status: 400 }
         );
       }
 
-      // Update order item status and decrease stock
+      // Calculate loyalty points to award
+      const pointsToAward = (orderItem.product.loyaltyPointsReward || 0) * orderItem.quantity;
+
+      // Update order item status, decrease stock, award loyalty points, and update order status
       await prisma.$transaction([
         prisma.orderItem.update({
           where: { id: itemId },
@@ -54,14 +62,34 @@ export async function POST(request: NextRequest) {
         prisma.product.update({
           where: { id: orderItem.productId },
           data: {
-            stockQty: {
-              decrement: orderItem.quantity,
-            },
           },
         }),
+        // Update parent order status to APPROVED
+        prisma.order.update({
+          where: { id: orderItem.orderId },
+          data: {
+            status: 'APPROVED',
+            validatedAt: new Date(),
+          },
+        }),
+        // Award loyalty points to optician if product has points reward
+        ...(pointsToAward > 0 ? [
+          prisma.optician.update({
+            where: { id: orderItem.order.opticianId },
+            data: {
+              loyaltyPoints: {
+                increment: pointsToAward,
+              },
+            },
+          })
+        ] : []),
       ]);
 
-      return NextResponse.json({ success: true, action: 'confirmed' });
+      return NextResponse.json({ 
+        success: true, 
+        action: 'confirmed',
+        pointsAwarded: pointsToAward 
+      });
     } else if (action === 'cancel') {
       await prisma.orderItem.update({
         where: { id: itemId },

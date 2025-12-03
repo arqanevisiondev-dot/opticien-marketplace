@@ -41,7 +41,6 @@ export async function GET(request: NextRequest) {
             id: true,
             name: true,
             reference: true,
-            stockQty: true,
             price: true,
             salePrice: true,
             inStock: true,
@@ -219,22 +218,13 @@ export async function POST(request: NextRequest) {
         if (!product) {
           throw new Error('Produit introuvable ou incompatible.');
         }
-        if (product.stockQty < item.quantity) {
-          throw new Error(`Stock insuffisant pour ${product.reference} (${product.name}).`);
+        if (!product.inStock) {
+          throw new Error(`Produit non disponible: ${product.reference} (${product.name}).`);
         }
 
         const unitPrice = product.salePrice ?? product.price;
         const lineTotal = unitPrice * item.quantity;
         runningTotal += lineTotal;
-
-        const newStock = product.stockQty - item.quantity;
-        await tx.product.update({
-          where: { id: product.id },
-          data: {
-            stockQty: newStock,
-            inStock: newStock > 0,
-          },
-        });
 
         await tx.orderItem.create({
           data: {

@@ -24,7 +24,6 @@ interface Product {
   color: string;
   price: number;
   salePrice?: number;
-  stockQty: number;
   inStock: boolean;
   isNewCollection: boolean;
   images: string[];
@@ -190,7 +189,7 @@ export default function ProductsListPage() {
               />
             </div>
 
-            {/* Category Filter */}
+            {/* Category filter */}
             <div className="relative">
               <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <select
@@ -207,7 +206,7 @@ export default function ProductsListPage() {
               </select>
             </div>
 
-            {/* Stock Filter */}
+            {/* Stock filter */}
             <div className="relative">
               <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <select
@@ -227,6 +226,7 @@ export default function ProductsListPage() {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#f56a24]"></div>
+            <p className="mt-4 text-gray-600">{t.loadingProducts}</p>
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="bg-white shadow-lg rounded-lg p-12 text-center">
@@ -236,7 +236,7 @@ export default function ProductsListPage() {
             <Link href="/admin/products/new">
               <Button className="bg-[#f56a24] hover:bg-[#d45a1e] text-white">
                 <Plus className="h-5 w-5 mr-2" />
-                {t.createProduct}
+                {t.newProduct}
               </Button>
             </Link>
           </div>
@@ -313,9 +313,13 @@ export default function ProductsListPage() {
                         </span>
                       )}
                     </div>
-                    <div className="text-sm text-gray-600">
-                      {t.stock} <span className="font-semibold">{product.stockQty}</span>
-                    </div>
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                      product.inStock
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {product.inStock ? t.inStock || 'En stock' : t.outOfStock || 'Rupture'}
+                    </span>
                   </div>
 
                   {/* Actions */}

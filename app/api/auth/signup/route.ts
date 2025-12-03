@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(validatedData.password, 10);
 
-    // Create user and optician profile
+    // Create user and optician profile (loyalty points awarded on admin approval)
     const user = await prisma.user.create({
       data: {
         email: validatedData.email,
@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
             city: validatedData.city,
             postalCode: validatedData.postalCode,
             status: 'PENDING',
+            loyaltyPoints: 0,
           },
         },
       },

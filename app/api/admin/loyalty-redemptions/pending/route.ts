@@ -5,35 +5,38 @@ import { prisma } from '@/lib/prisma';
 export async function GET() {
   try {
     const session = await auth();
-    
+
     if (!session || session.user?.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const orders = await prisma.order.findMany({
+    // Fetch pending loyalty redemptions with items
+    const redemptions = await prisma.loyaltyRedemption.findMany({
       where: {
-        items: {
-          some: {
-            status: 'PENDING',
-          },
-        },
+        status: 'PENDING',
       },
       include: {
         optician: {
           include: {
-            user: true,
+            user: {
+              select: {
+                email: true,
+              },
+            },
           },
         },
         items: {
           include: {
-            product: {
+            loyaltyProduct: {
               select: {
-                inStock: true,
+                isActive: true,
+                product: {
+                  select: {
+                    inStock: true,
+                  },
+                },
               },
             },
-          },
-          orderBy: {
-            createdAt: 'asc',
           },
         },
       },
@@ -42,11 +45,11 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(orders);
+    return NextResponse.json(redemptions);
   } catch (error) {
-    console.error('Error fetching pending orders:', error);
+    console.error('Error fetching pending loyalty redemptions:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch orders' },
+      { error: 'Failed to fetch pending redemptions' },
       { status: 500 }
     );
   }

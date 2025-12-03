@@ -35,6 +35,7 @@ const emptyForm = {
   salePrice: '',
   stockQty: '',
   firstOrderRemisePct: '',
+  loyaltyPointsReward: '',
   images: '',
   inStock: true,
   isNewCollection: false,
@@ -117,6 +118,8 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
           stockQty: product.stockQty != null ? String(product.stockQty) : '',
           firstOrderRemisePct:
             product.firstOrderRemisePct != null ? String(product.firstOrderRemisePct) : '',
+          loyaltyPointsReward:
+            product.loyaltyPointsReward != null ? String(product.loyaltyPointsReward) : '',
           images: '',
           inStock: product.inStock ?? true,
           isNewCollection: product.isNewCollection ?? false,
@@ -224,6 +227,9 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
         stockQty: formData.stockQty ? parseInt(formData.stockQty, 10) : 0,
         firstOrderRemisePct: formData.firstOrderRemisePct
           ? parseFloat(formData.firstOrderRemisePct)
+          : null,
+        loyaltyPointsReward: formData.loyaltyPointsReward
+          ? parseInt(formData.loyaltyPointsReward, 10)
           : null,
         images: [...existingImages, ...manualImages, ...newImages],
       };
@@ -453,6 +459,24 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
                   />
                   <p className="text-xs text-gray-500 mt-1">{t.firstOrderDiscountNote}</p>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Points de Fidélité (Opticians Only)
+                </label>
+                <input
+                  type="number"
+                  step="1"
+                  min="0"
+                  value={formData.loyaltyPointsReward}
+                  onChange={(e) => setFormData({ ...formData, loyaltyPointsReward: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-fantastic focus:border-transparent"
+                  placeholder="0"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Points de fidélité gagnés par les opticiens lors de l&apos;achat de ce produit
+                </p>
               </div>
 
               <div>
