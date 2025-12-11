@@ -511,6 +511,20 @@ export const translations = {
     locationDenied: 'Accès à la localisation refusé. Vous pouvez rechercher par ville ci-dessous.',
     enterCity: 'Entrez le nom de la ville...',
     searchingOpticians: 'Recherche des opticiens...',
+    
+    // Loyalty Points
+    loyaltyPoints: 'Points de fidélité',
+    currentPoints: 'Points actuels',
+    earnPoints: 'Gagnez',
+    pointsAfterValidation: 'points de fidélité',
+    pointsDescription: 'Points attribués après validation de votre commande par l\'administrateur',
+    addPoints: 'Ajouter des points',
+    decreasePoints: 'Retirer des points',
+    pointsAmount: 'Nombre de points',
+    updatePoints: 'Mettre à jour les points',
+    pointsHistory: 'Historique des points',
+    inCart: 'Dans le panier',
+    addToCart: 'Ajouter au panier',
   },
   
   en: {
@@ -1001,6 +1015,20 @@ export const translations = {
     locationDenied: 'Location access denied. You can search by city below.',
     enterCity: 'Enter city name...',
     searchingOpticians: 'Searching for opticians...',
+    
+    // Loyalty Points
+    loyaltyPoints: 'Loyalty Points',
+    currentPoints: 'Current Points',
+    earnPoints: 'Earn',
+    pointsAfterValidation: 'loyalty points',
+    pointsDescription: 'Points awarded after your order is validated by the administrator',
+    addPoints: 'Add points',
+    decreasePoints: 'Decrease points',
+    pointsAmount: 'Number of points',
+    updatePoints: 'Update points',
+    pointsHistory: 'Points history',
+    inCart: 'In cart',
+    addToCart: 'Add to cart',
   },
   
   ar: {
@@ -1491,6 +1519,20 @@ export const translations = {
     locationDenied: 'تم رفض الوصول إلى الموقع. يمكنك البحث حسب المدينة أدناه.',
     enterCity: 'أدخل اسم المدينة...',
     searchingOpticians: 'البحث عن أخصائيي البصريات...',
+    
+    // Loyalty Points
+    loyaltyPoints: 'نقاط الولاء',
+    currentPoints: 'النقاط الحالية',
+    earnPoints: 'اكسب',
+    pointsAfterValidation: 'نقاط الولاء',
+    pointsDescription: 'يتم منح النقاط بعد تأكيد طلبك من قبل المسؤول',
+    addPoints: 'إضافة نقاط',
+    decreasePoints: 'خصم نقاط',
+    pointsAmount: 'عدد النقاط',
+    updatePoints: 'تحديث النقاط',
+    pointsHistory: 'سجل النقاط',
+    inCart: 'في السلة',
+    addToCart: 'أضف إلى السلة',
   },
 };
 

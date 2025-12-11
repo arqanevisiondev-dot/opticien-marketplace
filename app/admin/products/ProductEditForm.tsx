@@ -185,6 +185,12 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
         return 'La remise doit être comprise entre 0 et 100%.';
       }
     }
+    if (formData.loyaltyPointsReward.trim()) {
+      const points = parseInt(formData.loyaltyPointsReward, 10);
+      if (Number.isNaN(points) || points < 0) {
+        return 'Les points de fidélité doivent être un entier positif ou nul.';
+      }
+    }
     return '';
   };
 
@@ -221,10 +227,18 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
 
       const payload = {
         id: productId,
-        ...formData,
+        name: formData.name,
+        reference: formData.reference,
+        description: formData.description,
+        categoryId: formData.categoryId,
+        material: formData.material,
+        gender: formData.gender,
+        shape: formData.shape,
+        color: formData.color,
+        inStock: formData.inStock,
+        isNewCollection: formData.isNewCollection,
         price: parseFloat(formData.price),
         salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
-        stockQty: formData.stockQty ? parseInt(formData.stockQty, 10) : 0,
         firstOrderRemisePct: formData.firstOrderRemisePct
           ? parseFloat(formData.firstOrderRemisePct)
           : null,

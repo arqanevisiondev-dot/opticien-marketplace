@@ -4,7 +4,7 @@ import { useState, useEffect, use } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Phone, MessageCircle, MapPin } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { useLanguage } from "@/contexts/LanguageContext"
 import dynamic from "next/dynamic"
@@ -57,10 +57,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     session?.user?.role === "ADMIN"
   const isOptician = session?.user?.role === "OPTICIAN"
 
-  useEffect(() => {
-    fetchProduct()
-  }, [resolvedParams.id])
-
   const fetchProduct = async () => {
     try {
       const res = await fetch(`/api/products/${resolvedParams.id}`)
@@ -77,6 +73,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchProduct()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resolvedParams.id])
 
   if (loading) {
     return (
@@ -148,7 +149,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
               <h1 className="text-3xl md:text-4xl font-bold text-[#1B2632] mb-4 text-pretty">{product.name}</h1>
 
-              {!product.inStock && (
+              {isOptician && !product.inStock && (
                 <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 mb-6 rounded">
                   <p className="font-semibold">{t.outOfStock}</p>
                 </div>
@@ -230,7 +231,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                       }
                     }}
                   >
-                    {isInCart(product.id) ? "In Cart" : "Add to Cart"}
+                    {isInCart(product.id) ? (t.inCart || "Dans le panier") : (t.addToCart || "Ajouter au panier")}
                   </Button>
                 </div>
               )}
@@ -245,7 +246,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
 
-        <NearestOpticianFinder productName={product.name} />
+        {!isOptician && (
+          <div id="supplier-section">
+            <NearestOpticianFinder productName={product.name} />
+          </div>
+        )}
       </div>
     </div>
   )

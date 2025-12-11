@@ -222,6 +222,7 @@ export async function POST(request: NextRequest) {
         price: parsedPrice,
         salePrice: parsedSalePrice,
         firstOrderRemisePct: parsedRemise,
+        loyaltyPointsReward: parsedLoyaltyPoints,
         images: imagesJson,
         inStock: typeof inStock === 'boolean' ? inStock : true,
         isNewCollection: typeof isNewCollection === 'boolean' ? isNewCollection : false,

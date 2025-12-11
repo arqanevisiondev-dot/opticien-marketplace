@@ -104,15 +104,6 @@ export default function CatalogueSection() {
                         <span>•</span>
                         <span>{product.gender}</span>
                       </div>
-
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                        <span className="text-[#f56a24] font-bold text-lg">
-                          {product.salePrice ? `${product.salePrice.toFixed(2)}` : `${product.price.toFixed(2)}`} DH
-                        </span>
-                        {product.salePrice && (
-                          <span className="text-xs text-gray-500 line-through">{product.price.toFixed(2)} DH</span>
-                        )}
-                      </div>
                     </div>
                   </div>
                 </Link>

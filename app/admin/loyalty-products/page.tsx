@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Plus, Edit, Trash2, Package, CheckCircle, XCircle, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface LoyaltyProduct {
   id: string;
@@ -23,6 +24,7 @@ interface LoyaltyProduct {
 }
 
 export default function LoyaltyProductsPage() {
+  const { t } = useLanguage();
   const [products, setProducts] = useState<LoyaltyProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteModal, setDeleteModal] = useState<{ show: boolean; product: LoyaltyProduct | null }>({ show: false, product: null });

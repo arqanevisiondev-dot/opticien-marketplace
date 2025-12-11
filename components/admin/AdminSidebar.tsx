@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   LayoutDashboard,
   Package,
@@ -37,11 +38,12 @@ interface MenuItem {
 }
 
 export default function AdminSidebar() {
+  const { t } = useLanguage();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [expandedMenus, setExpandedMenus] = useState<string[]>(['Produits', 'Opticiens', 'Fidélité']);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([t.products, t.opticians, t.loyalty]);
 
   const toggleMenu = (title: string) => {
     setExpandedMenus(prev =>
@@ -53,56 +55,56 @@ export default function AdminSidebar() {
 
   const menuItems: MenuItem[] = [
     {
-      title: 'Tableau de bord',
+      title: t.dashboard,
       icon: LayoutDashboard,
       href: '/admin',
     },
     {
-      title: 'Produits',
+      title: t.products,
       icon: Package,
       children: [
-        { title: 'Tous les produits', href: '/admin/products', icon: List },
-        { title: 'Ajouter un produit', href: '/admin/products/new', icon: Plus },
-        { title: 'Modifier les produits', href: '/admin/products?tab=edit', icon: Settings },
-        { title: 'Catégories', href: '/admin/categories', icon: FolderTree },
+        { title: t.allProducts, href: '/admin/products', icon: List },
+        { title: t.addProduct, href: '/admin/products/new', icon: Plus },
+        { title: t.editProducts, href: '/admin/products?tab=edit', icon: Settings },
+        { title: t.categories, href: '/admin/categories', icon: FolderTree },
       ],
     },
     {
-      title: 'Fidélité',
+      title: t.loyalty,
       icon: Gift,
       children: [
-        { title: 'Catalogue fidélité', href: '/admin/loyalty-products', icon: List },
-        { title: 'Nouveau produit', href: '/admin/loyalty-products/new', icon: Plus },
+        { title: t.loyaltyCatalog, href: '/admin/loyalty-products', icon: List },
+        { title: t.newProduct, href: '/admin/loyalty-products/new', icon: Plus },
       ],
     },
     {
-      title: 'Opticiens',
+      title: t.opticians,
       icon: Users,
       children: [
-        { title: 'Tous les opticiens', href: '/admin/opticians', icon: List },
-        { title: 'En attente', href: '/admin/opticians?status=pending', icon: UserCheck },
-        { title: 'Approuvés', href: '/admin/opticians?status=approved', icon: UserPlus },
+        { title: t.allOpticians, href: '/admin/opticians', icon: List },
+        { title: t.pending, href: '/admin/opticians?status=pending', icon: UserCheck },
+        { title: t.approved, href: '/admin/opticians?status=approved', icon: UserPlus },
       ],
     },
     {
-      title: 'Commandes',
+      title: t.orders,
       icon: ShoppingCart,
       href: '/admin/orders',
     },
     {
-      title: 'Campagnes',
+      title: t.campaigns,
       icon: Mail,
       children: [
-        { title: 'Toutes les campagnes', href: '/admin/campaigns', icon: List },
-        { title: 'Nouvelle campagne', href: '/admin/campaigns/new', icon: Plus },
+        { title: t.allCampaigns, href: '/admin/campaigns', icon: List },
+        { title: t.newCampaign, href: '/admin/campaigns/new', icon: Plus },
       ],
     },
     {
-      title: 'Paramètres',
+      title: t.settings,
       icon: Settings,
       children: [
-        { title: 'Options produits', href: '/admin/settings', icon: Settings },
-        { title: 'Gestion du Slider', href: '/admin/slider', icon: Package },
+        { title: t.productOptions, href: '/admin/settings', icon: Settings },
+        { title: t.sliderManagement, href: '/admin/slider', icon: Package },
       ],
     },
   ];
@@ -155,7 +157,7 @@ export default function AdminSidebar() {
             </div>
             <div>
               <h1 className="text-xl font-bold">Arqane Vision</h1>
-              <p className="text-xs text-oatmeal">Admin Panel</p>
+              <p className="text-xs text-oatmeal">{t.adminPanel}</p>
             </div>
           </div>
           
@@ -163,7 +165,7 @@ export default function AdminSidebar() {
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="hidden lg:block p-2 hover:bg-blue-fantastic/20 rounded-lg transition-colors"
-            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={isCollapsed ? t.expandSidebar : t.collapseSidebar}
           >
             {isCollapsed ? (
               <PanelLeftOpen className="w-5 h-5 text-oatmeal" />

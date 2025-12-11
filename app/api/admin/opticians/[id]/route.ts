@@ -65,6 +65,7 @@ export async function GET(
       longitude: optician.longitude ?? null,
       email: optician.user.email,
       status: optician.status,
+      loyaltyPoints: optician.loyaltyPoints,
       createdAt: optician.createdAt.toISOString(),
       analytics: {
         totalOrders,

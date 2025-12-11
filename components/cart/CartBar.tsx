@@ -23,6 +23,15 @@ export default function CartBar() {
   const hasRegularItems = regularItems.length > 0;
   const hasLoyaltyItems = loyaltyItems.length > 0;
 
+  // Auto-open when items are added, close when empty
+  useEffect(() => {
+    if (items.length > 0) {
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  }, [items.length]);
+
   useEffect(() => {
     let active = true;
     if (isOptician) {
@@ -118,7 +127,8 @@ export default function CartBar() {
     }
   };
 
-  if (!isOptician) return null;
+  // Hide cart bar completely when empty
+  if (!isOptician || items.length === 0) return null;
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40">

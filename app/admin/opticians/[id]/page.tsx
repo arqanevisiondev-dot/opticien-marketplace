@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/Button"
 import { useLanguage } from "@/contexts/LanguageContext"
-import { Check, X, ArrowLeft, BarChart3, Package, Clock } from "lucide-react"
+import { Check, X, ArrowLeft, BarChart3, Package, Clock, Star, Plus, Minus } from "lucide-react"
 
 interface OpticianAnalytics {
   totalOrders: number
@@ -33,6 +33,7 @@ interface OpticianDetail {
   latitude?: number | null
   longitude?: number | null
   status: "PENDING" | "APPROVED" | "REJECTED"
+  loyaltyPoints?: number
   createdAt: string
   analytics?: OpticianAnalytics
 }
@@ -45,6 +46,9 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
   const getText = (key: string, fallback: string) => (t as Record<string, string | undefined>)[key] ?? fallback
   const [optician, setOptician] = useState<OpticianDetail | null>(null)
   const [loading, setLoading] = useState(true)
+  const [pointsToModify, setPointsToModify] = useState<number>(0)
+  const [showPointsModal, setShowPointsModal] = useState(false)
+  const [pointsAction, setPointsAction] = useState<'add' | 'decrease'>('add')
 
   useEffect(() => {
     if (status === "loading") return
@@ -53,18 +57,20 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
       router.push("/")
       return
     }
-    ;(async () => {
-      try {
-        const res = await fetch(`/api/admin/opticians/${id}`)
-        if (res.ok) {
-          const data = await res.json()
-          setOptician(data)
-        }
-      } finally {
-        setLoading(false)
-      }
-    })()
+    fetchOptician()
   }, [status, session, id, router])
+
+  const fetchOptician = async () => {
+    try {
+      const res = await fetch(`/api/admin/opticians/${id}`)
+      if (res.ok) {
+        const data = await res.json()
+        setOptician(data)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleStatusChange = async (newStatus: "APPROVED" | "REJECTED") => {
     try {
@@ -78,6 +84,29 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
         setOptician((prev) => (prev ? { ...prev, status: newStatus } : prev))
       }
     } catch {}
+  }
+
+  const handleUpdatePoints = async () => {
+    if (!pointsToModify || pointsToModify <= 0) return
+
+    try {
+      const res = await fetch(`/api/admin/opticians/${id}/points`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          points: pointsAction === 'add' ? pointsToModify : -pointsToModify 
+        }),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setOptician((prev) => (prev ? { ...prev, loyaltyPoints: data.loyaltyPoints } : prev))
+        setShowPointsModal(false)
+        setPointsToModify(0)
+      }
+    } catch (error) {
+      console.error('Error updating points:', error)
+    }
   }
 
   const getStatusBadge = (s: string) => {
@@ -192,6 +221,48 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
               )}
             </div>
 
+            {/* Loyalty Points Management */}
+            <div className="bg-white rounded-lg shadow-lg p-8">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-[#f56a24]/20 rounded-lg">
+                    <Star className="h-6 w-6 text-[#f56a24]" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-abyssal">{t.loyaltyPoints}</h2>
+                    <p className="text-sm text-gray-600">{t.currentPoints}</p>
+                  </div>
+                </div>
+                <div className="text-4xl font-bold text-[#f56a24]">
+                  {optician.loyaltyPoints || 0}
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <Button
+                  onClick={() => {
+                    setPointsAction('add')
+                    setShowPointsModal(true)
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700"
+                >
+                  <Plus className="h-4 w-4" />
+                  {t.addPoints}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setPointsAction('decrease')
+                    setShowPointsModal(true)
+                  }}
+                  variant="outline"
+                  className="flex-1 flex items-center justify-center gap-2"
+                >
+                  <Minus className="h-4 w-4" />
+                  {t.decreasePoints}
+                </Button>
+              </div>
+            </div>
+
             {optician.analytics && (
               <div>
                 <div className="flex items-center gap-3 mb-6">
@@ -281,6 +352,49 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
           <div className="text-center py-12 text-gray-500">{t.opticianNotFound}</div>
         )}
       </div>
+
+      {/* Points Update Modal */}
+      {showPointsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <h3 className="text-2xl font-bold text-abyssal mb-4">
+              {pointsAction === 'add' ? t.addPoints : t.decreasePoints}
+            </h3>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t.pointsAmount}
+              </label>
+              <input
+                type="number"
+                min="1"
+                value={pointsToModify}
+                onChange={(e) => setPointsToModify(parseInt(e.target.value) || 0)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f56a24]"
+                placeholder="0"
+              />
+            </div>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => {
+                  setShowPointsModal(false)
+                  setPointsToModify(0)
+                }}
+                variant="outline"
+                className="flex-1"
+              >
+                {t.cancel}
+              </Button>
+              <Button
+                onClick={handleUpdatePoints}
+                className="flex-1 bg-[#f56a24] hover:bg-[#d85a1f]"
+                disabled={!pointsToModify || pointsToModify <= 0}
+              >
+                {t.updatePoints}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

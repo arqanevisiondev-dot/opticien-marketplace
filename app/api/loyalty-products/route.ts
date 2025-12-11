@@ -25,12 +25,21 @@ export async function GET() {
       orderBy: { pointsCost: 'asc' },
     });
 
-    // Filter out products with no stock (only relevant if linked to a Product)
-    const availableProducts = loyaltyProducts.filter(lp => 
-      !lp.productId || (lp.product && lp.product.inStock)
-    );
+    // Transform the data to flatten inStock status
+    const transformedProducts = loyaltyProducts.map(lp => ({
+      id: lp.id,
+      productId: lp.productId,
+      name: lp.name,
+      description: lp.description,
+      imageUrl: lp.imageUrl,
+      pointsCost: lp.pointsCost,
+      isActive: lp.isActive,
+      inStock: lp.productId ? (lp.product?.inStock ?? true) : true, // If linked to product, use its stock, otherwise assume in stock
+      createdAt: lp.createdAt,
+      updatedAt: lp.updatedAt,
+    }));
 
-    return NextResponse.json(availableProducts);
+    return NextResponse.json(transformedProducts);
   } catch (error) {
     console.error('Error fetching loyalty products:', error);
     return NextResponse.json(

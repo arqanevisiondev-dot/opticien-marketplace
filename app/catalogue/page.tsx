@@ -319,6 +319,11 @@ export default function CataloguePage() {
               <Link key={product.id} href={`/catalogue/${product.slug || product.id}`}>
                 <div className="bg-white shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer rounded-xl overflow-hidden group flex flex-col h-full">
                   <div className="aspect-square bg-gradient-to-br from-[#EEE9DF] to-[#80827f]/10 relative overflow-hidden">
+                    {product.salePrice && (
+                      <div className="absolute top-3 left-3 bg-green-600 text-white px-3 py-1 text-xs font-bold uppercase rounded-full z-10">
+                        PROMO
+                      </div>
+                    )}
                     {product.isNewCollection && (
                       <div className="absolute top-3 right-3 bg-[#f56a24] text-white px-3 py-1 text-xs font-bold uppercase rounded-full z-10">
                         {t.newBadge}
@@ -333,7 +338,7 @@ export default function CataloguePage() {
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400">No image</div>
                     )}
-                    {!product.inStock && (
+                    {isOptician && !product.inStock && (
                       <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-xs font-bold">
                         OUT OF STOCK
                       </div>

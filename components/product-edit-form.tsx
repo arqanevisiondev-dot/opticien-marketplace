@@ -40,6 +40,7 @@ interface AddOptionModalProps {
 }
 
 function AddOptionModal({ isOpen, onClose, onAdd, title, label, placeholder, requiresImage }: AddOptionModalProps) {
+  const { t } = useLanguage();
   const [value, setValue] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
@@ -544,7 +545,17 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
 
       const payload = {
         id: productId,
-        ...formData,
+        name: formData.name,
+        reference: formData.reference,
+        description: formData.description,
+        categoryId: formData.categoryId,
+        material: formData.material,
+        gender: formData.gender,
+        marque: formData.marque,
+        shape: formData.shape,
+        color: formData.color,
+        inStock: formData.inStock,
+        isNewCollection: formData.isNewCollection,
         price: Number.parseFloat(formData.price),
         salePrice: formData.salePrice ? Number.parseFloat(formData.salePrice) : null,
         firstOrderRemisePct: formData.firstOrderRemisePct ? Number.parseFloat(formData.firstOrderRemisePct) : null,
@@ -1006,7 +1017,7 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
 
             {/* Submit Buttons */}
             <div className="flex gap-4 pt-6 border-t-2">
-              <Button type="submit" disabled={saving} className="flex-1 py-4 text-lg font-semibold shadow-lg">
+              <Button type="submit" disabled={saving} className="flex-1 py-4 text-lg font-semibold shadow-lg ">
                 {saving ? (
                   <span className="flex items-center justify-center gap-2">
                     <Loader2 className="h-5 w-5 animate-spin" />
