@@ -181,8 +181,6 @@ function CategoriesContent() {
     )
   }
 
-  const selectedCategory = categories.find(c => c.slug === filters.category)
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#EEE9DF] to-white">
       {/* Hero Section */}
@@ -190,10 +188,10 @@ function CategoriesContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4">
-              {selectedCategory ? selectedCategory.name : (t.categories || "Catégories")}
+              {t.allProducts || "Tous les produits"}
             </h1>
             <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto">
-              {selectedCategory?.description || (t.categoriesDescription || "Découvrez notre large gamme de lunettes")}
+              {t.allProductsDescription || "Découvrez notre gamme complète de lunettes et accessoires"}
             </p>
           </div>
         </div>

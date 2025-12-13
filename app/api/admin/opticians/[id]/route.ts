@@ -153,3 +153,65 @@ export async function PATCH(
     );
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth();
+    
+    if (!session || session.user?.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: 'Accès non autorisé' },
+        { status: 403 }
+      );
+    }
+
+    const { id } = await params;
+
+    // Find the optician and their user
+    const optician = await prisma.optician.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+
+    if (!optician) {
+      return NextResponse.json(
+        { error: 'Opticien introuvable' },
+        { status: 404 }
+      );
+    }
+
+    // Delete in transaction to ensure both optician and user are deleted
+    await prisma.$transaction([
+      // Delete all orders related to this optician
+      prisma.orderItem.deleteMany({
+        where: { order: { opticianId: id } }
+      }),
+      prisma.order.deleteMany({
+        where: { opticianId: id }
+      }),
+      // Delete loyalty redemptions
+      prisma.loyaltyRedemption.deleteMany({
+        where: { opticianId: id }
+      }),
+      // Delete the optician
+      prisma.optician.delete({
+        where: { id }
+      }),
+      // Delete the user account
+      prisma.user.delete({
+        where: { id: optician.userId }
+      }),
+    ]);
+
+    return NextResponse.json({ message: 'Opticien supprimé avec succès' });
+  } catch (error) {
+    console.error('Error deleting optician:', error);
+    return NextResponse.json(
+      { error: 'Erreur lors de la suppression de l\'opticien' },
+      { status: 500 }
+    );
+  }
+}

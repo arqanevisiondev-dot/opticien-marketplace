@@ -36,6 +36,91 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(validatedData.password, 10);
 
+    // Geocode address if provided
+    let latitude: number | undefined;
+    let longitude: number | undefined;
+    
+    if (validatedData.address) {
+      try {
+        // Try 0: Check if address is a Plus Code (e.g., "X7Q6+29 Sala Al Jadida")
+        const plusCodeRegex = /^[23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,3}/i;
+        if (plusCodeRegex.test(validatedData.address.trim())) {
+          const query = validatedData.address.includes(',') 
+            ? validatedData.address 
+            : `${validatedData.address}, Morocco`;
+          const encodedQuery = encodeURIComponent(query);
+          
+          const geoResponse = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodedQuery}&limit=1`,
+            {
+              headers: {
+                'User-Agent': 'OpticienMarketplace/1.0'
+              }
+            }
+          );
+          
+          const geoData = await geoResponse.json();
+          
+          if (geoData && geoData.length > 0) {
+            latitude = parseFloat(geoData[0].lat);
+            longitude = parseFloat(geoData[0].lon);
+            console.log(`✅ Geocoded Plus Code: ${latitude}, ${longitude}`);
+          }
+        }
+        
+        // Try 1: Full address with Morocco (if not Plus Code or Plus Code failed)
+        if (!latitude && !longitude) {
+          const query = [validatedData.address, validatedData.postalCode, validatedData.city, 'Morocco']
+            .filter(Boolean)
+            .join(', ');
+          const encodedQuery = encodeURIComponent(query);
+        
+          const geoResponse = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodedQuery}&limit=1`,
+            {
+              headers: {
+                'User-Agent': 'OpticienMarketplace/1.0'
+              }
+            }
+          );
+          
+          const geoData = await geoResponse.json();
+          
+          if (geoData && geoData.length > 0) {
+            latitude = parseFloat(geoData[0].lat);
+            longitude = parseFloat(geoData[0].lon);
+            console.log(`✅ Geocoded full address: ${latitude}, ${longitude}`);
+          }
+        }
+        
+        // Try 2: Fallback to city + Morocco if full address didn't work
+        if (!latitude && !longitude && validatedData.city) {
+          const query = `${validatedData.city}, Morocco`;
+          const encodedQuery = encodeURIComponent(query);
+          
+          const geoResponse = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodedQuery}&limit=1`,
+            {
+              headers: {
+                'User-Agent': 'OpticienMarketplace/1.0'
+              }
+            }
+          );
+          
+          const geoData = await geoResponse.json();
+          
+          if (geoData && geoData.length > 0) {
+            latitude = parseFloat(geoData[0].lat);
+            longitude = parseFloat(geoData[0].lon);
+            console.log(`✅ Geocoded city: ${latitude}, ${longitude}`);
+          }
+        }
+      } catch (error) {
+        console.error('Geocoding failed during signup:', error);
+        // Continue without coordinates - can be added later
+      }
+    }
+
     // Create user and optician profile (loyalty points awarded on admin approval)
     const user = await prisma.user.create({
       data: {
@@ -52,6 +137,8 @@ export async function POST(request: NextRequest) {
             address: validatedData.address,
             city: validatedData.city,
             postalCode: validatedData.postalCode,
+            latitude,
+            longitude,
             status: 'PENDING',
             loyaltyPoints: 0,
           },

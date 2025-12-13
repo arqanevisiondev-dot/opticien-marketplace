@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function ForgotPasswordPage() {
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -46,15 +48,11 @@ export default function ForgotPasswordPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-abyssal mb-4">
-              Email envoyé !
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Si un compte existe avec l'adresse <strong>{email}</strong>, vous recevrez un email avec les instructions pour réinitialiser votre mot de passe.
-            </p>
+            <h2 className="text-2xl font-bold text-abyssal mb-4">{t.forgotPasswordSentTitle}</h2>
+            <p className="text-gray-600 mb-6">{t.forgotPasswordSentMessage?.replace('{email}', email)}</p>
             <Link href="/auth/signin">
               <Button className="w-full">
-                Retour à la connexion
+                {t.backToSignIn}
               </Button>
             </Link>
           </div>
@@ -67,12 +65,8 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-palladian py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full bg-white p-8 shadow-lg rounded-lg">
         <div>
-          <h2 className="text-center text-3xl font-bold text-abyssal">
-            Mot de passe oublié
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Entrez votre adresse email pour recevoir un lien de réinitialisation
-          </p>
+          <h2 className="text-center text-3xl font-bold text-abyssal">{t.forgotPasswordTitle}</h2>
+          <p className="mt-2 text-center text-sm text-gray-600">{t.forgotPasswordInstruction}</p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -83,9 +77,7 @@ export default function ForgotPasswordPage() {
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Adresse email
-            </label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">{t.emailAddressLabel}</label>
             <input
               id="email"
               name="email"
@@ -93,7 +85,7 @@ export default function ForgotPasswordPage() {
               autoComplete="email"
               required
               className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-fantastic focus:border-blue-fantastic focus:z-10 sm:text-sm"
-              placeholder="votre-email@example.com"
+              placeholder={t.emailPlaceholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -105,14 +97,12 @@ export default function ForgotPasswordPage() {
               disabled={loading}
               className="w-full"
             >
-              {loading ? 'Envoi en cours...' : 'Envoyer le lien'}
+              {loading ? t.signInLoading ?? 'Envoi en cours...' : t.sendResetLink}
             </Button>
           </div>
 
           <div className="text-center">
-            <Link href="/auth/signin" className="text-sm text-blue-fantastic hover:text-burning-flame">
-              ← Retour à la connexion
-            </Link>
+            <Link href="/auth/signin" className="text-sm text-blue-fantastic hover:text-burning-flame">{`← ${t.backToSignIn}`}</Link>
           </div>
         </form>
       </div>

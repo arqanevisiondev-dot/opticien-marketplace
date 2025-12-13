@@ -15,12 +15,10 @@ interface LoyaltyProduct {
   imageUrl: string | null;
   pointsCost: number;
   isActive: boolean;
-  stockQty: number;
   product?: {
     id: string;
     name: string;
     reference: string;
-    stockQty: number;
   } | null;
 }
 
@@ -35,7 +33,6 @@ export default function EditLoyaltyProductPage() {
     description: '',
     imageUrl: '',
     pointsCost: '',
-    stockQty: '',
     isActive: true,
   });
   
@@ -66,7 +63,6 @@ export default function EditLoyaltyProductPage() {
           description: data.description || '',
           imageUrl: data.imageUrl || '',
           pointsCost: String(data.pointsCost),
-          stockQty: String(data.stockQty),
           isActive: data.isActive,
         });
         setImagePreview(data.imageUrl || '');
@@ -129,7 +125,6 @@ export default function EditLoyaltyProductPage() {
           ...formData,
           imageUrl,
           pointsCost: parseInt(formData.pointsCost),
-          stockQty: parseInt(formData.stockQty) || 0,
         }),
       });
 
@@ -271,26 +266,6 @@ export default function EditLoyaltyProductPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent transition-all"
                   placeholder="100"
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Stock Disponible {linkedProduct && <span className="text-xs text-gray-500">(synchronisé si lié)</span>}
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.stockQty}
-                  onChange={(e) => setFormData({ ...formData, stockQty: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent transition-all"
-                  placeholder="10"
-                  disabled={!!linkedProduct}
-                />
-                {linkedProduct && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Le stock est géré par le produit lié
-                  </p>
-                )}
               </div>
             </div>
 

@@ -49,6 +49,16 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
   const [pointsToModify, setPointsToModify] = useState<number>(0)
   const [showPointsModal, setShowPointsModal] = useState(false)
   const [pointsAction, setPointsAction] = useState<'add' | 'decrease'>('add')
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [changingPassword, setChangingPassword] = useState(false)
+  const [editingCoords, setEditingCoords] = useState(false)
+  const [latitude, setLatitude] = useState('')
+  const [longitude, setLongitude] = useState('')
+  const [updatingCoords, setUpdatingCoords] = useState(false)
 
   useEffect(() => {
     if (status === "loading") return
@@ -106,6 +116,105 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
       }
     } catch (error) {
       console.error('Error updating points:', error)
+    }
+  }
+
+  const handleDeleteOptician = async () => {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${optician?.businessName}? Cette action est irréversible.`)) {
+      return
+    }
+
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/admin/opticians/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (res.ok) {
+        alert('Opticien supprimé avec succès')
+        router.push('/admin/opticians')
+      } else {
+        alert('Erreur lors de la suppression')
+      }
+    } catch (error) {
+      console.error('Error deleting optician:', error)
+      alert('Erreur lors de la suppression')
+    } finally {
+      setDeleting(false)
+      setShowDeleteModal(false)
+    }
+  }
+
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      alert('Les mots de passe ne correspondent pas')
+      return
+    }
+
+    if (newPassword.length < 6) {
+      alert('Le mot de passe doit contenir au moins 6 caractères')
+      return
+    }
+
+    setChangingPassword(true)
+    try {
+      const res = await fetch(`/api/admin/opticians/${id}/password`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: newPassword }),
+      })
+
+      if (res.ok) {
+        alert('Mot de passe modifié avec succès')
+        setShowPasswordModal(false)
+        setNewPassword('')
+        setConfirmPassword('')
+      } else {
+        alert('Erreur lors du changement de mot de passe')
+      }
+    } catch (error) {
+      console.error('Error changing password:', error)
+      alert('Erreur lors du changement de mot de passe')
+    } finally {
+      setChangingPassword(false)
+    }
+  }
+
+  const handleUpdateCoordinates = async () => {
+    if (!latitude || !longitude) {
+      alert('Veuillez entrer les coordonnées GPS')
+      return
+    }
+
+    const lat = parseFloat(latitude)
+    const lon = parseFloat(longitude)
+
+    if (isNaN(lat) || isNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+      alert('Coordonnées GPS invalides')
+      return
+    }
+
+    setUpdatingCoords(true)
+    try {
+      const res = await fetch(`/api/admin/opticians/${id}/coordinates`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ latitude: lat, longitude: lon }),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setOptician((prev) => (prev ? { ...prev, latitude: data.latitude, longitude: data.longitude } : prev))
+        setEditingCoords(false)
+        alert('Coordonnées mises à jour avec succès')
+      } else {
+        alert('Erreur lors de la mise à jour des coordonnées')
+      }
+    } catch (error) {
+      console.error('Error updating coordinates:', error)
+      alert('Erreur lors de la mise à jour des coordonnées')
+    } finally {
+      setUpdatingCoords(false)
     }
   }
 
@@ -196,6 +305,80 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
                         <p className="text-gray-900">{optician.postalCode}</p>
                       </div>
                     )}
+                    <div className="pt-4 border-t border-gray-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm text-gray-600 font-medium">Coordonnées GPS</p>
+                        <button
+                          onClick={() => {
+                            setEditingCoords(!editingCoords)
+                            if (!editingCoords) {
+                              setLatitude(optician.latitude?.toString() || '')
+                              setLongitude(optician.longitude?.toString() || '')
+                            }
+                          }}
+                          className="text-sm text-blue-fantastic hover:underline"
+                        >
+                          {editingCoords ? 'Annuler' : 'Modifier'}
+                        </button>
+                      </div>
+                      {editingCoords ? (
+                        <div className="space-y-3">
+                          <input
+                            type="number"
+                            step="any"
+                            placeholder="Latitude (ex: 33.5900889)"
+                            value={latitude}
+                            onChange={(e) => setLatitude(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-fantastic"
+                          />
+                          <input
+                            type="number"
+                            step="any"
+                            placeholder="Longitude (ex: -7.5897222)"
+                            value={longitude}
+                            onChange={(e) => setLongitude(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-fantastic"
+                          />
+                          <Button
+                            onClick={handleUpdateCoordinates}
+                            disabled={updatingCoords}
+                            className="w-full bg-green-600 hover:bg-green-700"
+                          >
+                            {updatingCoords ? 'Mise à jour...' : 'Enregistrer'}
+                          </Button>
+                          <p className="text-xs text-gray-500">
+                            💡 Obtenez les coordonnées sur{' '}
+                            <a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer" className="text-blue-fantastic hover:underline">
+                              Google Maps
+                            </a>
+                            {' '}(clic droit → coordonnées) ou{' '}
+                            <a href="https://plus.codes/" target="_blank" rel="noopener noreferrer" className="text-blue-fantastic hover:underline">
+                              Plus Codes
+                            </a>
+                          </p>
+                        </div>
+                      ) : (
+                        <div>
+                          {optician.latitude && optician.longitude ? (
+                            <div className="space-y-1">
+                              <p className="text-gray-900 font-mono text-sm">
+                                📍 {optician.latitude.toFixed(7)}, {optician.longitude.toFixed(7)}
+                              </p>
+                              <a
+                                href={`https://www.google.com/maps?q=${optician.latitude},${optician.longitude}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-blue-fantastic hover:underline inline-block"
+                              >
+                                Voir sur la carte →
+                              </a>
+                            </div>
+                          ) : (
+                            <p className="text-red-600 text-sm">⚠️ Aucune coordonnée GPS</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -219,6 +402,23 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
                   </Button>
                 </div>
               )}
+
+              {/* Admin Actions */}
+              <div className="flex gap-4 pt-6 border-t border-gray-200 mt-6">
+                <Button
+                  onClick={() => setShowPasswordModal(true)}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  {t.changePassword || 'Changer le mot de passe'}
+                </Button>
+                <Button
+                  onClick={() => setShowDeleteModal(true)}
+                  variant="outline"
+                  className="flex-1 bg-red-50 text-red-600 border-red-300 hover:bg-red-100"
+                >
+                  {t.deleteAccount || 'Supprimer le compte'}
+                </Button>
+              </div>
             </div>
 
             {/* Loyalty Points Management */}
@@ -390,6 +590,104 @@ export default function AdminOpticianDetailsPage({ params }: { params: Promise<{
                 disabled={!pointsToModify || pointsToModify <= 0}
               >
                 {t.updatePoints}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              {t.changePassword || 'Changer le mot de passe'}
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Définir un nouveau mot de passe pour {optician?.businessName}
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t.newPassword || 'Nouveau mot de passe'}
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Min. 6 caractères"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t.confirmPassword || 'Confirmer le mot de passe'}
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Confirmez le mot de passe"
+                />
+              </div>
+              <div className="flex gap-4 mt-6">
+                <Button
+                  onClick={() => {
+                    setShowPasswordModal(false)
+                    setNewPassword('')
+                    setConfirmPassword('')
+                  }}
+                  variant="outline"
+                  className="flex-1"
+                  disabled={changingPassword}
+                >
+                  {t.cancel}
+                </Button>
+                <Button
+                  onClick={handleChangePassword}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  disabled={changingPassword || !newPassword || !confirmPassword}
+                >
+                  {changingPassword ? 'Changement...' : t.save || 'Enregistrer'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold text-red-600 mb-4">
+              {t.confirmDelete || 'Confirmer la suppression'}
+            </h3>
+            <p className="text-gray-700 mb-2">
+              Êtes-vous sûr de vouloir supprimer le compte de:
+            </p>
+            <p className="text-lg font-bold text-gray-900 mb-4">
+              {optician?.businessName}
+            </p>
+            <p className="text-sm text-red-600 mb-6">
+              ⚠️ Cette action est irréversible. Toutes les commandes et données associées seront perdues.
+            </p>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => setShowDeleteModal(false)}
+                variant="outline"
+                className="flex-1"
+                disabled={deleting}
+              >
+                {t.cancel}
+              </Button>
+              <Button
+                onClick={handleDeleteOptician}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                disabled={deleting}
+              >
+                {deleting ? 'Suppression...' : t.deleteAccount || 'Supprimer'}
               </Button>
             </div>
           </div>

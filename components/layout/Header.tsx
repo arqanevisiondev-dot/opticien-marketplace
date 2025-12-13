@@ -18,7 +18,7 @@ export default function Header() {
 
   const navigation = [
     { name: t.home, href: "/" },
-    { name: t.categories || "Catégories", href: "/categories" },
+    { name: t.allProducts || "Tous les produits", href: "/categories" },
     { name: t.catalog, href: "/catalogue" },
     { name: t.contact, href: "/contact" },
   ];
@@ -109,7 +109,7 @@ export default function Header() {
                 {session.user?.role === "OPTICIAN" && (
                   <Link href="/profile">
                     <Button variant="secondary" size="sm">
-                      Mon Profil
+                      {t.myProfile}
                     </Button>
                   </Link>
                 )}
@@ -117,12 +117,12 @@ export default function Header() {
                   <>
                     <Link href="/admin">
                       <Button variant="secondary" size="sm">
-                        Admin
+                        {t.admin}
                       </Button>
                     </Link>
                     <Link href="/admin/orders/confirm">
                       <Button variant="secondary" size="sm">
-                        Commandes
+                        {t.orders}
                       </Button>
                     </Link>
                   </>

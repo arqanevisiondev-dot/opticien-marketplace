@@ -14,7 +14,6 @@ interface Product {
   description: string | null;
   price: number;
   images: string[] | string;
-  inStock: boolean;
 }
 
 type CreationMode = 'select' | 'manual' | null;
@@ -36,7 +35,6 @@ export default function NewLoyaltyProductPage() {
     description: '',
     imageUrl: '',
     pointsCost: '',
-    inStock: true,
     isActive: true,
   });
   
@@ -303,34 +301,6 @@ export default function NewLoyaltyProductPage() {
                     placeholder="100"
                   />
                 </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Disponibilité
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, inStock: !formData.inStock })}
-                    className={`w-full flex items-center justify-center gap-3 px-4 py-3 border-2 rounded-lg transition-all ${
-                      formData.inStock
-                        ? 'bg-green-50 border-green-500 text-green-700 hover:bg-green-100'
-                        : 'bg-red-50 border-red-500 text-red-700 hover:bg-red-100'
-                    }`}
-                  >
-                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                      formData.inStock ? 'bg-green-500' : 'bg-red-500'
-                    }`}>
-                      {formData.inStock ? (
-                        <Check className="w-7 h-7 text-white" strokeWidth={3} />
-                      ) : (
-                        <X className="w-7 h-7 text-white" strokeWidth={3} />
-                      )}
-                    </div>
-                    <span className="text-lg font-bold">
-                      {formData.inStock ? 'En stock' : 'Rupture de stock'}
-                    </span>
-                  </button>
-                </div>
               </div>
 
               <div>
@@ -464,13 +434,6 @@ export default function NewLoyaltyProductPage() {
                         <p className="text-sm text-gray-600 mt-1">
                           Réf: {selectedProduct.reference}
                         </p>
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                          selectedProduct.inStock
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {selectedProduct.inStock ? 'En stock' : 'Rupture'}
-                        </span>
                       </div>
                       <button
                         onClick={() => setSelectedProduct(null)}
@@ -539,13 +502,6 @@ export default function NewLoyaltyProductPage() {
                         <div className="flex-1">
                           <h3 className="font-bold text-[#2C3B4D]">{product.name}</h3>
                           <p className="text-sm text-gray-600">{product.reference}</p>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                            product.inStock
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}>
-                            {product.inStock ? 'En stock' : 'Rupture'}
-                          </span>
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-bold text-[#f56a24]">

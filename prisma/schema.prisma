@@ -11,6 +11,8 @@ model User {
   id             String          @id @default(cuid())
   email          String          @unique
   password       String
+  resetToken     String?
+  resetTokenExpiry DateTime?
   role           UserRole        @default(OPTICIAN)
   businessName   String?
   phone          String?

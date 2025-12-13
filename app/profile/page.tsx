@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useCart } from '@/contexts/CartContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Product {
   id: string;
@@ -30,6 +31,7 @@ interface Product {
 }
 
 export default function ProfilePage() {
+  const { t } = useLanguage();
   const { data: session, status } = useSession();
   const router = useRouter();
   const { items, regularItems, loyaltyItems, increase, decrease, remove, clear, clearLoyalty, getTotalPoints } = useCart();
@@ -267,10 +269,10 @@ export default function ProfilePage() {
             </div>
             <div>
               <h1 className="text-5xl font-bold text-[#2C3B4D] tracking-tight">
-                Mon Profil
+                {t.myProfile}
               </h1>
               <p className="text-gray-600 mt-1 text-lg">
-                Gérez votre panier et suivez vos commandes
+                {t.profileSubtitle}
               </p>
             </div>
           </div>
@@ -282,26 +284,26 @@ export default function ProfilePage() {
             <div className="bg-white rounded-xl shadow-xl p-6 mb-6 border-t-4 border-[#f56a24]">
               <h2 className="text-xl font-bold text-[#2C3B4D] mb-4 flex items-center gap-2">
                 <User className="h-5 w-5 text-[#f56a24]" />
-                Informations
+                {t.basicInfo}
               </h2>
               <div className="space-y-4">
                 <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Email</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{t.email}</p>
                   <p className="font-semibold text-[#2C3B4D]">{session?.user?.email}</p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Statut</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{t.status}</p>
                   <p className="font-medium">
                     {session?.user?.opticianStatus === 'APPROVED' && (
                       <span className="text-green-600 flex items-center gap-1">
                         <CheckCircle className="h-4 w-4" />
-                        Approuvé
+                        {t.approved}
                       </span>
                     )}
                     {session?.user?.opticianStatus === 'PENDING' && (
                       <span className="text-orange-600 flex items-center gap-1">
                         <AlertCircle className="h-4 w-4" />
-                        En attente
+                        {t.pending}
                       </span>
                     )}
                   </p>
@@ -317,18 +319,18 @@ export default function ProfilePage() {
               <div className="relative z-10">
                 <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
                   <Package className="h-5 w-5" />
-                  Points de Fidélité
+                  {t.loyaltyPoints}
                 </h3>
                 <div className="flex items-baseline gap-2 mb-3">
                   <span className="text-5xl font-extrabold drop-shadow-lg">{loyaltyPoints}</span>
                   <span className="text-sm opacity-90 font-medium">points</span>
                 </div>
                 <p className="text-sm opacity-95 mb-4 leading-relaxed">
-                  Gagnez des points à chaque achat et échangez-les contre des produits exclusifs!
+                  {t.loyaltyDescription}
                 </p>
                 <Link href="/loyalty-catalog" className="inline-flex items-center gap-2 bg-white text-[#f56a24] px-5 py-2.5 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg">
                   <Package className="h-4 w-4" />
-                  Voir le Catalogue
+                  {t.browseCatalog}
                 </Link>
               </div>
             </div>
@@ -344,7 +346,7 @@ export default function ProfilePage() {
                   {regularItems.length > 0 && (
                     <>
                       <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                        <span className="text-gray-600 text-sm">Produits réguliers</span>
+                        <span className="text-gray-600 text-sm">{t.regularProducts}</span>
                         <span className="font-bold bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">{regularItems.length}</span>
                       </div>
                       <div className="flex justify-between text-lg font-bold pt-2 border-t">
@@ -377,7 +379,7 @@ export default function ProfilePage() {
               <div className="bg-gradient-to-r from-[#2C3B4D] to-[#1B2632] px-6 py-5">
                 <h2 className="text-2xl font-bold text-white flex items-center gap-3">
                   <ShoppingCart className="h-6 w-6" />
-                  Mon Panier ({items.length})
+                  {t.myCart} ({items.length})
                 </h2>
               </div>
 
@@ -401,10 +403,10 @@ export default function ProfilePage() {
               {items.length === 0 ? (
                 <div className="text-center py-12">
                   <Package className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                  <p className="text-gray-600 text-lg mb-4">Votre panier est vide</p>
+                  <p className="text-gray-600 text-lg mb-4">{t.emptyCart}</p>
                   <Link href="/catalogue">
                     <Button className="bg-[#f56a24] hover:bg-[#d45a1e]">
-                      Parcourir le catalogue
+                      {t.browseCatalog}
                     </Button>
                   </Link>
                 </div>
@@ -415,7 +417,7 @@ export default function ProfilePage() {
                     <div>
                       <h3 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
                         <ShoppingCart className="h-5 w-5" />
-                        Produits Réguliers ({regularItems.length})
+                        {t.regularProducts} ({regularItems.length})
                       </h3>
                       <div className="space-y-4">
                         {regularItems.map((item) => {
@@ -490,7 +492,7 @@ export default function ProfilePage() {
                           disabled={submitting}
                           className="flex-1 bg-[#f56a24] hover:bg-[#d45a1e] text-white py-4 text-lg font-semibold"
                         >
-                          {submitting ? 'Envoi en cours...' : `Confirmer la commande (${calculateTotal().toFixed(2)} DH)`}
+                          {submitting ? t.submitting : (t.confirmOrder ? t.confirmOrder.replace('{amount}', `${calculateTotal().toFixed(2)} DH`) : `Confirmer la commande (${calculateTotal().toFixed(2)} DH)`)}
                         </Button>
                       </div>
                     </div>
@@ -565,7 +567,7 @@ export default function ProfilePage() {
                           disabled={submittingLoyalty || loyaltyPoints < getTotalPoints()}
                           className="flex-1 bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-semibold disabled:opacity-50"
                         >
-                          {submittingLoyalty ? 'Envoi en cours...' : `Commander (${getTotalPoints()} points)`}
+                          {submittingLoyalty ? t.submitting : (t.placeOrderWithPoints ? t.placeOrderWithPoints.replace('{points}', `${getTotalPoints()}`) : `Commander (${getTotalPoints()} points)`) }
                         </Button>
                       </div>
 

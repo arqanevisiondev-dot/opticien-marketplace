@@ -152,10 +152,12 @@ export default function CartBar() {
         <Button
           variant="outline"
           size="sm"
-          onClick={clear}
+          onClick={() => {
+            router.push('/catalogue');
+          }}
           disabled={!items.length || loading}
         >
-          {t.clearCart}
+          {t.validateCart}
         </Button>
         <Button 
           variant="primary" 

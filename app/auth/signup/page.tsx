@@ -1,12 +1,21 @@
 'use client';
 
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Eye, EyeOff } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+// Dynamically import LocationPicker (client-side only)
+const LocationPicker = dynamic(() => import('@/components/map/LocationPicker'), {
+  ssr: false,
+  loading: () => <div className="w-full h-[400px] bg-gray-100 rounded-lg animate-pulse" />,
+});
 
 export default function SignUpPage() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,6 +32,8 @@ export default function SignUpPage() {
     address: '',
     city: '',
     postalCode: '',
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,7 +42,7 @@ export default function SignUpPage() {
     setError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+      setError(t.passwordsDoNotMatch);
       setLoading(false);
       return;
     }
@@ -68,12 +79,12 @@ export default function SignUpPage() {
       <div className="max-w-2xl w-full bg-white p-8 shadow-lg">
         <div>
           <h2 className="text-center text-3xl font-bold text-abyssal">
-            Créer un compte opticien
+            {t.signupTitle}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Ou{' '}
             <Link href="/auth/signin" className="font-medium text-blue-fantastic hover:text-burning-flame">
-              connectez-vous à votre compte existant
+              {t.signInLink}
             </Link>
           </p>
         </div>
@@ -88,7 +99,7 @@ export default function SignUpPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                  Prénom *
+                  {t.firstName} *
                 </label>
                 <input
                   id="firstName"
@@ -102,7 +113,7 @@ export default function SignUpPage() {
               </div>
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                  Nom *
+                  {t.lastName} *
                 </label>
                 <input
                   id="lastName"
@@ -118,7 +129,7 @@ export default function SignUpPage() {
 
             <div>
               <label htmlFor="businessName" className="block text-sm font-medium text-gray-700">
-                Nom de l&apos;entreprise *
+                {t.businessName} *
               </label>
               <input
                 id="businessName"
@@ -133,7 +144,7 @@ export default function SignUpPage() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email professionnel *
+                {t.professionalEmail} *
               </label>
               <input
                 id="email"
@@ -149,9 +160,9 @@ export default function SignUpPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                  Téléphone *
-                </label>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                    {t.phone} *
+                  </label>
                 <input
                   id="phone"
                   name="phone"
@@ -164,7 +175,7 @@ export default function SignUpPage() {
               </div>
               <div>
                 <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700">
-                  WhatsApp (optionnel)
+                  {t.whatsapp} {t.optional}
                 </label>
                 <input
                   id="whatsapp"
@@ -179,7 +190,7 @@ export default function SignUpPage() {
 
             <div>
               <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                Adresse
+                {t.address}
               </label>
               <input
                 id="address"
@@ -194,7 +205,7 @@ export default function SignUpPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-                  Ville
+                  {t.city}
                 </label>
                 <input
                   id="city"
@@ -207,7 +218,7 @@ export default function SignUpPage() {
               </div>
               <div>
                 <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700">
-                  Code postal
+                  {t.postalCode}
                 </label>
                 <input
                   id="postalCode"
@@ -222,7 +233,7 @@ export default function SignUpPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Mot de passe *
+                {t.password} *
               </label>
               <div className="relative mt-1">
                 <input
@@ -251,7 +262,7 @@ export default function SignUpPage() {
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirmer le mot de passe *
+                {t.confirmPassword} *
               </label>
               <input
                 id="confirmPassword"
@@ -275,9 +286,9 @@ export default function SignUpPage() {
               className="h-4 w-4 text-blue-fantastic focus:ring-blue-fantastic border-gray-300"
             />
             <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
-              J&apos;accepte les{' '}
+              {t.acceptTermsPrefix} {' '}
               <Link href="/legal/terms" className="text-blue-fantastic hover:text-burning-flame">
-                conditions générales
+                {t.termsConditions}
               </Link>
             </label>
           </div>
@@ -290,12 +301,12 @@ export default function SignUpPage() {
               disabled={loading}
               className="w-full"
             >
-              {loading ? 'Inscription...' : 'Créer mon compte'}
+              {loading ? t.signupLoading : t.createAccountButton}
             </Button>
           </div>
 
           <p className="text-xs text-gray-500 text-center">
-            Votre compte sera vérifié par notre équipe avant activation. Vous recevrez un email de confirmation.
+            {t.pendingApprovalMessage}
           </p>
         </form>
       </div>

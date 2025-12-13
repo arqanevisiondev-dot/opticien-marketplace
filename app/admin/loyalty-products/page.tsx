@@ -14,13 +14,9 @@ interface LoyaltyProduct {
   description: string | null;
   imageUrl: string | null;
   pointsCost: number;
-  inStock: boolean;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  product?: {
-    inStock: boolean;
-  } | null;
 }
 
 export default function LoyaltyProductsPage() {
@@ -169,9 +165,6 @@ export default function LoyaltyProductsPage() {
                     Coût (Points)
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
-                    Disponibilité
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                     Statut
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
@@ -182,7 +175,7 @@ export default function LoyaltyProductsPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {products.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center">
+                    <td colSpan={5} className="px-6 py-12 text-center">
                       <Package className="h-16 w-16 mx-auto text-gray-400 mb-4" />
                       <p className="text-gray-600 text-lg mb-4">Aucun produit de fidélité</p>
                       <Link href="/admin/loyalty-products/new">
@@ -227,19 +220,6 @@ export default function LoyaltyProductsPage() {
                           {product.pointsCost}
                         </div>
                         <div className="text-xs text-gray-500">points</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {(product.productId && product.product ? product.product.inStock : product.inStock) ? (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                            <CheckCircle className="h-3 w-3" />
-                            En stock
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
-                            <XCircle className="h-3 w-3" />
-                            Rupture
-                          </span>
-                        )}
                         {product.productId && (
                           <div className="text-xs text-gray-500 mt-1">
                             (Produit lié)

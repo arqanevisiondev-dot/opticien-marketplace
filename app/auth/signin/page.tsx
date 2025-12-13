@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/Button';
 import { Eye, EyeOff } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function SignInPage() {
+  const { t } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -44,13 +46,11 @@ export default function SignInPage() {
     <div className="min-h-screen flex items-center justify-center bg-palladian py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full bg-white p-8 shadow-lg">
         <div>
-          <h2 className="text-center text-3xl font-bold text-abyssal">
-            Connexion
-          </h2>
+          <h2 className="text-center text-3xl font-bold text-abyssal">{t.signInTitle}</h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Ou{' '}
+            {t.signInSubtitle.replace(t.createAccountText, '').trim()}{' '}
             <Link href="/auth/signup" className="font-medium text-blue-fantastic hover:text-burning-flame">
-              créez un nouveau compte
+              {t.createAccountText}
             </Link>
           </p>
         </div>
@@ -62,9 +62,7 @@ export default function SignInPage() {
           )}
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">{t.emailAddressLabel}</label>
               <input
                 id="email"
                 name="email"
@@ -77,9 +75,7 @@ export default function SignInPage() {
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Mot de passe
-              </label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">{t.password}</label>
               <div className="relative mt-1">
                 <input
                   id="password"
@@ -120,9 +116,7 @@ export default function SignInPage() {
             </div>
 
             <div className="text-sm">
-              <Link href="/auth/forgot-password" className="font-medium text-blue-fantastic hover:text-burning-flame">
-                Mot de passe oublié ?
-              </Link>
+              <Link href="/auth/forgot-password" className="font-medium text-blue-fantastic hover:text-burning-flame">{t.forgotPasswordLink}</Link>
             </div>
           </div>
 
@@ -134,7 +128,7 @@ export default function SignInPage() {
               disabled={loading}
               className="w-full"
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {loading ? t.signInLoading ?? 'Connexion...' : t.signInButton}
             </Button>
           </div>
         </form>
