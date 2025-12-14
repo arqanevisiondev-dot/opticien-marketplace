@@ -18,6 +18,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface Slide {
   id: string;
@@ -38,6 +39,7 @@ interface Slide {
 }
 
 export default function SliderManagement() {
+  const { t } = useLanguage()
   const { data: session, status } = useSession();
   const router = useRouter();
   const [slides, setSlides] = useState<Slide[]>([]);
@@ -247,15 +249,15 @@ export default function SliderManagement() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">Gestion du Slider</h1>
-            <p className="text-gray-600 mt-2">Gérer les diapositives de la page d'accueil</p>
+            <h1 className="text-4xl font-bold text-gray-900">{t.sliderPageTitle}</h1>
+            <p className="text-gray-600 mt-2">{t.sliderPageSubtitle}</p>
           </div>
           <Button
             onClick={() => setShowForm(true)}
             className="flex items-center space-x-2"
           >
             <Plus className="w-5 h-5" />
-            <span>Nouvelle Diapositive</span>
+            <span>{t.sliderNewButton}</span>
           </Button>
         </div>
 
@@ -265,7 +267,7 @@ export default function SliderManagement() {
             <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {editingSlide ? 'Modifier la Diapositive' : 'Nouvelle Diapositive'}
+                  {editingSlide ? t.sliderEditTitle : t.sliderNewTitle}
                 </h2>
                 <button onClick={resetForm} className="text-gray-500 hover:text-gray-700">
                   <X className="w-6 h-6" />
@@ -276,7 +278,7 @@ export default function SliderManagement() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Titre *
+                      {t.sliderLabelTitle + ' *'}
                     </label>
                     <input
                       type="text"
@@ -289,24 +291,24 @@ export default function SliderManagement() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Type *
+                      {t.sliderLabelType + ' *'}
                     </label>
                     <select
                       value={formData.type}
                       onChange={(e) => setFormData({ ...formData, type: e.target.value as Slide['type'] })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burning-flame focus:border-transparent"
                     >
-                      <option value="NEWS">Actualité</option>
-                      <option value="PRODUCT">Produit</option>
-                      <option value="PROMOTION">Promotion</option>
-                      <option value="ANNOUNCEMENT">Annonce</option>
+                      <option value="NEWS">{t.sliderTypeNews}</option>
+                      <option value="PRODUCT">{t.sliderTypeProduct}</option>
+                      <option value="PROMOTION">{t.sliderTypePromotion}</option>
+                      <option value="ANNOUNCEMENT">{t.sliderTypeAnnouncement}</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sous-titre
+                    {t.sliderLabelSubtitle}
                   </label>
                   <input
                     type="text"
@@ -318,7 +320,7 @@ export default function SliderManagement() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description
+                    {t.sliderLabelDescription}
                   </label>
                   <textarea
                     value={formData.description}
@@ -330,7 +332,7 @@ export default function SliderManagement() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Image *
+                    {t.sliderLabelImage + ' *'}
                   </label>
                   
                   {/* Image Preview */}
@@ -381,27 +383,27 @@ export default function SliderManagement() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      URL du lien
+                      {t.sliderLabelLinkUrl}
                     </label>
                     <input
                       type="text"
                       value={formData.linkUrl}
                       onChange={(e) => setFormData({ ...formData, linkUrl: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burning-flame focus:border-transparent"
-                      placeholder="/catalogue ou https://example.com"
+                      placeholder={t.sliderPlaceholderLinkUrl}
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Texte du bouton
+                      {t.sliderLabelLinkText}
                     </label>
                     <input
                       type="text"
                       value={formData.linkText}
                       onChange={(e) => setFormData({ ...formData, linkText: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burning-flame focus:border-transparent"
-                      placeholder="En savoir plus"
+                      placeholder={t.sliderPlaceholderLinkText}
                     />
                   </div>
                 </div>
@@ -409,7 +411,7 @@ export default function SliderManagement() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Couleur de fond
+                      {t.sliderLabelBackgroundColor}
                     </label>
                     <input
                       type="color"
@@ -421,7 +423,7 @@ export default function SliderManagement() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Couleur du texte
+                      {t.sliderLabelTextColor}
                     </label>
                     <input
                       type="color"
@@ -433,7 +435,7 @@ export default function SliderManagement() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Couleur du bouton
+                      {t.sliderLabelButtonColor}
                     </label>
                     <input
                       type="color"
@@ -447,7 +449,7 @@ export default function SliderManagement() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Ordre
+                      {t.sliderLabelOrder}
                     </label>
                     <input
                       type="number"
@@ -459,7 +461,7 @@ export default function SliderManagement() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Date de début
+                      {t.sliderLabelStartDate}
                     </label>
                     <input
                       type="date"
@@ -471,7 +473,7 @@ export default function SliderManagement() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Date de fin
+                      {t.sliderLabelEndDate}
                     </label>
                     <input
                       type="date"
@@ -491,17 +493,17 @@ export default function SliderManagement() {
                     className="w-5 h-5 text-burning-flame rounded focus:ring-burning-flame"
                   />
                   <label htmlFor="isActive" className="ml-2 text-sm font-medium text-gray-700">
-                    Activer la diapositive
+                    {t.sliderActivateSlide}
                   </label>
                 </div>
 
                 <div className="flex justify-end space-x-4 pt-4 border-t">
                   <Button type="button" variant="secondary" onClick={resetForm}>
-                    Annuler
+                    {t.sliderCancel}
                   </Button>
                   <Button type="submit" className="flex items-center space-x-2">
                     <Save className="w-5 h-5" />
-                    <span>{editingSlide ? 'Mettre à jour' : 'Créer'}</span>
+                    <span>{editingSlide ? t.sliderUpdate : t.sliderCreate}</span>
                   </Button>
                 </div>
               </form>
@@ -513,12 +515,18 @@ export default function SliderManagement() {
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           {slides.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">Aucune diapositive trouvée</p>
+              <p className="text-gray-500">{t.sliderNoSlidesFound}</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
               {slides.map((slide) => {
                 const TypeIcon = typeIcons[slide.type];
+                const typeLabels: Record<Slide['type'], string> = {
+                  NEWS: t.sliderTypeNews,
+                  PRODUCT: t.sliderTypeProduct,
+                  PROMOTION: t.sliderTypePromotion,
+                  ANNOUNCEMENT: t.sliderTypeAnnouncement,
+                }
                 return (
                   <div
                     key={slide.id}
@@ -537,16 +545,16 @@ export default function SliderManagement() {
                         <h3 className="font-semibold text-gray-900">{slide.title}</h3>
                         <div className="flex items-center space-x-1 bg-gray-100 px-2 py-1 rounded text-xs">
                           <TypeIcon className="w-3 h-3" />
-                          <span>{slide.type}</span>
+                          <span>{typeLabels[slide.type]}</span>
                         </div>
                       </div>
                       {slide.subtitle && (
                         <p className="text-sm text-gray-600">{slide.subtitle}</p>
                       )}
                       <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                        <span>Ordre: {slide.order}</span>
-                        {slide.startDate && <span>Début: {new Date(slide.startDate).toLocaleDateString()}</span>}
-                        {slide.endDate && <span>Fin: {new Date(slide.endDate).toLocaleDateString()}</span>}
+                        <span>{t.sliderPrefixOrder}{slide.order}</span>
+                        {slide.startDate && <span>{t.sliderStart} {new Date(slide.startDate).toLocaleDateString()}</span>}
+                        {slide.endDate && <span>{t.sliderEnd} {new Date(slide.endDate).toLocaleDateString()}</span>}
                       </div>
                     </div>
 

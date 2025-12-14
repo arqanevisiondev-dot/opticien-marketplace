@@ -179,32 +179,8 @@ export async function POST(request: NextRequest) {
           emailHtml
         ).catch(err => console.error('Email send failed:', err));
       }
-
-      // Also generate WhatsApp link for manual notification if needed
-      if (admin?.whatsapp) {
-        const message = `🆕 *Nouvelle Inscription Opticien*\n\n` +
-          `👤 Nom: ${validatedData.firstName} ${validatedData.lastName}\n` +
-          `🏢 Entreprise: ${validatedData.businessName}\n` +
-          `📧 Email: ${validatedData.email}\n` +
-          `📱 Téléphone: ${validatedData.phone}\n` +
-          `📍 Ville: ${validatedData.city || 'N/A'}\n` +
-          `📮 Code Postal: ${validatedData.postalCode || 'N/A'}\n\n` +
-          `✅ Veuillez approuver ce compte dans le dashboard admin.`;
-
-        const encodedMessage = encodeURIComponent(message);
-        const whatsappPhone = admin.whatsapp.replace(/\D/g, '');
-        const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodedMessage}`;
-        
-        // Return with WhatsApp URL (optional manual notification)
-        return NextResponse.json(
-          { 
-            message: 'Inscription réussie. Votre compte sera vérifié par notre équipe.',
-            userId: user.id,
-            whatsappNotificationUrl: whatsappUrl
-          },
-          { status: 201 }
-        );
-      }
+      // Previously we returned a WhatsApp URL to notify the admin manually.
+      // The admin is notified by email now (we only have a single admin), so continue to final response.
     } catch (notificationError) {
       console.error('Failed to send notification:', notificationError);
     }

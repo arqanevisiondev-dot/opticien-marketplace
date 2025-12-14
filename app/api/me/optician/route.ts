@@ -11,10 +11,10 @@ export async function GET() {
 
     const optician = await prisma.optician.findUnique({
       where: { userId: session.user.id },
-      select: { businessName: true },
+      select: { businessName: true, firstOrderUsed: true },
     });
 
-    return NextResponse.json({ businessName: optician?.businessName ?? null });
+    return NextResponse.json({ businessName: optician?.businessName ?? null, firstOrderUsed: optician?.firstOrderUsed ?? false });
   } catch (error) {
     return NextResponse.json({ businessName: null }, { status: 200 });
   }

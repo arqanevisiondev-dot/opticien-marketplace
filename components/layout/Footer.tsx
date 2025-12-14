@@ -1,11 +1,28 @@
 "use client"
 
 import Link from "next/link"
+import { useState, useEffect } from "react"
 import { Mail, Phone, MapPin } from "lucide-react"
 import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function Footer() {
   const { t } = useLanguage()
+  const [siteSettings, setSiteSettings] = useState<Record<string, string> | null>(null)
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try {
+        const res = await fetch('/api/settings')
+        if (!res.ok) return
+        const data = await res.json()
+        if (mounted) setSiteSettings(data)
+      } catch (e) {
+        // ignore
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
   return (
     <footer className="bg-gradient-to-r from-[#2C3B4D] to-[#1B2632] text-white mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -61,15 +78,15 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-gray-300">
               <li className="flex items-center space-x-2 hover:text-[#f56a24] transition-colors">
                 <Mail className="h-4 w-4" />
-                <span>contact@Arqane Vision.com</span>
+                <span>{siteSettings?.contact_email}</span>
               </li>
               <li className="flex items-center space-x-2 hover:text-[#f56a24] transition-colors">
                 <Phone className="h-4 w-4" />
-                <span>+33 1 23 45 67 89</span>
+                <span>{siteSettings?.contact_phone}</span>
               </li>
               <li className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4" />
-                <span>Paris, France</span>
+                <span>{siteSettings?.contact_address}</span>
               </li>
             </ul>
           </div>

@@ -188,10 +188,10 @@ function CategoriesContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4">
-              {t.allProducts || "Tous les produits"}
+              {t.allProducts}
             </h1>
             <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto">
-              {t.allProductsDescription || "Découvrez notre gamme complète de lunettes et accessoires"}
+              {t.allProductsDescription}
             </p>
           </div>
         </div>

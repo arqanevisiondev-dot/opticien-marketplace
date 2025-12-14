@@ -16,6 +16,7 @@ export default function CartBar() {
   const businessName = (session?.user as unknown as { opticianBusinessName?: string })?.opticianBusinessName;
   const [fetchedBusinessName, setFetchedBusinessName] = useState<string | undefined>(undefined);
   const [open, setOpen] = useState(false);
+  const [manualClose, setManualClose] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -23,14 +24,17 @@ export default function CartBar() {
   const hasRegularItems = regularItems.length > 0;
   const hasLoyaltyItems = loyaltyItems.length > 0;
 
-  // Auto-open when items are added, close when empty
+  // Auto-open when items are added, close when empty.
+  // Respect `manualClose` so user can explicitly close the cart
+  // (for example after clicking "Valider") without it immediately reopening.
   useEffect(() => {
     if (items.length > 0) {
-      setOpen(true);
+      if (!manualClose) setOpen(true);
     } else {
       setOpen(false);
+      setManualClose(false);
     }
-  }, [items.length]);
+  }, [items.length, manualClose]);
 
   useEffect(() => {
     let active = true;
@@ -133,7 +137,17 @@ export default function CartBar() {
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
       <div className="bg-white shadow-xl border border-gray-200 rounded-full px-4 py-2 flex items-center gap-3">
-        <button className="text-sm underline" onClick={() => setOpen((v) => !v)}>
+        <button
+          className="text-sm underline"
+          onClick={() => {
+            setOpen((v) => {
+              const next = !v;
+              if (!next) setManualClose(true);
+              if (next) setManualClose(false);
+              return next;
+            });
+          }}
+        >
           {open ? t.closeCart : t.cartDetails}
         </button>
         <div className="text-sm">
@@ -153,7 +167,14 @@ export default function CartBar() {
           variant="outline"
           size="sm"
           onClick={() => {
-            router.push('/catalogue');
+            // Minimize cart and navigate back if possible, otherwise go to catalogue
+            setOpen(false);
+            setManualClose(true);
+            if (typeof window !== 'undefined' && window.history.length > 1) {
+              router.back();
+            } else {
+              router.push('/catalogue');
+            }
           }}
           disabled={!items.length || loading}
         >

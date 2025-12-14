@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
@@ -15,6 +15,7 @@ export default function ContactPage() {
     subject: '',
     message: '',
   });
+  const [siteSettings, setSiteSettings] = useState<Record<string, string> | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -46,6 +47,21 @@ export default function ContactPage() {
     }
   };
 
+  useEffect(() => {
+    let mounted = true;
+    ;(async () => {
+      try {
+        const res = await fetch('/api/settings');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (mounted) setSiteSettings(data);
+      } catch (e) {
+        // ignore
+      }
+    })();
+    return () => { mounted = false };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -68,7 +84,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-abyssal mb-2">{t.email}</h3>
-                  <p className="text-gray-600">arqanevision@gmail.com</p>
+                  <p className="text-gray-600">{siteSettings?.contact_email}</p>
                 </div>
               </div>
             </div>
@@ -80,7 +96,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-abyssal mb-2">{t.phone}</h3>
-                  <p className="text-gray-600">+212 657 435 204</p>
+                  <p className="text-gray-600">{siteSettings?.contact_phone}</p>
                 </div>
               </div>
             </div>
@@ -93,9 +109,9 @@ export default function ContactPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-abyssal mb-2">{t.address}</h3>
                   <p className="text-gray-600">
-                    123 Rue Principale<br />
-                    Casablanca 20000<br />
-                    Maroc
+                    {siteSettings?.contact_address && (
+                      <span dangerouslySetInnerHTML={{ __html: siteSettings.contact_address.replace(/\n/g, '<br/>') }} />
+                    )}
                   </p>
                 </div>
               </div>
@@ -110,7 +126,7 @@ export default function ContactPage() {
             </div>
 
             <a
-              href="https://wa.me/212657435204"
+              href={siteSettings?.contact_whatsapp ? `https://wa.me/${siteSettings.contact_whatsapp.replace(/\D/g, '')}` : 'https://wa.me/212657435204'}
               target="_blank"
               rel="noopener noreferrer"
               className="block bg-green-500 hover:bg-green-600 text-white p-6 rounded-lg shadow-md transition-colors"

@@ -42,7 +42,7 @@ type ApiProduct = Omit<Product, "images"> & {
 }
 
 export default function CataloguePage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const { t } = useLanguage()
   const { add, isInCart } = useCart()
   const [products, setProducts] = useState<Product[]>([])
@@ -58,8 +58,26 @@ export default function CataloguePage() {
   })
 
   const canSeePrices =
-    (session?.user?.role === "OPTICIAN" && session?.user?.opticianStatus === "APPROVED") ||
-    session?.user?.role === "ADMIN"
+    status === 'authenticated' && (
+      (session?.user?.role === "OPTICIAN" && session?.user?.opticianStatus === "APPROVED") ||
+      session?.user?.role === "ADMIN"
+    )
+
+  // debug: log session/status (temporary)
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.debug('Catalogue page session debug', { status, user: session?.user })
+  }, [status, session])
+
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(typeof window !== 'undefined' ? window.innerWidth < 768 : false)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  const effectiveCanSeePrices = !isMobile && canSeePrices
   const isOptician = session?.user?.role === "OPTICIAN"
 
   useEffect(() => {
@@ -367,7 +385,7 @@ export default function CataloguePage() {
                     </div>
 
                     <div className="border-t border-gray-200 pt-4">
-                      {isOptician && product.loyaltyPointsReward && product.loyaltyPointsReward > 0 && (
+                      {isOptician && effectiveCanSeePrices && product.loyaltyPointsReward && product.loyaltyPointsReward > 0 && (
                         <div className="mb-3 bg-gradient-to-r from-[#f56a24]/10 to-transparent px-2 py-1.5 rounded-lg">
                           <div className="flex items-center gap-1.5">
                             <svg className="h-4 w-4 text-[#f56a24]" fill="currentColor" viewBox="0 0 20 20">
@@ -380,7 +398,7 @@ export default function CataloguePage() {
                         </div>
                       )}
                       <div className="text-sm font-semibold mb-3">
-                        {canSeePrices ? (
+                        {effectiveCanSeePrices ? (
                           product.salePrice ? (
                             <div className="flex items-baseline gap-2">
                               <span className="text-xs text-gray-500 line-through">{product.price.toFixed(2)} DH</span>

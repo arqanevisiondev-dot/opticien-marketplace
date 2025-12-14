@@ -238,6 +238,9 @@ export const translations = {
       confirmOrder: 'Confirmer la commande',
       sendingOrder: 'Envoi en cours...',
     },
+
+    // Combined confirm + redeem label
+    confirmOrderAndRedeem: 'Confirmer la commande ({amount}) et échanger ({points})',
     
     // Profile
     profile: {
@@ -764,6 +767,9 @@ export const translations = {
       confirmOrder: 'Confirm order',
       sendingOrder: 'Sending...',
     },
+
+    // Combined confirm + redeem label
+    confirmOrderAndRedeem: 'Confirm order ({amount}) and redeem ({points})',
     
     // Profile
     profile: {
@@ -1268,6 +1274,9 @@ export const translations = {
       confirmOrder: 'تأكيد الطلب',
       sendingOrder: 'جارٍ الإرسال...',
     },
+
+    // Combined confirm + redeem label
+    confirmOrderAndRedeem: 'تأكيد الطلب ({amount}) واستبدال ({points})',
     
     // Profile
     profile: {

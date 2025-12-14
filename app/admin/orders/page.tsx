@@ -248,31 +248,31 @@ export default function AdminOrdersPage() {
 
   const loyaltySummaryCards = [
     {
-      label: "Échanges Totaux",
+      label: t.loyaltyExchangesTotal,
       value: loyaltySummary.totalRedemptions.toLocaleString(locale),
       icon: Gift,
       color: "bg-burning-flame",
     },
     {
-      label: "Articles Fidélité",
+      label: t.loyaltyItemsLabel,
       value: loyaltySummary.totalItems.toLocaleString(locale),
       icon: Package,
       color: "bg-blue-fantastic",
     },
     {
-      label: "En Attente",
+      label: t.loyaltyPendingLabel,
       value: loyaltySummary.pending.toLocaleString(locale),
       icon: Clock3,
       color: "bg-truffle-trouble",
     },
     {
-      label: "Approuvés",
+      label: t.loyaltyApprovedLabel,
       value: loyaltySummary.approved.toLocaleString(locale),
       icon: CheckCircle2,
       color: "bg-blue-fantastic",
     },
     {
-      label: "Points Totaux",
+      label: t.loyaltyTotalPointsLabel,
       value: loyaltySummary.totalPoints.toLocaleString(locale),
       icon: Coins,
       color: "bg-burning-flame",
@@ -287,12 +287,17 @@ export default function AdminOrdersPage() {
             <h1 className="text-3xl font-bold text-abyssal sm:text-4xl">{t.ordersPageTitle}</h1>
             <p className="mt-2 text-sm text-gray-600 sm:text-base">{t.ordersPageSubtitle}</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Button variant="outline" onClick={loadOrders} disabled={loading}>
-              <RotateCcw className="mr-2 h-4 w-4" />
-              {t.refresh}
-            </Button>
-          </div>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                variant="outline"
+                onClick={loadOrders}
+                disabled={loading}
+                className="flex items-center gap-2 whitespace-nowrap"
+              >
+                <RotateCcw className="h-4 w-4" />
+                {t.refresh}
+              </Button>
+            </div>
         </div>
 
         {error && (
@@ -325,9 +330,9 @@ export default function AdminOrdersPage() {
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
               <Package className="h-5 w-5" />
-              Commandes Régulières ({summary.totalOrders})
+              {t.regularOrdersLabel} ({summary.totalOrders})
             </div>
           </button>
           <button
@@ -338,9 +343,9 @@ export default function AdminOrdersPage() {
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
               <Gift className="h-5 w-5" />
-              Échanges Fidélité ({loyaltySummary.totalRedemptions})
+              {t.loyaltyTabLabel} ({loyaltySummary.totalRedemptions})
             </div>
           </button>
         </div>
@@ -416,9 +421,9 @@ export default function AdminOrdersPage() {
         <div className="mt-0 bg-white shadow-lg">
           <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
             <div>
-              <h2 className="text-lg font-semibold text-[#f56a24]">Historique des Échanges de Fidélité</h2>
+              <h2 className="text-lg font-semibold text-[#f56a24]">{t.loyaltyHistoryTitle}</h2>
               <p className="text-sm text-gray-500">
-                Total: {loyaltySummary.totalRedemptions.toLocaleString(locale)} échanges
+                {t.loyaltyExchangesTotal}: {loyaltySummary.totalRedemptions.toLocaleString(locale)}
               </p>
             </div>
           </div>
@@ -445,7 +450,7 @@ export default function AdminOrdersPage() {
                 ) : loyaltyRedemptions.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
-                      Aucun échange de fidélité
+                      {t.noLoyaltyRedemptions}
                     </td>
                   </tr>
                 ) : (

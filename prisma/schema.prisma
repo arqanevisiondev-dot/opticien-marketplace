@@ -46,6 +46,7 @@ model Optician {
   latitude     Float?
   longitude    Float?
   status       OpticianStatus @default(PENDING)
+  firstOrderUsed Boolean       @default(false)
   loyaltyPoints Int           @default(0)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt

@@ -43,6 +43,7 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState('');
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
   const [loyaltyPoints, setLoyaltyPoints] = useState(0);
+  const [firstOrderUsed, setFirstOrderUsed] = useState(false);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -52,7 +53,20 @@ export default function ProfilePage() {
     }
     fetchOrderHistory();
     fetchLoyaltyPoints();
+    fetchOpticianInfo();
   }, [session, status, router]);
+
+  const fetchOpticianInfo = async () => {
+    try {
+      const response = await fetch('/api/me/optician');
+      if (response.ok) {
+        const data = await response.json();
+        setFirstOrderUsed(Boolean(data.firstOrderUsed));
+      }
+    } catch (err) {
+      console.error('Error fetching optician info:', err);
+    }
+  };
 
   useEffect(() => {
     // Fetch products when regularItems change
@@ -139,8 +153,24 @@ export default function ProfilePage() {
     }, 0);
   };
 
+  const calculateTotalQuantity = () => {
+    return regularItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  };
+
+  const deliveryCost = () => {
+    const qty = calculateTotalQuantity();
+    // Free delivery when at least 5 products, otherwise 50 DH
+    return qty >= 5 ? 0 : 50;
+  };
+
   const handleConfirmLoyaltyOrder = async () => {
     if (loyaltyItems.length === 0) return;
+
+    // Require at least one regular product in the cart to place a loyalty order
+    if (regularItems.length === 0) {
+      setError('Vous devez ajouter au moins un produit régulier pour commander des produits de fidélité.');
+      return;
+    }
 
     const totalPoints = getTotalPoints();
     if (loyaltyPoints < totalPoints) {
@@ -178,6 +208,36 @@ export default function ProfilePage() {
       setSuccess('Votre commande de fidélité a été envoyée! L\'admin va la confirmer.');
       clearLoyalty();
       fetchLoyaltyPoints();
+      fetchOpticianInfo();
+      // Notify admins by email about the loyalty redemption
+      try {
+        const emailPayload = {
+          order: null,
+          items: [],
+          subtotal: 0,
+          deliveryCost: 0,
+          total: 0,
+          user: {
+            email: session?.user?.email,
+            businessName: (session?.user as any)?.opticianBusinessName || null,
+          },
+          loyaltyItems: loyaltyItems.map(li => ({
+            productId: li.id,
+            name: li.name,
+            quantity: li.quantity,
+            pointsCost: li.pointsCost || 0,
+          })),
+          totalPoints: getTotalPoints(),
+        };
+
+        await fetch('/api/admin/email-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(emailPayload),
+        });
+      } catch (err) {
+        console.warn('Failed to notify admin by email (loyalty)');
+      }
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
@@ -214,9 +274,10 @@ export default function ProfilePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          items: orderItems,
-          totalAmount: calculateTotal(),
-        }),
+            items: orderItems,
+            totalAmount: calculateTotal() + deliveryCost(),
+            deliveryCost: deliveryCost(),
+          }),
       });
 
       if (!response.ok) {
@@ -230,22 +291,178 @@ export default function ProfilePage() {
       clear();
       setProducts([]);
       
-      // Show WhatsApp redirect option
-      if (data.whatsappUrl) {
-        setTimeout(() => {
-          if (window.confirm('Voulez-vous ouvrir WhatsApp pour contacter l\'admin?')) {
-            window.open(data.whatsappUrl, '_blank');
-          }
-        }, 1000);
+      // Send order details to admin by email
+      try {
+        const emailPayload = {
+          order: data,
+          items: orderItems,
+          subtotal: calculateTotal(),
+          deliveryCost: deliveryCost(),
+          total: calculateTotal() + deliveryCost(),
+          user: {
+            email: session?.user?.email,
+            businessName: (session?.user as any)?.opticianBusinessName || null,
+          },
+        };
+
+        const emailResp = await fetch('/api/admin/email-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(emailPayload),
+        });
+
+        if (!emailResp.ok) {
+          console.warn('Failed to notify admin by email');
+        }
+      } catch (err) {
+        console.error('Error sending order email to admin:', err);
       }
       
       fetchOrderHistory();
+      fetchOpticianInfo();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
     } finally {
       setSubmitting(false);
     }
   };
+
+    // Combined handler: create regular order (if any) and redeem loyalty items (if any)
+    const handleConfirmAll = async () => {
+      if (regularItems.length === 0 && loyaltyItems.length === 0) return;
+
+      // Require at least one regular product to order loyalty items
+      if (loyaltyItems.length > 0 && regularItems.length === 0) {
+        setError('Vous devez ajouter au moins un produit régulier pour commander des produits de fidélité.');
+        return;
+      }
+
+      const totalPoints = getTotalPoints();
+      if (loyaltyItems.length > 0 && loyaltyPoints < totalPoints) {
+        setError(`Points insuffisants. Il vous manque ${totalPoints - loyaltyPoints} points.`);
+        return;
+      }
+
+      setSubmitting(true);
+      setSubmittingLoyalty(true);
+      setError('');
+      setSuccess('');
+
+      try {
+        // Create regular order if present
+        let createdOrder: any = null;
+        let orderItems: any[] = [];
+        if (regularItems.length > 0) {
+          orderItems = regularItems.map(item => {
+            const product = getProduct(item.id);
+            if (!product) throw new Error(`Product ${item.name} not found`);
+
+            return {
+              productId: item.id,
+              productName: product.name,
+              productReference: product.reference,
+              quantity: item.quantity,
+              unitPrice: product.price,
+              salePrice: product.salePrice,
+              remisePct: product.firstOrderRemisePct,
+              totalLine: calculateItemTotal(item.id, item.quantity),
+            };
+          });
+
+          const response = await fetch('/api/orders/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              items: orderItems,
+              totalAmount: calculateTotal() + deliveryCost(),
+              deliveryCost: deliveryCost(),
+            }),
+          });
+
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to create order');
+          }
+
+          createdOrder = await response.json();
+        }
+
+        // Redeem loyalty items if present
+        if (loyaltyItems.length > 0) {
+          const redemptionItems = loyaltyItems.map(item => ({
+            productId: item.id,
+            quantity: item.quantity,
+            pointsCost: item.pointsCost || 0,
+          }));
+
+          const resp = await fetch('/api/loyalty-products/redeem', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: redemptionItems, totalPoints }),
+          });
+
+          if (!resp.ok) {
+            const data = await resp.json();
+            throw new Error(data.error || 'Échec de la commande de fidélité');
+          }
+        }
+
+        // Notify admins by email about the order + loyalty redemption (if any)
+        try {
+          const emailPayload = {
+            order: createdOrder,
+            items: orderItems,
+            subtotal: calculateTotal(),
+            deliveryCost: deliveryCost(),
+            total: calculateTotal() + deliveryCost(),
+            user: {
+              email: session?.user?.email,
+              businessName: (session?.user as any)?.opticianBusinessName || null,
+            },
+            loyaltyItems: loyaltyItems.map(li => ({
+              productId: li.id,
+              name: li.name,
+              quantity: li.quantity,
+              pointsCost: li.pointsCost || 0,
+            })),
+            totalPoints: getTotalPoints(),
+          };
+
+          await fetch('/api/admin/email-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(emailPayload),
+          });
+        } catch (err) {
+          console.warn('Failed to notify admin by email');
+        }
+
+        // Success messages and cleanup
+        if (regularItems.length > 0 && loyaltyItems.length > 0) {
+          setSuccess("Votre commande et l'échange de fidélité ont été envoyés ! L'admin va confirmer.");
+        } else if (regularItems.length > 0) {
+          setSuccess('Votre commande a été envoyée avec succès! L\'admin va confirmer chaque produit.');
+        } else if (loyaltyItems.length > 0) {
+          setSuccess('Votre commande de fidélité a été envoyée! L\'admin va la confirmer.');
+        }
+
+        if (regularItems.length > 0) {
+          clear();
+          setProducts([]);
+          fetchOrderHistory();
+        }
+        if (loyaltyItems.length > 0) {
+          clearLoyalty();
+          fetchLoyaltyPoints();
+        }
+        fetchOpticianInfo();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      } finally {
+        setSubmitting(false);
+        setSubmittingLoyalty(false);
+      }
+    };
 
   if (status === 'loading' || loading) {
     return (
@@ -342,6 +559,7 @@ export default function ProfilePage() {
                   <ShoppingCart className="h-5 w-5 text-blue-500" />
                   Résumé de la commande
                 </h3>
+                <p className="text-sm text-gray-600 mb-3">Livraison gratuite si vous avez au moins <span className="font-semibold">5 produits</span> dans la commande.</p>
                 <div className="space-y-3">
                   {regularItems.length > 0 && (
                     <>
@@ -349,9 +567,38 @@ export default function ProfilePage() {
                         <span className="text-gray-600 text-sm">{t.regularProducts}</span>
                         <span className="font-bold bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">{regularItems.length}</span>
                       </div>
-                      <div className="flex justify-between text-lg font-bold pt-2 border-t">
-                        <span className="text-gray-700">Total</span>
-                        <span className="text-[#f56a24]">{calculateTotal().toFixed(2)} DH</span>
+                      <div className="text-sm text-gray-600 mt-3 mb-3">
+                        <div className="mb-1 font-medium">Facturation:</div>
+                        <div className="space-y-1">
+                          {regularItems.map((item) => {
+                            const prod = getProduct(item.id);
+                            const name = prod ? prod.name : item.name || item.id;
+                            const lineTotal = calculateItemTotal(item.id, item.quantity);
+                            return (
+                              <div key={item.id} className="flex justify-between">
+                                <span className="truncate">{name} × {item.quantity}</span>
+                                <span className="font-medium">{lineTotal.toFixed(2)} DH</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="border-t mt-2 pt-2">
+                          <div className="flex justify-between text-sm">
+                            <span>Sous-total</span>
+                            <span className="font-medium">{calculateTotal().toFixed(2)} DH</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Frais de livraison</span>
+                            <span className="font-medium">{deliveryCost() === 0 ? 'Gratuit' : `${deliveryCost().toFixed(2)} DH`}</span>
+                          </div>
+                          <div className="flex justify-between text-lg font-bold pt-2">
+                            <span>Total</span>
+                            <span className="text-[#f56a24]">{(calculateTotal() + deliveryCost()).toFixed(2)} DH</span>
+                          </div>
+                        </div>
+
+                        <div className="text-xs text-gray-500 mt-1">Livraison gratuite à partir de 5 produits</div>
                       </div>
                     </>
                   )}
@@ -449,7 +696,7 @@ export default function ProfilePage() {
                                       {product.price.toFixed(2)} DH
                                     </span>
                                   )}
-                                  {hasDiscount && (
+                                  {hasDiscount && !firstOrderUsed && (
                                     <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
                                       -{product.firstOrderRemisePct}% 1ère commande
                                     </span>
@@ -488,11 +735,18 @@ export default function ProfilePage() {
 
                       <div className="flex gap-4 pt-4 border-t-2 mt-4">
                         <Button
-                          onClick={handleConfirmOrder}
-                          disabled={submitting}
-                          className="flex-1 bg-[#f56a24] hover:bg-[#d45a1e] text-white py-4 text-lg font-semibold"
+                          onClick={handleConfirmAll}
+                          disabled={submitting || submittingLoyalty || (loyaltyItems.length > 0 && loyaltyPoints < getTotalPoints()) || (loyaltyItems.length > 0 && regularItems.length === 0)}
+                          className="flex-1 bg-[#f56a24] hover:bg-[#d45a1e] text-white py-4 text-lg font-semibold disabled:opacity-50"
                         >
-                          {submitting ? t.submitting : (t.confirmOrder ? t.confirmOrder.replace('{amount}', `${calculateTotal().toFixed(2)} DH`) : `Confirmer la commande (${calculateTotal().toFixed(2)} DH)`)}
+                          {submitting || submittingLoyalty ? t.submitting : (
+                            regularItems.length > 0 && loyaltyItems.length > 0
+                              ? (t.confirmOrderAndRedeem ? t.confirmOrderAndRedeem.replace('{amount}', `${(calculateTotal() + deliveryCost()).toFixed(2)} DH`).replace('{points}', `${getTotalPoints()} pts`) : `Confirmer la commande (${(calculateTotal() + deliveryCost()).toFixed(2)} DH) et échanger (${getTotalPoints()} pts)`)
+                              : (regularItems.length > 0
+                                  ? (t.confirmOrder ? t.confirmOrder.replace('{amount}', `${(calculateTotal() + deliveryCost()).toFixed(2)} DH`) : `Confirmer la commande (${(calculateTotal() + deliveryCost()).toFixed(2)} DH)`)
+                                  : (t.placeOrderWithPoints ? t.placeOrderWithPoints.replace('{points}', `${getTotalPoints()}`) : `Commander (${getTotalPoints()} points)`)
+                                )
+                          )}
                         </Button>
                       </div>
                     </div>
@@ -561,20 +815,44 @@ export default function ProfilePage() {
                         })}
                       </div>
 
-                      <div className="flex gap-4 pt-4 border-t-2 border-orange-200 mt-4">
-                        <Button
-                          onClick={handleConfirmLoyaltyOrder}
-                          disabled={submittingLoyalty || loyaltyPoints < getTotalPoints()}
-                          className="flex-1 bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-semibold disabled:opacity-50"
-                        >
-                          {submittingLoyalty ? t.submitting : (t.placeOrderWithPoints ? t.placeOrderWithPoints.replace('{points}', `${getTotalPoints()}`) : `Commander (${getTotalPoints()} points)`) }
-                        </Button>
+                      <div className="pt-4 border-t-2 border-orange-200 mt-4">
+                        {regularItems.length === 0 && (
+                          <div className="w-full mt-2">
+                            <div className="flex items-center justify-between gap-4 bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded">
+                              <div className="flex items-start gap-3">
+                                <AlertCircle className="h-5 w-5 mt-0.5" />
+                                <div>
+                                  <div className="font-medium">Action requise</div>
+                                  <div className="text-sm">Vous devez ajouter au moins un produit régulier pour commander des produits de fidélité.</div>
+                                </div>
+                              </div>
+                              <div className="flex-shrink-0">
+                                <Link href="/catalogue">
+                                  <Button size="sm" className="bg-[#f56a24] hover:bg-[#d45a1e] text-white">{t.browseCatalog || 'Parcourir le catalogue'}</Button>
+                                </Link>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       {loyaltyPoints < getTotalPoints() && (
-                        <p className="text-sm text-red-600 mt-2">
-                          Points insuffisants. Il vous manque {getTotalPoints() - loyaltyPoints} points.
-                        </p>
+                        <div className="w-full mt-2">
+                          <div className="flex items-center justify-between gap-4 bg-orange-50 border-l-4 border-orange-400 text-orange-800 p-3 rounded">
+                            <div className="flex items-start gap-3">
+                              <MessageCircle className="h-5 w-5 mt-0.5" />
+                              <div>
+                                <div className="font-medium">Points insuffisants</div>
+                                <div className="text-sm">Il vous manque <span className="font-semibold">{getTotalPoints() - loyaltyPoints}</span> points pour commander ces produits.</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Link href="/catalogue">
+                                <Button size="sm" className="bg-[#f56a24] hover:bg-[#d45a1e] text-white">{t.browseCatalog || 'Parcourir le catalogue'}</Button>
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
                       )}
                     </div>
                   )}

@@ -80,6 +80,19 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // If any ordered item used a first-order remise and the optician hasn't used it before, mark it used
+    try {
+      const usedRemise = order.items.some((it) => (it.remisePct || 0) > 0);
+      if (usedRemise && !user.optician.firstOrderUsed) {
+        await prisma.optician.update({
+          where: { id: user.optician.id },
+          data: { firstOrderUsed: true },
+        });
+      }
+    } catch (e) {
+      console.warn('Could not update optician.firstOrderUsed:', e);
+    }
+
     // Prepare WhatsApp message
     let whatsappUrl = null;
     if (admin?.whatsapp) {

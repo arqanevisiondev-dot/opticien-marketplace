@@ -1017,19 +1017,24 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
 
             {/* Submit Buttons */}
             <div className="flex gap-4 pt-6 border-t-2">
-              <Button type="submit" disabled={saving} className="flex-1 py-4 text-lg font-semibold shadow-lg ">
+              <Button
+                type="submit"
+                disabled={saving}
+                className="flex-1 py-4 text-lg font-semibold shadow-lg"
+              >
                 {saving ? (
-                  <span className="flex items-center justify-center gap-2">
+                  <span className="flex items-center justify-center gap-2 whitespace-nowrap">
                     <Loader2 className="h-5 w-5 animate-spin" />
                     Mise à jour...
                   </span>
                 ) : (
-                  <>
-                    <Check className="h-5 w-5 mr-2" />
+                  <span className="flex items-center justify-center gap-2 whitespace-nowrap">
+                    <Check className="h-5 w-5" />
                     Mettre à jour
-                  </>
+                  </span>
                 )}
               </Button>
+
               <Link href="/admin/products" className="flex-1">
                 <Button type="button" variant="outline" className="w-full py-4 text-lg font-semibold">
                   Annuler

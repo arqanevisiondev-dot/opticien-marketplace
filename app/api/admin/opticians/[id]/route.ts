@@ -144,6 +144,37 @@ export async function PATCH(
       data: updateData,
     });
 
+    // If we just approved the optician (from PENDING -> APPROVED), send them an email
+    if (status === 'APPROVED' && currentOptician?.status === 'PENDING') {
+      try {
+        const opticianWithUser = await prisma.optician.findUnique({
+          where: { id },
+          include: { user: { select: { email: true } } },
+        });
+
+        if (opticianWithUser?.user?.email) {
+          const { sendEmailWithNodemailer } = await import('@/lib/email');
+
+          const emailHtml = `
+            <h2>✅ Compte Opticien Approuvé</h2>
+            <p>Bonjour ${opticianWithUser.firstName || ''},</p>
+            <p>Votre compte entreprise <strong>${opticianWithUser.businessName}</strong> a été approuvé par notre équipe. Vous pouvez désormais vous connecter et accéder aux fonctionnalités réservées aux opticiens.</p>
+            <p><a href="${process.env.NEXTAUTH_URL}/auth/signin">Se connecter au tableau de bord</a></p>
+            <p>Si vous avez des questions, répondez à cet email.</p>
+          `;
+
+          // Send email in background
+          sendEmailWithNodemailer(
+            opticianWithUser.user.email,
+            'Votre compte Opticien a été approuvé',
+            emailHtml
+          ).catch((err: unknown) => console.error('Approval email failed:', err));
+        }
+      } catch (emailError) {
+        console.error('Error sending approval email to optician:', emailError);
+      }
+    }
+
     return NextResponse.json(optician);
   } catch (error) {
     console.error('Error updating optician:', error);

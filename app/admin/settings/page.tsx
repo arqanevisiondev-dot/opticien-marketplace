@@ -26,6 +26,10 @@ export default function SettingsPage() {
   const [newMaterial, setNewMaterial] = useState("")
   const [newGender, setNewGender] = useState("")
   const [registrationPoints, setRegistrationPoints] = useState("")
+  const [contactEmail, setContactEmail] = useState("")
+  const [contactPhone, setContactPhone] = useState("")
+  const [contactAddress, setContactAddress] = useState("")
+  const [contactWhatsApp, setContactWhatsApp] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
@@ -57,6 +61,10 @@ export default function SettingsPage() {
       if (settingsRes.ok) {
         const data = await settingsRes.json()
         setRegistrationPoints(data.registration_bonus_points || "0")
+        setContactEmail(data.contact_email || "")
+        setContactPhone(data.contact_phone || "")
+        setContactAddress(data.contact_address || "")
+        setContactWhatsApp(data.contact_whatsapp || "")
       }
     } catch (error) {
       console.error("Error fetching options:", error)
@@ -156,11 +164,40 @@ export default function SettingsPage() {
         throw new Error(data.error)
       }
 
-      setSuccess("Points de fidélité d'inscription mis à jour")
+      setSuccess(t.registrationPointsUpdated)
       setTimeout(() => setSuccess(""), 3000)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur")
       setTimeout(() => setError(""), 3000)
+    }
+  }
+
+  const handleUpdateContactSettings = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    try {
+      const updates = [
+        { key: 'contact_email', value: contactEmail, description: 'Site contact email' },
+        { key: 'contact_phone', value: contactPhone, description: 'Site contact phone' },
+        { key: 'contact_address', value: contactAddress, description: 'Site contact address' },
+        { key: 'contact_whatsapp', value: contactWhatsApp, description: 'Site WhatsApp number (international format, no +)' },
+      ]
+
+      await Promise.all(
+        updates.map((u) =>
+          fetch('/api/admin/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(u),
+          })
+        )
+      )
+
+      setSuccess(t.contactSettingsUpdated)
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur')
+      setTimeout(() => setError(''), 3000)
     }
   }
 
@@ -194,11 +231,9 @@ export default function SettingsPage() {
 
           {/* Loyalty Points Settings */}
           <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-            <h2 className="text-2xl font-bold text-abyssal mb-4">Points de Fidélité</h2>
+            <h2 className="text-2xl font-bold text-abyssal mb-4">{t.loyaltyPoints}</h2>
             <form onSubmit={handleUpdateRegistrationPoints} className="max-w-md">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Points attribués à l&apos;inscription
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.registrationPointsLabel}</label>
               <div className="flex gap-2">
                 <input
                   type="number"
@@ -208,13 +243,60 @@ export default function SettingsPage() {
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burning-flame focus:border-transparent"
                   placeholder="Ex: 100"
                 />
-                <Button type="submit" className="bg-burning-flame hover:bg-burning-flame/90">
-                  Enregistrer
-                </Button>
+                <Button type="submit" className="bg-burning-flame hover:bg-burning-flame/90">{t.save}</Button>
               </div>
               <p className="mt-2 text-sm text-gray-600">
                 Ces points seront automatiquement attribués aux nouveaux opticiens lors de leur inscription.
               </p>
+            </form>
+          </div>
+
+          {/* Contact Settings */}
+          <div className="mt-8 mb-8 p-6 bg-green-50 border border-green-200 rounded-lg">
+            <h2 className="text-2xl font-bold text-abyssal mb-4">{t.contactInfo}</h2>
+            <form onSubmit={handleUpdateContactSettings} className="max-w-2xl space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.contactEmailLabel}</label>
+                <input
+                  type="email"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.contactPhoneLabel}</label>
+                <input
+                  type="text"
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.contactAddressLabel}</label>
+                <textarea
+                  value={contactAddress}
+                  onChange={(e) => setContactAddress(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.contactWhatsAppLabel}</label>
+                <input
+                  type="text"
+                  value={contactWhatsApp}
+                  onChange={(e) => setContactWhatsApp(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <Button type="submit" className="bg-burning-flame hover:bg-burning-flame/90">{t.save}</Button>
+              </div>
             </form>
           </div>
 
@@ -316,8 +398,7 @@ export default function SettingsPage() {
 
           <div className="mt-12 p-6 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800">
-              <strong className="text-blue-900">Note:</strong> {t.productOptions} will be available when creating or
-              modifying products. Existing product options remain unchanged.
+              <strong className="text-blue-900">{t.note}</strong> {t.productOptionsNote.replace("{productOptions}", t.productOptions)}
             </p>
           </div>
         </div>

@@ -44,7 +44,7 @@ interface Product {
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const { t } = useLanguage()
   const resolvedParams = use(params)
   const { add, isInCart } = useCart()
@@ -53,8 +53,27 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [selectedImage, setSelectedImage] = useState(0)
 
   const canSeePrices =
-    (session?.user?.role === "OPTICIAN" && session?.user?.opticianStatus === "APPROVED") ||
-    session?.user?.role === "ADMIN"
+    status === 'authenticated' && (
+      (session?.user?.role === "OPTICIAN" && session?.user?.opticianStatus === "APPROVED") ||
+      session?.user?.role === "ADMIN"
+    )
+
+  // debug: log session/status (temporary)
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.debug('Product page session debug', { status, user: session?.user })
+  }, [status, session])
+
+  // hide prices on small screens to avoid exposing them on mobile if session logic is unreliable
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(typeof window !== 'undefined' ? window.innerWidth < 768 : false)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  const effectiveCanSeePrices = !isMobile && canSeePrices
   const isOptician = session?.user?.role === "OPTICIAN"
 
   const fetchProduct = async () => {
@@ -157,7 +176,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
               <div className="bg-gradient-to-br from-[#f56a24]/5 to-[#80827f]/5 p-6 rounded-xl mb-8 border border-[#f56a24]/20">
                 <p className="text-sm text-gray-600 mb-3">{t.priceOnRequest}</p>
-                {canSeePrices ? (
+                {effectiveCanSeePrices ? (
                   product.salePrice ? (
                     <div className="flex items-baseline gap-3">
                       <span className="text-sm text-gray-500 line-through font-medium">
@@ -176,7 +195,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     {t.contactForPrice}
                   </button>
                 )}
-                {isOptician && product.loyaltyPointsReward && product.loyaltyPointsReward > 0 && (
+                {isOptician && effectiveCanSeePrices && product.loyaltyPointsReward && product.loyaltyPointsReward > 0 && (
                   <div className="mt-4 pt-4 border-t border-[#f56a24]/20">
                     <div className="flex items-center gap-2">
                       <svg className="h-5 w-5 text-[#f56a24]" fill="currentColor" viewBox="0 0 20 20">

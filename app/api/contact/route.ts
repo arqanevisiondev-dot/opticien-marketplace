@@ -17,22 +17,6 @@ export async function POST(request: NextRequest) {
     // Log the contact form submission
     console.log('Contact form submission:', validatedData);
 
-    // TODO: Send email to admin
-    // const { sendEmailWithNodemailer } = await import('@/lib/email');
-    // await sendEmailWithNodemailer(
-    //   'contact@arqanevision.com',
-    //   `Nouveau message: ${validatedData.subject}`,
-    //   `
-    //     <h2>Nouveau message de contact</h2>
-    //     <p><strong>Nom:</strong> ${validatedData.name}</p>
-    //     <p><strong>Email:</strong> ${validatedData.email}</p>
-    //     <p><strong>Téléphone:</strong> ${validatedData.phone || 'Non fourni'}</p>
-    //     <p><strong>Sujet:</strong> ${validatedData.subject}</p>
-    //     <p><strong>Message:</strong></p>
-    //     <p>${validatedData.message}</p>
-    //   `
-    // );
-
     return NextResponse.json(
       { 
         success: true,
