@@ -44,6 +44,7 @@ export default function ProfilePage() {
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
   const [loyaltyPoints, setLoyaltyPoints] = useState(0);
   const [firstOrderUsed, setFirstOrderUsed] = useState(false);
+  const missingPointsParts = (t.missingPointsForLoyalty || 'Il vous manque {points} points pour commander ces produits.').split('{points}');
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -168,13 +169,13 @@ export default function ProfilePage() {
 
     // Require at least one regular product in the cart to place a loyalty order
     if (regularItems.length === 0) {
-      setError('Vous devez ajouter au moins un produit régulier pour commander des produits de fidélité.');
+      setError(t.addRegularProductNotice);
       return;
     }
 
     const totalPoints = getTotalPoints();
     if (loyaltyPoints < totalPoints) {
-      setError(`Points insuffisants. Il vous manque ${totalPoints - loyaltyPoints} points.`);
+      setError(`${t.insufficientPointsError}. ${t.missingPointsForLoyalty.replace('{points}', `${totalPoints - loyaltyPoints}`)}`);
       return;
     }
 
@@ -540,7 +541,7 @@ export default function ProfilePage() {
                 </h3>
                 <div className="flex items-baseline gap-2 mb-3">
                   <span className="text-5xl font-extrabold drop-shadow-lg">{loyaltyPoints}</span>
-                  <span className="text-sm opacity-90 font-medium">points</span>
+                  <span className="text-sm opacity-90 font-medium">{t.pointsLabel}</span>
                 </div>
                 <p className="text-sm opacity-95 mb-4 leading-relaxed">
                   {t.loyaltyDescription}
@@ -557,9 +558,9 @@ export default function ProfilePage() {
               <div className="bg-white rounded-xl shadow-xl p-6 border-t-4 border-blue-500">
                 <h3 className="text-lg font-bold text-[#2C3B4D] mb-4 flex items-center gap-2">
                   <ShoppingCart className="h-5 w-5 text-blue-500" />
-                  Résumé de la commande
+                  {t.orderSummary}
                 </h3>
-                <p className="text-sm text-gray-600 mb-3">Livraison gratuite si vous avez au moins <span className="font-semibold">5 produits</span> dans la commande.</p>
+                <p className="text-sm text-gray-600 mb-3">{t.freeShippingFull}</p>
                 <div className="space-y-3">
                   {regularItems.length > 0 && (
                     <>
@@ -568,7 +569,7 @@ export default function ProfilePage() {
                         <span className="font-bold bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm">{regularItems.length}</span>
                       </div>
                       <div className="text-sm text-gray-600 mt-3 mb-3">
-                        <div className="mb-1 font-medium">Facturation:</div>
+                        <div className="mb-1 font-medium">{t.billing}</div>
                         <div className="space-y-1">
                           {regularItems.map((item) => {
                             const prod = getProduct(item.id);
@@ -585,20 +586,20 @@ export default function ProfilePage() {
 
                         <div className="border-t mt-2 pt-2">
                           <div className="flex justify-between text-sm">
-                            <span>Sous-total</span>
+                            <span>{t.orderSubtotal}</span>
                             <span className="font-medium">{calculateTotal().toFixed(2)} DH</span>
                           </div>
                           <div className="flex justify-between text-sm">
-                            <span>Frais de livraison</span>
-                            <span className="font-medium">{deliveryCost() === 0 ? 'Gratuit' : `${deliveryCost().toFixed(2)} DH`}</span>
+                            <span>{t.deliveryFees}</span>
+                            <span className="font-medium">{deliveryCost() === 0 ? t.freeLabel : `${deliveryCost().toFixed(2)} DH`}</span>
                           </div>
                           <div className="flex justify-between text-lg font-bold pt-2">
-                            <span>Total</span>
+                            <span>{t.totalLabel}</span>
                             <span className="text-[#f56a24]">{(calculateTotal() + deliveryCost()).toFixed(2)} DH</span>
                           </div>
                         </div>
 
-                        <div className="text-xs text-gray-500 mt-1">Livraison gratuite à partir de 5 produits</div>
+                        <div className="text-xs text-gray-500 mt-1">{t.freeShippingNoteShort}</div>
                       </div>
                     </>
                   )}
@@ -606,12 +607,12 @@ export default function ProfilePage() {
                     <>
                       {regularItems.length > 0 && <div className="border-t-2 pt-3 mt-3" />}
                       <div className="flex justify-between items-center p-2 bg-orange-50 rounded">
-                        <span className="text-[#f56a24] text-sm font-medium">Produits de fidélité</span>
+                        <span className="text-[#f56a24] text-sm font-medium">{t.loyaltyProductsTitle}</span>
                         <span className="font-bold bg-orange-100 text-[#f56a24] px-3 py-1 rounded-full text-sm">{loyaltyItems.length}</span>
                       </div>
                       <div className="flex justify-between text-lg font-bold pt-2 border-t border-orange-200">
-                        <span className="text-[#f56a24]">Total Points</span>
-                        <span className="text-[#f56a24] text-xl">{getTotalPoints()} pts</span>
+                        <span className="text-[#f56a24]">{t.totalPointsLabel}</span>
+                        <span className="text-[#f56a24] text-xl">{getTotalPoints()} {t.points}</span>
                       </div>
                     </>
                   )}
@@ -741,7 +742,7 @@ export default function ProfilePage() {
                         >
                           {submitting || submittingLoyalty ? t.submitting : (
                             regularItems.length > 0 && loyaltyItems.length > 0
-                              ? (t.confirmOrderAndRedeem ? t.confirmOrderAndRedeem.replace('{amount}', `${(calculateTotal() + deliveryCost()).toFixed(2)} DH`).replace('{points}', `${getTotalPoints()} pts`) : `Confirmer la commande (${(calculateTotal() + deliveryCost()).toFixed(2)} DH) et échanger (${getTotalPoints()} pts)`)
+                              ? (t.confirmOrderAndRedeem ? t.confirmOrderAndRedeem.replace('{amount}', `${(calculateTotal() + deliveryCost()).toFixed(2)} DH`).replace('{points}', `${getTotalPoints()} ${t.points}`) : `Confirmer la commande (${(calculateTotal() + deliveryCost()).toFixed(2)} DH) et échanger (${getTotalPoints()} ${t.points})`)
                               : (regularItems.length > 0
                                   ? (t.confirmOrder ? t.confirmOrder.replace('{amount}', `${(calculateTotal() + deliveryCost()).toFixed(2)} DH`) : `Confirmer la commande (${(calculateTotal() + deliveryCost()).toFixed(2)} DH)`)
                                   : (t.placeOrderWithPoints ? t.placeOrderWithPoints.replace('{points}', `${getTotalPoints()}`) : `Commander (${getTotalPoints()} points)`)
@@ -755,9 +756,9 @@ export default function ProfilePage() {
                   {/* Loyalty Products Section */}
                   {loyaltyItems.length > 0 && (
                     <div>
-                      <h3 className="text-lg font-bold text-[#f56a24] mb-3 flex items-center gap-2">
+                        <h3 className="text-lg font-bold text-[#f56a24] mb-3 flex items-center gap-2">
                         <Package className="h-5 w-5" />
-                        Produits de Fidélité ({loyaltyItems.length})
+                        {t.loyaltyProductsTitle} ({loyaltyItems.length})
                       </h3>
                       <div className="space-y-4">
                         {loyaltyItems.map((item) => {
@@ -780,7 +781,7 @@ export default function ProfilePage() {
                                 )}
                                 <div className="mt-2">
                                   <span className="text-lg font-bold text-[#f56a24]">
-                                    {item.pointsCost} points/unité
+                                    {item.pointsCost} {t.pointsPerUnit}
                                   </span>
                                 </div>
                               </div>
@@ -807,7 +808,7 @@ export default function ProfilePage() {
                                   </button>
                                 </div>
                                 <p className="font-bold text-lg text-[#f56a24]">
-                                  {(item.pointsCost || 0) * item.quantity} pts
+                                  {(item.pointsCost || 0) * item.quantity} {t.points}
                                 </p>
                               </div>
                             </div>
@@ -821,10 +822,10 @@ export default function ProfilePage() {
                             <div className="flex items-center justify-between gap-4 bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded">
                               <div className="flex items-start gap-3">
                                 <AlertCircle className="h-5 w-5 mt-0.5" />
-                                <div>
-                                  <div className="font-medium">Action requise</div>
-                                  <div className="text-sm">Vous devez ajouter au moins un produit régulier pour commander des produits de fidélité.</div>
-                                </div>
+                                  <div>
+                                    <div className="font-medium">{t.actionRequired}</div>
+                                    <div className="text-sm">{t.addRegularProductNotice}</div>
+                                  </div>
                               </div>
                               <div className="flex-shrink-0">
                                 <Link href="/catalogue">
@@ -842,8 +843,8 @@ export default function ProfilePage() {
                             <div className="flex items-start gap-3">
                               <MessageCircle className="h-5 w-5 mt-0.5" />
                               <div>
-                                <div className="font-medium">Points insuffisants</div>
-                                <div className="text-sm">Il vous manque <span className="font-semibold">{getTotalPoints() - loyaltyPoints}</span> points pour commander ces produits.</div>
+                                  <div className="font-medium">{t.insufficientPointsError}</div>
+                                  <div className="text-sm">{missingPointsParts[0]}<span className="font-semibold">{getTotalPoints() - loyaltyPoints}</span>{missingPointsParts[1]}</div>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">

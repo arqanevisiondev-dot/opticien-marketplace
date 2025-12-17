@@ -4,13 +4,15 @@ import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/Button';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function CartBar() {
   const { items, regularItems, loyaltyItems, clear, remove, increase, decrease, getTotalPoints } = useCart();
   const { data: session } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
   const { t } = useLanguage();
   const isOptician = session?.user?.role === 'OPTICIAN';
   const businessName = (session?.user as unknown as { opticianBusinessName?: string })?.opticianBusinessName;
@@ -35,6 +37,18 @@ export default function CartBar() {
       setManualClose(false);
     }
   }, [items.length, manualClose]);
+
+  // If an optician adds an item (items length increases), always expand the cart
+  // so they can see details of what they just added.
+  const prevCountRef = useRef(items.length);
+  useEffect(() => {
+    const prev = prevCountRef.current;
+    if (isOptician && items.length > prev) {
+      setOpen(true);
+      setManualClose(false);
+    }
+    prevCountRef.current = items.length;
+  }, [items.length, isOptician]);
 
   useEffect(() => {
     let active = true;
@@ -167,12 +181,10 @@ export default function CartBar() {
           variant="outline"
           size="sm"
           onClick={() => {
-            // Minimize cart and navigate back if possible, otherwise go to catalogue
+            // Minimize cart and navigate to catalogue (unless already there)
             setOpen(false);
             setManualClose(true);
-            if (typeof window !== 'undefined' && window.history.length > 1) {
-              router.back();
-            } else {
+            if (pathname !== '/catalogue') {
               router.push('/catalogue');
             }
           }}
@@ -184,7 +196,12 @@ export default function CartBar() {
           variant="primary" 
           size="sm" 
           disabled={!items.length}
-          onClick={() => router.push('/profile')}
+          onClick={() => {
+            // Minimize cart before navigating to the profile/order page
+            setOpen(false);
+            setManualClose(true);
+            router.push('/profile');
+          }}
         >
           {hasLoyaltyItems && !hasRegularItems ? t.orderLoyalty : t.placeOrder}
         </Button>

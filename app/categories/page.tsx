@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, Suspense } from "react"
+import { useSession } from "next-auth/react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useLanguage } from "@/contexts/LanguageContext"
@@ -39,6 +40,7 @@ interface Product {
 
 function CategoriesContent() {
   const { t } = useLanguage()
+  const { data: session } = useSession()
   const searchParams = useSearchParams()
   const router = useRouter()
   const categoryParam = searchParams?.get("category") || ""
@@ -305,7 +307,15 @@ function CategoriesContent() {
           {/* Results Count */}
           <div className="mb-6">
             <p className="text-gray-600">
-              <span className="font-bold text-[#1B2632]">{filteredProducts.length}</span> produit{filteredProducts.length !== 1 && 's'} trouvé{filteredProducts.length !== 1 && 's'}
+              {(() => {
+                const count = filteredProducts.length
+                const template = count === 1 ? t.productsFoundOne : t.productsFoundMany
+                if (typeof template === "string") {
+                  return template.replace('{count}', String(count))
+                }
+                // Fallback (French) if translation is missing
+                return `${count} produit${count !== 1 ? 's' : ''} trouvé${count !== 1 ? 's' : ''}`
+              })()}
             </p>
           </div>
 
@@ -360,13 +370,17 @@ function CategoriesContent() {
 
                     <div className="flex items-center justify-between">
                       <div>
-                        {product.salePrice ? (
-                          <div>
-                            <span className="text-lg font-bold text-[#f56a24]">{product.salePrice}DH</span>
-                            <span className="text-sm text-gray-400 line-through ml-2">{product.price}DH</span>
-                          </div>
+                        {session ? (
+                          product.salePrice ? (
+                            <div>
+                              <span className="text-lg font-bold text-[#f56a24]">{product.salePrice}DH</span>
+                              <span className="text-sm text-gray-400 line-through ml-2">{product.price}DH</span>
+                            </div>
+                          ) : (
+                            <span className="text-lg font-bold text-[#1B2632]">{product.price}DH</span>
+                          )
                         ) : (
-                          <span className="text-lg font-bold text-[#1B2632]">{product.price}DH</span>
+                          <span className="text-sm text-gray-600">{t.seeMore}</span>
                         )}
                       </div>
                       <ChevronRight className="h-5 w-5 text-[#f56a24] group-hover:translate-x-1 transition-transform" />
