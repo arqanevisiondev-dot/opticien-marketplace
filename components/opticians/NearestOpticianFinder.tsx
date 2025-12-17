@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { MapPin, Search, Navigation, Phone, MessageCircle, Loader2 } from 'lucide-react';
+import { MapPin, Search, Navigation, Phone, MessageCircle, Loader2, Car, Clock, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGeolocation } from '@/hooks/useGeolocation';
@@ -12,6 +12,12 @@ const MapComponent = dynamic(() => import('@/components/map/OpticianMap'), {
   ssr: false,
   loading: () => <div className="h-64 bg-gray-200 animate-pulse flex items-center justify-center">Chargement de la carte...</div>,
 });
+
+interface RouteInfo {
+  drivingDistance: number; // in km
+  drivingTime: number; // in minutes
+  walkingTime: number; // in minutes
+}
 
 interface Optician {
   id: string;
@@ -26,6 +32,7 @@ interface Optician {
   latitude?: number;
   longitude?: number;
   distance?: number;
+  routeInfo?: RouteInfo;
 }
 
 interface NearestOpticianFinderProps {
@@ -43,24 +50,21 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
   const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredCities, setFilteredCities] = useState<string[]>([]);
-  const [searchRadius, setSearchRadius] = useState<number>(10); // Default 10km
+  const [searchRadius, setSearchRadius] = useState<number>(10);
   const [sortBy, setSortBy] = useState<'distance' | 'city'>('distance');
   const [groupByCityEnabled, setGroupByCityEnabled] = useState(false);
+  const [routesLoading, setRoutesLoading] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Filter opticians by radius (only for those with distance calculated)
   const filteredOpticians = useMemo(() => {
     if (!latitude || !longitude) return opticians;
     
     return opticians.filter(opt => {
-      // Keep opticians without distance (no GPS coordinates)
       if (opt.distance === undefined) return true;
-      // Filter by radius for those with distance
       return opt.distance <= searchRadius;
     });
   }, [opticians, searchRadius, latitude, longitude]);
 
-  // Sort opticians
   const sortedOpticians = useMemo(() => {
     const toSort = [...filteredOpticians];
     
@@ -71,7 +75,6 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
         return a.distance - b.distance;
       });
     } else {
-      // Sort by city, then by distance within city
       return toSort.sort((a, b) => {
         const cityA = a.city || 'ZZZ';
         const cityB = b.city || 'ZZZ';
@@ -84,7 +87,6 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
     }
   }, [filteredOpticians, sortBy]);
 
-  // Group opticians by city
   const groupedOpticians = useMemo(() => {
     if (!groupByCityEnabled) return null;
     
@@ -94,20 +96,16 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
     return { groups, cities: sortedCities };
   }, [sortedOpticians, groupByCityEnabled]);
 
-  // Fetch available cities on mount
   useEffect(() => {
     fetchCities();
   }, []);
 
-  // Fetch opticians when location is available or radius changes
   useEffect(() => {
     if (latitude && longitude) {
       fetchNearestOpticians(latitude, longitude);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [latitude, longitude, searchRadius]);
 
-  // Filter cities based on search input
   useEffect(() => {
     if (citySearch.trim()) {
       const filtered = availableCities.filter(city =>
@@ -121,7 +119,6 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
     }
   }, [citySearch, availableCities]);
 
-  // Handle click outside to close suggestions
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -135,6 +132,13 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
     };
   }, []);
 
+  // Fetch routes when GPS location is available
+  useEffect(() => {
+    if (latitude && longitude && opticians.length > 0) {
+      calculateRoutesForOpticians(latitude, longitude);
+    }
+  }, [latitude, longitude, opticians.length]);
+
   const fetchCities = async () => {
     try {
       const res = await fetch('/api/opticians/cities');
@@ -147,16 +151,90 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
 
   const fetchNearestOpticians = async (lat: number, lon: number) => {
     setLoading(true);
-    console.log('Fetching opticians for location:', { lat, lon, radius: searchRadius });
     try {
       const res = await fetch(`/api/opticians/nearest?latitude=${lat}&longitude=${lon}&radius=${searchRadius}&limit=100`);
       const data = await res.json();
-      console.log('Received opticians:', data.length);
       setOpticians(data);
     } catch (error) {
       console.error('Error fetching nearest opticians:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const calculateRoutesForOpticians = async (userLat: number, userLng: number) => {
+    setRoutesLoading(true);
+    
+    // Get top 5 opticians with coordinates
+    const opticiansToRoute = opticians
+      .filter(opt => opt.latitude && opt.longitude && opt.distance !== undefined)
+      .sort((a, b) => (a.distance || 0) - (b.distance || 0))
+      .slice(0, 5);
+
+    const routePromises = opticiansToRoute.map(async (optician) => {
+      if (!optician.latitude || !optician.longitude) return { id: optician.id, routeInfo: null };
+      
+      try {
+        const routeInfo = await fetchRoute(userLat, userLng, optician.latitude, optician.longitude);
+        return { id: optician.id, routeInfo };
+      } catch (error) {
+        console.error(`Error fetching route for ${optician.businessName}:`, error);
+        return { id: optician.id, routeInfo: null };
+      }
+    });
+
+    const results = await Promise.all(routePromises);
+    
+    setOpticians(prev => prev.map(opt => {
+      const result = results.find(r => r.id === opt.id);
+      if (result?.routeInfo) {
+        return { ...opt, routeInfo: result.routeInfo };
+      }
+      return opt;
+    }));
+    
+    setRoutesLoading(false);
+  };
+
+  const fetchRoute = async (
+    fromLat: number,
+    fromLng: number,
+    toLat: number,
+    toLng: number
+  ): Promise<RouteInfo | null> => {
+    try {
+      // OSRM for driving route
+      const drivingUrl = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=false`;
+      const drivingRes = await fetch(drivingUrl);
+      const drivingData = await drivingRes.json();
+      
+      if (drivingData.code !== 'Ok' || !drivingData.routes?.[0]) {
+        return null;
+      }
+
+      const route = drivingData.routes[0];
+      const drivingDistance = route.distance / 1000; // meters to km
+      const drivingTime = route.duration / 60; // seconds to minutes
+      
+      // OSRM for walking route
+      const walkingUrl = `https://router.project-osrm.org/route/v1/foot/${fromLng},${fromLat};${toLng},${toLat}?overview=false`;
+      const walkingRes = await fetch(walkingUrl);
+      const walkingData = await walkingRes.json();
+      
+      let walkingTime = drivingTime * 3; // Fallback: assume walking is 3x driving
+      
+      if (walkingData.code === 'Ok' && walkingData.routes?.[0]) {
+        walkingTime = walkingData.routes[0].duration / 60;
+      }
+
+      return {
+        drivingDistance,
+        drivingTime,
+        walkingTime
+      };
+    } catch (error) {
+      console.error('Route fetch error:', error);
+      return null;
     }
   };
 
@@ -179,7 +257,6 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
   const handleCitySelect = (city: string) => {
     setCitySearch(city);
     setShowSuggestions(false);
-    // Automatically search when a city is selected
     setTimeout(() => {
       searchByCityName(city);
     }, 100);
@@ -210,6 +287,33 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
   const handleWhatsAppClick = (phone: string) => {
     const cleanPhone = phone.replace(/\D/g, '');
     window.open(`https://wa.me/${cleanPhone}`, '_blank');
+  };
+
+  const getGoogleMapsUrl = (optician: Optician, withDirections: boolean = false) => {
+    if (withDirections && latitude && longitude) {
+      // Directions from user location to optician
+      if (optician.latitude && optician.longitude) {
+        return `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${optician.latitude},${optician.longitude}`;
+      } else {
+        const address = encodeURIComponent(`${optician.address}, ${optician.postalCode} ${optician.city}, Morocco`);
+        return `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${address}`;
+      }
+    } else {
+      // Just show optician location
+      if (optician.latitude && optician.longitude) {
+        return `https://www.google.com/maps/search/?api=1&query=${optician.latitude},${optician.longitude}`;
+      } else {
+        const address = encodeURIComponent(`${optician.address}, ${optician.postalCode} ${optician.city}, Morocco`);
+        return `https://www.google.com/maps/search/?api=1&query=${address}`;
+      }
+    }
+  };
+
+  const formatTime = (minutes: number): string => {
+    if (minutes < 60) return `${Math.round(minutes)}min`;
+    const hours = Math.floor(minutes / 60);
+    const mins = Math.round(minutes % 60);
+    return mins > 0 ? `${hours}h${mins}min` : `${hours}h`;
   };
 
   return (
@@ -315,7 +419,6 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-fantastic"
               />
               
-              {/* City Suggestions Dropdown */}
               {showSuggestions && filteredCities.length > 0 && (
                 <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                   {filteredCities.map((city, index) => (
@@ -384,7 +487,6 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
               </Button>
             </div>
 
-            {/* Filters - Only show when GPS is active */}
             {latitude && longitude && (
               <div className="bg-gray-50 p-4 rounded-lg space-y-3">
                 <div className="flex items-center justify-between">
@@ -447,9 +549,14 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
             </div>
           ) : (
             <div className="space-y-4">
-              {/* Render grouped or ungrouped */}
+              {routesLoading && latitude && longitude && (
+                <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg flex items-center gap-2 text-sm text-blue-700">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Calcul des itinéraires en cours...
+                </div>
+              )}
+              
               {groupedOpticians ? (
-                // Grouped by city
                 groupedOpticians.cities.map((city) => {
                   const cityOpticians = groupedOpticians.groups.get(city) || [];
                   return (
@@ -466,7 +573,6 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
                   );
                 })
               ) : (
-                // Ungrouped list
                 sortedOpticians.map((optician) => renderOpticianCard(optician))
               )}
             </div>
@@ -474,7 +580,6 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
         </>
       )}
 
-      {/* No Results */}
       {!loading && opticians.length === 0 && (latitude || citySearch) && (
         <div className="text-center py-8 bg-gray-50 rounded-lg">
           <p className="text-gray-600">
@@ -485,7 +590,6 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
     </div>
   );
 
-  // Helper function to render optician card
   function renderOpticianCard(optician: Optician) {
     return (
       <div key={optician.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -505,6 +609,36 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
           )}
         </div>
 
+        {/* Route Information Card */}
+        {optician.routeInfo && latitude && longitude && (
+          <div className="mb-3 bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center gap-2">
+                <div className="bg-blue-100 p-2 rounded-full">
+                  <Car className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600">En voiture</p>
+                  <p className="text-sm font-bold text-gray-800">
+                    {formatTime(optician.routeInfo.drivingTime)} • {optician.routeInfo.drivingDistance.toFixed(1)} km
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="bg-purple-100 p-2 rounded-full">
+                  <Clock className="h-4 w-4 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600">À pied</p>
+                  <p className="text-sm font-bold text-gray-800">
+                    {formatTime(optician.routeInfo.walkingTime)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {optician.address && (
           <div className="flex items-start mb-3 text-sm text-gray-600">
             <MapPin className="h-4 w-4 mr-2 mt-0.5 shrink-0" />
@@ -515,8 +649,9 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
           </div>
         )}
 
-        <div className="flex gap-2">
-          <a href={`tel:${optician.phone}`} className="flex-1">
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          <a href={`tel:${optician.phone}`}>
             <Button variant="primary" size="sm" className="w-full flex items-center justify-center">
               <Phone className="mr-2 h-4 w-4" />
               {t.call || 'Appeler'}
@@ -526,13 +661,39 @@ export default function NearestOpticianFinder({ productName }: NearestOpticianFi
             <Button
               variant="secondary"
               size="sm"
-              className="flex-1 flex items-center justify-center"
+              className="w-full flex items-center justify-center"
               onClick={() => handleWhatsAppClick(optician.whatsapp!)}
             >
               <MessageCircle className="mr-2 h-4 w-4" />
               WhatsApp
             </Button>
           )}
+        </div>
+
+        {/* Google Maps Buttons */}
+        <div className="grid grid-cols-2 gap-2">
+          <a
+            href={getGoogleMapsUrl(optician, false)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button variant="outline" size="sm" className="w-full flex items-center justify-center text-xs">
+              <MapPin className="mr-1 h-3 w-3" />
+              Voir sur Maps
+              <ExternalLink className="ml-1 h-3 w-3" />
+            </Button>
+          </a>
+          <a
+            href={getGoogleMapsUrl(optician, true)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button variant="outline" size="sm" className="w-full flex items-center justify-center text-xs">
+              <Navigation className="mr-1 h-3 w-3" />
+              Itinéraire
+              <ExternalLink className="ml-1 h-3 w-3" />
+            </Button>
+          </a>
         </div>
       </div>
     );

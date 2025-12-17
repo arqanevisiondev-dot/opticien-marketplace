@@ -4,8 +4,8 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { Phone, MessageCircle, Navigation } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
-import { calculateBounds, formatDistance } from '@/lib/geolocation';
+import { useEffect, useMemo, useState } from 'react';
+import { formatDistance } from '@/lib/geolocation';
 
 // Fix for default marker icon
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -56,26 +56,59 @@ interface OpticianMapProps {
   userLocation?: { lat: number; lng: number };
 }
 
-// Component to fit bounds automatically
+// Component to fit bounds automatically with safety checks
 function AutoFitBounds({ coordinates }: { coordinates: [number, number][] }) {
   const map = useMap();
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (coordinates.length === 0) return;
+    // Wait for map to be fully initialized
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 100);
 
-    if (coordinates.length === 1) {
-      map.setView(coordinates[0], 13);
-      return;
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!isReady || coordinates.length === 0) return;
+
+    try {
+      // Check if map is still mounted and valid
+      if (!map || !map.getContainer()) return;
+
+      if (coordinates.length === 1) {
+        map.setView(coordinates[0], 13, { animate: false });
+        return;
+      }
+
+      const bounds = L.latLngBounds(coordinates);
+      
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        try {
+          if (map && map.getContainer()) {
+            map.fitBounds(bounds, { 
+              padding: [50, 50], 
+              maxZoom: 15,
+              animate: false // Disable animation to prevent timing issues
+            });
+          }
+        } catch (err) {
+          console.warn('Error fitting bounds:', err);
+        }
+      });
+    } catch (err) {
+      console.warn('Error in AutoFitBounds:', err);
     }
-
-    const bounds = L.latLngBounds(coordinates);
-    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
-  }, [coordinates, map]);
+  }, [coordinates, map, isReady]);
 
   return null;
 }
 
 export default function OpticianMap({ opticians, userLocation }: OpticianMapProps) {
+  const [mapKey, setMapKey] = useState(0);
+
   // Filter opticians with valid coordinates
   const opticiansWithCoords = useMemo(() => 
     opticians.filter((o) => o.latitude && o.longitude),
@@ -93,8 +126,8 @@ export default function OpticianMap({ opticians, userLocation }: OpticianMapProp
     }, opticiansWithCoords[0]);
   }, [opticiansWithCoords, userLocation]);
 
-  // Default center (Paris, France)
-  const defaultCenter: [number, number] = [48.8566, 2.3522];
+  // Default center (Rabat, Morocco)
+  const defaultCenter: [number, number] = [33.9716, -6.8498];
   const center: [number, number] = userLocation
     ? [userLocation.lat, userLocation.lng]
     : opticiansWithCoords.length > 0
@@ -102,30 +135,44 @@ export default function OpticianMap({ opticians, userLocation }: OpticianMapProp
     : defaultCenter;
 
   // Collect all coordinates for auto-fit
-  const allCoordinates: [number, number][] = [
+  const allCoordinates: [number, number][] = useMemo(() => [
     ...(userLocation ? [[userLocation.lat, userLocation.lng] as [number, number]] : []),
     ...opticiansWithCoords.map(o => [o.latitude!, o.longitude!] as [number, number]),
-  ];
+  ], [userLocation, opticiansWithCoords]);
 
   const handleGetDirections = (lat: number, lng: number) => {
     if (userLocation) {
-      // Open Google Maps with directions
       window.open(
         `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${lat},${lng}`,
         '_blank'
       );
     } else {
-      // Open location directly
       window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
     }
   };
 
+  // Force remount when coordinates change significantly
+  useEffect(() => {
+    setMapKey(prev => prev + 1);
+  }, [opticiansWithCoords.length, userLocation?.lat, userLocation?.lng]);
+
+  if (opticiansWithCoords.length === 0 && !userLocation) {
+    return (
+      <div className="h-96 w-full bg-gray-100 rounded-lg flex items-center justify-center">
+        <p className="text-gray-500">Aucune position disponible pour afficher la carte</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-96 w-full">
+    <div className="h-96 w-full rounded-lg overflow-hidden shadow-lg">
       <MapContainer
+        key={mapKey}
         center={center}
         zoom={13}
         style={{ height: '100%', width: '100%' }}
+        scrollWheelZoom={true}
+        zoomControl={true}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
