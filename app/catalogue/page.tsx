@@ -125,9 +125,7 @@ export default function CataloguePage() {
   const uniqueMaterials = Array.from(new Set(safeProducts.map((p) => p.material).filter(Boolean)))
   const uniqueGenders = Array.from(new Set(safeProducts.map((p) => p.gender).filter(Boolean)))
   const uniqueMarques = Array.from(new Set(safeProducts.map((p) => p.marque).filter(Boolean)))
-  const newCollectionProducts = safeProducts.filter((product) => product.isNewCollection)
-  const featuredNewCollection = newCollectionProducts[0]
-  const additionalNewCollection = newCollectionProducts.slice(1)
+  
 
   const filteredProducts = safeProducts.filter((product) => {
     const matchesSearch =
@@ -152,99 +150,7 @@ export default function CataloguePage() {
           <p className="text-lg text-gray-700">{t.exclusiveCatalogDesc}</p>
         </div>
 
-        {/* Featured New Collection */}
-        {featuredNewCollection && (
-          <section className="mb-12">
-            <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
-              <div className="flex flex-col lg:flex-row">
-                <Link
-                  href={`/catalogue/${featuredNewCollection.slug || featuredNewCollection.id}`}
-                  className="relative lg:w-1/2 h-80 lg:h-auto"
-                >
-                  {featuredNewCollection.images?.[0] ? (
-                    <img
-                      src={featuredNewCollection.images[0] || "/placeholder.svg"}
-                      alt={featuredNewCollection.name}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-[#EEE9DF] to-[#80827f]/10 flex items-center justify-center text-gray-400">
-                      No image
-                    </div>
-                  )}
-                  <div className="absolute top-4 right-4 bg-[#f56a24] text-white px-4 py-2 text-xs font-bold uppercase tracking-wide rounded-full shadow-lg">
-                    {t.newBadge}
-                  </div>
-                </Link>
-                <div className="flex-1 p-8 lg:p-12 space-y-6 flex flex-col justify-center">
-                  <span className="inline-flex items-center rounded-full bg-[#f56a24]/10 text-[#f56a24] px-3 py-1 text-sm font-semibold w-fit">
-                    {t.newCollection}
-                  </span>
-                  <h2 className="text-4xl font-bold text-[#1B2632]">{featuredNewCollection.name}</h2>
-                  <div className="space-y-2 text-gray-600">
-                    <p>
-                      <strong>{t.reference}:</strong> {featuredNewCollection.reference}
-                    </p>
-                    {featuredNewCollection.marque && (
-                      <p>
-                        <strong>Marque:</strong> {featuredNewCollection.marque}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-600">
-                    <span>{featuredNewCollection.material}</span>
-                    <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                    <span>{featuredNewCollection.gender}</span>
-                    {featuredNewCollection.color && (
-                      <>
-                        <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                        <span>{featuredNewCollection.color}</span>
-                      </>
-                    )}
-                  </div>
-                  <Link href={`/catalogue/${featuredNewCollection.slug || featuredNewCollection.id}`}>
-                    <Button variant="secondary" size="lg">
-                      {t.view}
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {additionalNewCollection.length > 0 && (
-              <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {additionalNewCollection.map((product) => (
-                  <Link key={product.id} href={`/catalogue/${product.slug || product.id}`}>
-                    <div className="relative bg-white shadow-md rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group">
-                      <div className="aspect-square bg-gradient-to-br from-[#EEE9DF] to-[#80827f]/10">
-                        {product.images?.[0] ? (
-                          <img
-                            src={product.images[0] || "/placeholder.svg"}
-                            alt={product.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">No image</div>
-                        )}
-                        <div className="absolute top-3 right-3 bg-[#f56a24] text-white px-3 py-1 text-xs font-bold uppercase rounded-full">
-                          {t.newBadge}
-                        </div>
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold text-[#1B2632] mb-1 group-hover:text-[#f56a24] transition-colors">
-                          {product.name}
-                        </h3>
-                        <p className="text-xs text-gray-500">
-                          {t.reference}: {product.reference}
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
+        
 
         {/* Filters and Search */}
         <div className="bg-white p-6 md:p-8 shadow-lg rounded-xl mb-8">
@@ -321,121 +227,32 @@ export default function CataloguePage() {
           </div>
         </div>
 
-        {/* Products Grid */}
+        {/* Categories Grid */}
         {loading ? (
           <div className="text-center py-16">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#f56a24]"></div>
             <p className="mt-4 text-gray-600">{t.loading}...</p>
           </div>
-        ) : filteredProducts.length === 0 ? (
+        ) : categories.length === 0 ? (
           <div className="text-center py-16 bg-white shadow-lg rounded-xl">
-            <p className="text-gray-600 text-lg">{t.noProducts}</p>
+            <p className="text-gray-600 text-lg">{t.noCategories || 'No categories found'}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-            {filteredProducts.map((product) => (
-              <Link key={product.id} href={`/catalogue/${product.slug || product.id}`}>
-                <div className="bg-white shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer rounded-xl overflow-hidden group flex flex-col h-full">
-                  <div className="aspect-square bg-gradient-to-br from-[#EEE9DF] to-[#80827f]/10 relative overflow-hidden">
-                    {product.salePrice && (
-                      <div className="absolute top-3 left-3 bg-green-600 text-white px-3 py-1 text-xs font-bold uppercase rounded-full z-10">
-                        PROMO
-                      </div>
-                    )}
-                    {product.isNewCollection && (
-                      <div className="absolute top-3 right-3 bg-[#f56a24] text-white px-3 py-1 text-xs font-bold uppercase rounded-full z-10">
-                        {t.newBadge}
-                      </div>
-                    )}
-                    {product.images && product.images.length > 0 ? (
-                      <img
-                        src={product.images[0] || "/placeholder.svg"}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
+            {categories.map((category) => (
+              <Link key={category.id} href={`/catalogue/category/${category.slug || category.id}`}>
+                <div className="group bg-white rounded-lg border-2 border-gray-200 hover:border-[#f56a24]/60 transition-all duration-300 hover:shadow-xl overflow-hidden">
+                  <div className="relative h-48 bg-gradient-to-br from-[#EEE9DF] to-[#80827f]/10 flex items-center justify-center">
+                    {/* Image placeholder: server provides imageUrl if available */}
+                    {(category as any)?.imageUrl ? (
+                      <img src={(category as any).imageUrl} alt={category.name} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">No image</div>
-                    )}
-                    {isOptician && !product.inStock && (
-                      <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-xs font-bold">
-                        OUT OF STOCK
-                      </div>
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">{category.name}</div>
                     )}
                   </div>
-                  <div className="p-5 flex flex-col flex-grow">
-                    <h3 className="font-bold text-lg text-[#1B2632] mb-1 group-hover:text-[#f56a24] transition-colors line-clamp-2">
-                      {product.name}
-                    </h3>
-                    <div className="text-sm text-gray-600 mb-3 space-y-1">
-                      <p>
-                        <strong>{t.ref}</strong> {product.reference}
-                      </p>
-                      {product.marque && (
-                        <p>
-                          <strong>{t.brand}</strong> {product.marque}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between mb-4 flex-grow">
-                      <div className="text-xs text-gray-500">
-                        <span>{product.material}</span>
-                        <span className="mx-2">•</span>
-                        <span>{product.gender}</span>
-                      </div>
-                    </div>
-
-                    <div className="border-t border-gray-200 pt-4">
-                      {isOptician && effectiveCanSeePrices && product.loyaltyPointsReward && product.loyaltyPointsReward > 0 && (
-                        <div className="mb-3 bg-gradient-to-r from-[#f56a24]/10 to-transparent px-2 py-1.5 rounded-lg">
-                          <div className="flex items-center gap-1.5">
-                            <svg className="h-4 w-4 text-[#f56a24]" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <span className="text-xs font-semibold text-[#1B2632]">
-                              +{product.loyaltyPointsReward} pts
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                      <div className="text-sm font-semibold mb-3">
-                        {effectiveCanSeePrices ? (
-                          product.salePrice ? (
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-xs text-gray-500 line-through">{product.price.toFixed(2)} DH</span>
-                              <span className="text-[#f56a24] text-xl">{product.salePrice.toFixed(2)} DH</span>
-                            </div>
-                          ) : (
-                            <span className="text-[#f56a24] text-xl">{product.price.toFixed(2)} DH</span>
-                          )
-                        ) : (
-                          <span className="text-gray-400">{t.priceOnRequest}</span>
-                        )}
-                      </div>
-
-                      {isOptician && (
-                        <Button
-                          variant={isInCart(product.id) ? "outline" : "primary"}
-                          size="sm"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            if (!isInCart(product.id)) {
-                              const url = `/catalogue/${product.slug || product.id}`
-                              add({
-                                id: product.id,
-                                name: product.name,
-                                reference: product.reference,
-                                url,
-                                type: 'regular'
-                              })
-                            }
-                          }}
-                          className="w-full"
-                        >
-                          {isInCart(product.id) ? t.inCartBadge : t.addToCartButton}
-                        </Button>
-                      )}
-                    </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-[#1B2632] mb-1 group-hover:text-[#f56a24] transition-colors line-clamp-2">{category.name}</h3>
+                    <p className="text-sm text-gray-500">{t.viewCategory || 'View category'}</p>
                   </div>
                 </div>
               </Link>

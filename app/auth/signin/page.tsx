@@ -30,10 +30,36 @@ export default function SignInPage() {
       });
 
       if (result?.error) {
-        throw new Error('Email ou mot de passe incorrect');
+        // If credentials failed, check the account status by email
+        try {
+          const res = await fetch('/api/auth/check-status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: formData.email }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.status === 'PENDING') {
+              setError(t.signInPendingMessage);
+              setLoading(false);
+              return;
+            }
+            if (data.status === 'REJECTED') {
+              setError(t.signInRejectedMessage);
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (e) {
+          // ignore and show generic error below
+        }
+
+        setError('Email ou mot de passe incorrect');
+        setLoading(false);
+        return;
       }
 
-      // Attendre que la session soit mise à jour
+      // Wait for session update
       window.location.href = '/auth/callback';
     } catch (err: any) {
       setError(err.message);

@@ -18,7 +18,7 @@ export default function Header() {
 
   const navigation = [
     { name: t.home, href: "/" },
-    { name: t.allProducts || "Tous les produits", href: "/categories" },
+    { name: t.allProducts || "Tous les produits", href: "/products" },
     { name: t.catalog, href: "/catalogue" },
     { name: t.contact, href: "/contact" },
   ];
@@ -167,82 +167,99 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <div className="md:hidden py-4 space-y-2 pb-4">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`block px-3 py-2 text-base font-medium hover:bg-white/10 rounded ${
-                  pathname === item.href ? "text-[#f56a24]" : "text-white"
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
-            ))}
+        {/* Mobile Navigation: backdrop + sliding drawer from right */}
+        <div className="md:hidden">
+          {/* Backdrop */}
+          <div
+            className={`fixed inset-0 bg-black transition-opacity duration-300 ease-in-out z-40 ${
+              mobileMenuOpen ? "opacity-40 pointer-events-auto" : "opacity-0 pointer-events-none"
+            }`}
+            onClick={() => setMobileMenuOpen(false)}
+          />
 
-            <div className="pt-4 border-t border-white/20">
-              <div className="px-3 py-2 text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
-                <Globe className="h-4 w-4" />
-                {t.language || "Language"}
+          {/* Sliding panel */}
+          <aside
+            className={`fixed top-0 right-0 h-full z-50 w-72 max-w-full text-white transform transition-transform duration-300 ease-in-out bg-gradient-to-r from-[#1B2632] to-[#2C3B4D] shadow-lg ${
+              mobileMenuOpen ? "translate-x-0" : "translate-x-full"
+            }`}
+          >
+            <div className="p-4 overflow-y-auto h-full">
+              <div className="mb-4">
+                {navigation.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`block px-3 py-2 text-base font-medium hover:bg-white/10 rounded ${
+                      pathname === item.href ? "text-[#f56a24]" : "text-white"
+                    }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
               </div>
-              <div className="space-y-1 pl-3">
-                <button
-                  onClick={() => {
-                    setLanguage("fr")
-                    setMobileMenuOpen(false)
-                  }}
-                  className={`block w-full text-left px-3 py-2 text-sm rounded hover:bg-white/10 transition-colors ${
-                    language === "fr" ? "text-[#f56a24] font-medium" : "text-white"
-                  }`}
-                >
-                  🇫🇷 Français
-                </button>
-                <button
-                  onClick={() => {
-                    setLanguage("en")
-                    setMobileMenuOpen(false)
-                  }}
-                  className={`block w-full text-left px-3 py-2 text-sm rounded hover:bg-white/10 transition-colors ${
-                    language === "en" ? "text-[#f56a24] font-medium" : "text-white"
-                  }`}
-                >
-                  🇬🇧 English
-                </button>
-                <button
-                  onClick={() => {
-                    setLanguage("ar")
-                    setMobileMenuOpen(false)
-                  }}
-                  className={`block w-full text-left px-3 py-2 text-sm rounded hover:bg-white/10 transition-colors ${
-                    language === "ar" ? "text-[#f56a24] font-medium" : "text-white"
-                  }`}
-                >
-                  🇸🇦 العربية
-                </button>
+
+              <div className="pt-2 border-t border-white/20">
+                <div className="px-3 py-2 text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  {t.language || "Language"}
+                </div>
+                <div className="space-y-1 pl-3">
+                  <button
+                    onClick={() => {
+                      setLanguage("fr")
+                      setMobileMenuOpen(false)
+                    }}
+                    className={`block w-full text-left px-3 py-2 text-sm rounded hover:bg-white/10 transition-colors ${
+                      language === "fr" ? "text-[#f56a24] font-medium" : "text-white"
+                    }`}
+                  >
+                    🇫🇷 Français
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLanguage("en")
+                      setMobileMenuOpen(false)
+                    }}
+                    className={`block w-full text-left px-3 py-2 text-sm rounded hover:bg-white/10 transition-colors ${
+                      language === "en" ? "text-[#f56a24] font-medium" : "text-white"
+                    }`}
+                  >
+                    🇬🇧 English
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLanguage("ar")
+                      setMobileMenuOpen(false)
+                    }}
+                    className={`block w-full text-left px-3 py-2 text-sm rounded hover:bg-white/10 transition-colors ${
+                      language === "ar" ? "text-[#f56a24] font-medium" : "text-white"
+                    }`}
+                  >
+                    🇸🇦 العربية
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-4 space-y-2 border-t border-white/20">
+                <Link href="/auth/signin" className="block" onClick={() => setMobileMenuOpen(false)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-white text-white hover:bg-white hover:text-[#1B2632] bg-transparent"
+                  >
+                    {t.login}
+                  </Button>
+                </Link>
+                <Link href="/auth/signup" className="block" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="secondary" size="sm" className="w-full">
+                    {t.signup}
+                  </Button>
+                </Link>
               </div>
             </div>
-
-            <div className="pt-4 space-y-2 border-t border-white/20">
-              <Link href="/auth/signin" className="block">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full border-white text-white hover:bg-white hover:text-[#1B2632] bg-transparent"
-                >
-                  {t.login}
-                </Button>
-              </Link>
-              <Link href="/auth/signup" className="block">
-                <Button variant="secondary" size="sm" className="w-full">
-                  {t.signup}
-                </Button>
-              </Link>
-            </div>
-          </div>
-        )}
+          </aside>
+        </div>
       </nav>
     </header>
   )

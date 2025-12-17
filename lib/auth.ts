@@ -35,6 +35,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
+        // Prevent opticians from signing in until approved by an admin
+        if (user.role === 'OPTICIAN' && user.optician) {
+          const status = user.optician.status;
+          if (status === 'PENDING') {
+            throw new Error('OPTICIAN_PENDING');
+          }
+          if (status === 'REJECTED') {
+            throw new Error('OPTICIAN_REJECTED');
+          }
+        }
+
         return {
           id: user.id,
           email: user.email,

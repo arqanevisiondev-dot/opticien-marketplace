@@ -45,7 +45,7 @@ export default function CategoriesSection() {
     return (
       <section className="py-20 bg-[#1B2632]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-gray-400">Loading categories...</div>
+          <div className="text-center text-gray-400">{t.categoriesLoading}</div>
         </div>
       </section>
     )
@@ -55,7 +55,7 @@ export default function CategoriesSection() {
     return (
       <section className="py-20 bg-[#1B2632]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-red-500">Error: {error}</div>
+          <div className="text-center text-red-500">{t.categoriesError}: {error}</div>
         </div>
       </section>
     )
@@ -66,10 +66,10 @@ export default function CategoriesSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 text-pretty">
-            {t.categories || "Nos Catégories"}
+            {t.categories}
           </h2>
           <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-            {t.categoriesDescription || "Découvrez notre large gamme de lunettes organisée par catégorie"}
+            {t.categoriesDescription}
           </p>
         </div>
 
@@ -78,7 +78,7 @@ export default function CategoriesSection() {
             {categories.slice(0, 6).map((category) => (
               <Link
                 key={category.id}
-                href={`/categories?category=${category.slug}`}
+                href={`/catalogue/category/${category.slug}`}
                 className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#2C3B4D] to-[#1B2632] border border-[#80827f]/20 hover:border-[#f56a24]/60 transition-all duration-500 hover:shadow-2xl hover:shadow-[#f56a24]/20 transform hover:-translate-y-2"
               >
                 {/* Image Background */}
@@ -128,15 +128,15 @@ export default function CategoriesSection() {
             ))}
           </div>
         ) : (
-          <div className="text-center text-gray-400 py-12">Aucune catégorie disponible pour le moment.</div>
+          <div className="text-center text-gray-400 py-12">{t.noCategoriesAvailable}</div>
         )}
 
         {/* View All Button */}
         {categories.length > 6 && (
           <div className="text-center mt-12">
-            <Link href="/categories">
+            <Link href="/products">
               <button className="px-8 py-4 bg-[#f56a24] hover:bg-[#f56a24]/90 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-                Voir toutes les catégories ({categories.length})
+                {t.viewAllCategories.replace('{count}', String(categories.length))}
               </button>
             </Link>
           </div>

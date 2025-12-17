@@ -147,13 +147,13 @@ function CategoriesContent() {
     if (newFilters.marque) params.set("marque", newFilters.marque)
     
     const queryString = params.toString()
-    router.push(`/categories${queryString ? `?${queryString}` : ""}`)
+    router.push(`/products${queryString ? `?${queryString}` : ""}`)
   }
 
   const clearFilters = () => {
     setFilters({ category: "", gender: "", marque: "" })
     setSearchQuery("")
-    router.push("/categories")
+    router.push("/products")
   }
 
   const activeFiltersCount = Object.values(filters).filter(Boolean).length

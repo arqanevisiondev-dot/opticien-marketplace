@@ -73,8 +73,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  const effectiveCanSeePrices = !isMobile && canSeePrices
+  // allow admins and approved opticians to see prices even on mobile
   const isOptician = session?.user?.role === "OPTICIAN"
+  const isAdmin = session?.user?.role === "ADMIN"
+  const effectiveCanSeePrices = canSeePrices && (!isMobile || isOptician || isAdmin)
+  const showContactLink = isAdmin || !effectiveCanSeePrices
 
   const fetchProduct = async () => {
     try {
@@ -175,38 +178,45 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               )}
 
               <div className="bg-gradient-to-br from-[#f56a24]/5 to-[#80827f]/5 p-6 rounded-xl mb-8 border border-[#f56a24]/20">
-                <p className="text-sm text-gray-600 mb-3">{t.priceOnRequest}</p>
+                {/* Show 'price on request' only to non-privileged users */}
+                {!effectiveCanSeePrices && (
+                  <p className="text-sm text-gray-600 mb-3">{t.priceOnRequest}</p>
+                )}
                 {effectiveCanSeePrices ? (
                   product.salePrice ? (
                     <div className="flex items-baseline gap-3">
                       <span className="text-sm text-gray-500 line-through font-medium">
-                        {product.price.toFixed(2)} DH
+                        {product.price.toFixed(2)} {t.Dh}
                       </span>
-                      <span className="text-4xl font-bold text-[#f56a24]">{product.salePrice.toFixed(2)} DH</span>
+                      <span className="text-4xl font-bold text-[#f56a24]">{product.salePrice.toFixed(2)} {t.Dh}</span>
                     </div>
                   ) : (
-                    <div className="text-4xl font-bold text-[#f56a24]">{product.price.toFixed(2)} DH</div>
+                    <div className="text-4xl font-bold text-[#f56a24]">{product.price.toFixed(2)} {t.Dh}</div>
                   )
-                ) : (
+                ) : null}
+
+                {/* Contact link: visible to admin and to users who cannot see prices */}
+                {showContactLink && (
                   <button
                     onClick={() => document.getElementById("supplier-section")?.scrollIntoView({ behavior: "smooth" })}
-                    className="text-base text-[#f56a24] hover:text-[#d85a1f] font-semibold underline cursor-pointer"
+                    className="text-base text-[#f56a24] hover:text-[#d85a1f] font-semibold underline cursor-pointer mt-3 block"
                   >
-                    {t.contactForPrice}
+                    {isAdmin ? (t.contactOptician || "Contact the optician") : (t.contactForPrice)}
                   </button>
                 )}
-                {isOptician && effectiveCanSeePrices && product.loyaltyPointsReward && product.loyaltyPointsReward > 0 && (
+
+                {(effectiveCanSeePrices && product.loyaltyPointsReward && product.loyaltyPointsReward > 0) && (
                   <div className="mt-4 pt-4 border-t border-[#f56a24]/20">
                     <div className="flex items-center gap-2">
                       <svg className="h-5 w-5 text-[#f56a24]" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                       <span className="text-sm font-semibold text-[#1B2632]">
-                        Gagnez <span className="text-[#f56a24] text-lg">{product.loyaltyPointsReward}</span> points de fidélité
+                        {t.earnPoints} <span className="text-[#f56a24] text-lg">{product.loyaltyPointsReward}</span> {t.pointsAfterValidation}
                       </span>
                     </div>
                     <p className="text-xs text-gray-600 mt-2">
-                      Points attribués après validation de votre commande par l&apos;administrateur
+                      {t.pointsDescription}
                     </p>
                   </div>
                 )}

@@ -213,9 +213,25 @@ export default function SliderManagement() {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result as string;
-        setImagePreview(base64String);
-        setFormData({ ...formData, imageUrl: base64String });
-        setUploadingImage(false);
+
+        // Validate image dimensions: must be 1920x600
+        const img = new window.Image();
+        img.onload = () => {
+          if (img.width !== 1920 || img.height !== 600) {
+            alert(t.sliderImageSizeError || 'Image must be 1920×600 pixels');
+            setUploadingImage(false);
+            return;
+          }
+
+          setImagePreview(base64String);
+          setFormData({ ...formData, imageUrl: base64String });
+          setUploadingImage(false);
+        };
+        img.onerror = () => {
+          alert('Erreur lors de la lecture des dimensions de l\'image');
+          setUploadingImage(false);
+        };
+        img.src = base64String;
       };
       reader.onerror = () => {
         alert('Erreur lors de la lecture du fichier');
@@ -378,6 +394,7 @@ export default function SliderManagement() {
                     onChange={handleImageUpload}
                     className="hidden"
                   />
+                  <p className="text-sm text-gray-500 mt-2">{t.sliderImageSizeNote}</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -532,7 +549,6 @@ export default function SliderManagement() {
                     key={slide.id}
                     className="p-6 hover:bg-gray-50 transition-colors flex items-center space-x-4"
                   >
-                    <GripVertical className="w-5 h-5 text-gray-400 cursor-move" />
                     
                     <img
                       src={slide.imageUrl}
