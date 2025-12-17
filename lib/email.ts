@@ -1,70 +1,92 @@
-// Email notification service using Resend (Free tier: 3,000 emails/month)
-// Sign up at https://resend.com (no credit card needed for free tier)
+import { Resend } from 'resend';
 
-export async function sendEmailNotification(to: string, subject: string, html: string) {
+function getResendClient() {
   const apiKey = process.env.RESEND_API_KEY;
-
+  
   if (!apiKey) {
-    console.error('RESEND_API_KEY not configured');
-    return false;
+    console.error('❌ RESEND_API_KEY is not set in environment variables');
+    return null;
   }
 
   try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: process.env.EMAIL_FROM || 'noreply@yourdomain.com',
-        to: [to],
-        subject: subject,
-        html: html,
-      }),
-    });
+    console.log('🔧 Initializing Resend client with API key:', apiKey.substring(0, 10) + '...');
+    const client = new Resend(apiKey);
+    console.log('✅ Resend client initialized successfully');
+    return client;
+  } catch (error) {
+    console.error('❌ Failed to initialize Resend client:', error);
+    return null;
+  }
+}
 
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('Resend API error:', error);
+/**
+ * Send email using Resend (primary and only method)
+ */
+export async function sendEmailNotification(
+  to: string,
+  subject: string,
+  html: string
+): Promise<boolean> {
+  try {
+    console.log('📨 [sendEmailNotification] Called with:', { to, subject });
+    
+    const emailFrom = process.env.EMAIL_FROM;
+    console.log('📧 EMAIL_FROM:', emailFrom);
+
+    if (!emailFrom) {
+      console.error('❌ EMAIL_FROM not configured');
       return false;
     }
 
-    const result = await response.json();
-    console.log('Email sent:', result.id);
+    // Check if Resend API key is configured
+    const apiKey = process.env.RESEND_API_KEY;
+    console.log('🔑 RESEND_API_KEY configured:', !!apiKey);
+    
+    if (!apiKey) {
+      console.error('❌ Resend API key not configured');
+      return false;
+    }
+
+    console.log('🚀 Getting Resend client...');
+    const resend = getResendClient();
+    
+    if (!resend) {
+      console.error('❌ Failed to initialize Resend client');
+      return false;
+    }
+
+    console.log(`📧 Sending email via Resend to ${to} from ${emailFrom}`);
+    const response = await resend.emails.send({
+      from: emailFrom,
+      to,
+      subject,
+      html,
+    });
+
+    console.log('📬 Resend response:', response);
+
+    if (response.error) {
+      console.error('❌ Resend error:', response.error);
+      console.error('⚠️  Error details:', response.error.message);
+      return false;
+    }
+
+    console.log('✅ Email sent via Resend:', response.data?.id);
     return true;
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('❌ Error sending email via Resend:', error);
     return false;
   }
 }
 
-// Alternative: Using built-in nodemailer (works with Gmail, etc.)
-import nodemailer from 'nodemailer';
-
-export async function sendEmailWithNodemailer(to: string, subject: string, html: string) {
-  try {
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
-      },
-    });
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM || 'noreply@yourdomain.com',
-      to: to,
-      subject: subject,
-      html: html,
-    });
-
-    console.log('Email sent successfully');
-    return true;
-  } catch (error) {
-    console.error('Error sending email:', error);
-    return false;
-  }
+/**
+ * Alias for backward compatibility (still use Resend, not SMTP)
+ */
+export async function sendEmailWithNodemailer(
+  to: string,
+  subject: string,
+  html: string
+): Promise<boolean> {
+  // Just call the Resend method
+  return sendEmailNotification(to, subject, html);
 }

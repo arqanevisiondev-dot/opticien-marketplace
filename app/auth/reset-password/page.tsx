@@ -1,6 +1,13 @@
 import ResetForm from './ResetForm';
 
-export default function ResetPasswordPage({ searchParams }: { searchParams?: { token?: string } }) {
-  const token = searchParams?.token ?? null;
+interface PageProps {
+  searchParams: Promise<{ token?: string }>;
+}
+
+export default async function ResetPasswordPage({ searchParams }: PageProps) {
+  // Await the searchParams Promise
+  const params = await searchParams;
+  const token = params?.token ?? null;
+  
   return <ResetForm token={token} />;
 }

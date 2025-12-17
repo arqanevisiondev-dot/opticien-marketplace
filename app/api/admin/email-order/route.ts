@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     const { order, items, subtotal, deliveryCost, total, user, loyaltyItems, totalPoints } = body;
 
     // Build a simple, sweet HTML email for admin (includes loyalty items if provided)
-    const adminBase = process.env.NEXT_PUBLIC_ADMIN_URL || process.env.ADMIN_URL || process.env.BASE_URL || '';
+    const adminBase = process.env.NEXTAUTH_URL;
     const html = buildOrderEmailHtml({ order, items, subtotal, deliveryCost, total, user, loyaltyItems, totalPoints, adminBase });
 
     // Fetch admin users from database
@@ -127,7 +127,6 @@ function buildOrderEmailHtml({ order, items, subtotal, deliveryCost, total, user
       <div style="background:#fff;border-radius:10px;overflow:hidden;border:1px solid #eee">
         <div style="background:linear-gradient(90deg,#f56a24,#ff8345);padding:20px;color:#fff;display:flex;align-items:center;justify-content:space-between">
           <div style="display:flex;align-items:center;gap:12px">
-            <div style="width:48px;height:48px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:700">OM</div>
             <div>
               <div style="font-size:18px;font-weight:700">Nouvelle commande reçue</div>
               <div style="font-size:13px;opacity:0.95">Une nouvelle commande a été passée depuis la marketplace</div>
@@ -143,9 +142,9 @@ function buildOrderEmailHtml({ order, items, subtotal, deliveryCost, total, user
               ${userInfo}
               <div style="height:8px"></div>
               <div style="font-size:13px;color:#666">Résumé financier</div>
-              <div style="display:flex;justify-content:space-between;padding-top:8px;font-size:14px"><div>Sous-total</div><div style="font-weight:700">${Number(subtotal || 0).toFixed(2)} DH</div></div>
-              <div style="display:flex;justify-content:space-between;padding-top:6px;font-size:14px"><div>Frais de livraison</div><div style="font-weight:700">${Number(deliveryCost || 0) === 0 ? 'Gratuit' : Number(deliveryCost).toFixed(2) + ' DH'}</div></div>
-              <div style="border-top:1px dashed #eee;margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:#f56a24"><div>Total</div><div>${Number(total || 0).toFixed(2)} DH</div></div>
+              <div style="display:flex;justify-content:space-between;padding-top:8px;font-size:14px"><div>Sous-total: </div><div style="font-weight:700">${Number(subtotal || 0).toFixed(2)} DH</div></div>
+              <div style="display:flex;justify-content:space-between;padding-top:6px;font-size:14px"><div>Frais de livraison: </div><div style="font-weight:700">${Number(deliveryCost || 0) === 0 ? 'Gratuit' : Number(deliveryCost).toFixed(2) + ' DH'}</div></div>
+              <div style="border-top:1px dashed #eee;margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:#f56a24"><div>Total:</div><div>${Number(total || 0).toFixed(2)} DH</div></div>
               ${loyaltyRows ? `<div style="margin-top:10px;font-size:13px;color:#666">Points totaux: <strong style="color:#333">${Number(totalPoints || 0)} pts</strong></div>` : ''}
             </div>
             <div style="margin-top:12px"><a href="${adminLink}" style="display:inline-block;padding:10px 14px;background:#2C3B4D;color:#fff;border-radius:8px;text-decoration:none;font-weight:700">Voir dans l'admin</a></div>

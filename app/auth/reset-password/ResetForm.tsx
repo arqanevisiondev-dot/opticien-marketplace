@@ -1,17 +1,16 @@
 "use client";
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import { Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-interface Props {
-  token?: string | null;
-}
-
-export default function ResetForm({ token }: Props) {
+export default function ResetForm() {
   const { t } = useLanguage();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
+  
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [password, setPassword] = useState('');
