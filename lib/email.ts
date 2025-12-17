@@ -65,13 +65,19 @@ export async function sendEmailNotification(
 
     console.log('📬 Resend response:', response);
 
-    if (response.error) {
-      console.error('❌ Resend error:', response.error);
-      console.error('⚠️  Error details:', response.error.message);
+    // The Resend SDK's response type doesn't expose `error` on CreateEmailResponse
+    // Use a runtime check with an `any` cast so TypeScript won't complain while
+    // we still log and handle any possible error shape returned by the SDK.
+    const respAny = response as any;
+    if (respAny?.error) {
+      console.error('❌ Resend error:', respAny.error);
+      console.error('⚠️  Error details:', respAny.error?.message ?? respAny.error);
       return false;
     }
 
-    console.log('✅ Email sent via Resend:', response.data?.id);
+    // The SDK may return the created id at different paths depending on version.
+    const sentId = respAny?.id ?? respAny?.data?.id ?? null;
+    console.log('✅ Email sent via Resend:', sentId);
     return true;
   } catch (error) {
     console.error('❌ Error sending email via Resend:', error);
