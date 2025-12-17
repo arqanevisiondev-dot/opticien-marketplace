@@ -145,7 +145,7 @@ export default function AdminSidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-40 h-screen bg-abyssal text-white transition-all duration-300 ${
+        className={`fixed lg:static top-0 left-0 z-40 h-screen lg:h-auto bg-abyssal text-white transition-all duration-300 ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         } ${isCollapsed ? 'w-20' : 'w-64'} flex flex-col shadow-2xl`}
       >

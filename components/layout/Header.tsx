@@ -242,20 +242,66 @@ export default function Header() {
               </div>
 
               <div className="mt-6 pt-4 space-y-2 border-t border-white/20">
-                <Link href="/auth/signin" className="block" onClick={() => setMobileMenuOpen(false)}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full border-white text-white hover:bg-white hover:text-[#1B2632] bg-transparent"
-                  >
-                    {t.login}
-                  </Button>
-                </Link>
-                <Link href="/auth/signup" className="block" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="secondary" size="sm" className="w-full">
-                    {t.signup}
-                  </Button>
-                </Link>
+                {status === "loading" ? (
+                  <div className="px-3 text-sm text-gray-300">{t.loading}...</div>
+                ) : session ? (
+                  <div className="space-y-2 px-1">
+                    <div className="px-3 text-sm text-gray-300">{session.user?.email}</div>
+
+                    {session.user?.role === "OPTICIAN" && (
+                      <Link href="/profile" className="block" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="secondary" size="sm" className="w-full">
+                          {t.myProfile}
+                        </Button>
+                      </Link>
+                    )}
+
+                    {session.user?.role === "ADMIN" && (
+                      <>
+                        <Link href="/admin" className="block" onClick={() => setMobileMenuOpen(false)}>
+                          <Button variant="secondary" size="sm" className="w-full">
+                            {t.admin}
+                          </Button>
+                        </Link>
+                        <Link href="/admin/orders/confirm" className="block" onClick={() => setMobileMenuOpen(false)}>
+                          <Button variant="secondary" size="sm" className="w-full">
+                            {t.orders}
+                          </Button>
+                        </Link>
+                      </>
+                    )}
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setMobileMenuOpen(false)
+                        signOut({ callbackUrl: "/" })
+                      }}
+                      className="w-full border-white text-white hover:bg-white hover:text-[#1B2632] bg-transparent flex items-center justify-center"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      {t.logout}
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Link href="/auth/signin" className="block" onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-white text-white hover:bg-white hover:text-[#1B2632] bg-transparent"
+                      >
+                        {t.login}
+                      </Button>
+                    </Link>
+                    <Link href="/auth/signup" className="block" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="secondary" size="sm" className="w-full">
+                        {t.signup}
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </aside>

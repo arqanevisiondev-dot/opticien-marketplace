@@ -13,11 +13,11 @@ interface Recipient {
   businessName: string
   firstName: string
   lastName: string
-  whatsapp: string
+  email?: string | null
   status: "PENDING" | "APPROVED" | "REJECTED"
 }
 
-export default function WhatsappCampaignsPage() {
+export default function EmailCampaignsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { t } = useLanguage()
@@ -25,6 +25,7 @@ export default function WhatsappCampaignsPage() {
   const [recipients, setRecipients] = useState<Recipient[]>([])
   const [selected, setSelected] = useState<Record<string, boolean>>({})
   const [selectAll, setSelectAll] = useState(true)
+  const [subject, setSubject] = useState("")
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<{ success: number; failed: number } | null>(null)
@@ -36,7 +37,7 @@ export default function WhatsappCampaignsPage() {
       return
     }
     ;(async () => {
-      const res = await fetch("/api/admin/opticians/whatsapp-recipients")
+      const res = await fetch("/api/admin/opticians/email-recipients")
       if (res.ok) {
         const data = (await res.json()) as Recipient[]
         setRecipients(data)
@@ -60,7 +61,7 @@ export default function WhatsappCampaignsPage() {
   }
 
   const handleSend = async () => {
-    if (!message.trim()) return
+    if (!message.trim() || !subject.trim()) return
     setLoading(true)
     setResult(null)
     try {
@@ -70,14 +71,19 @@ export default function WhatsappCampaignsPage() {
             .filter(([, v]) => v)
             .map(([k]) => k)
 
-      const res = await fetch("/api/admin/campaigns/whatsapp", {
+      const res = await fetch("/api/admin/campaigns/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, recipientIds }),
+        body: JSON.stringify({ 
+          subject: subject.trim(), 
+          contentHtml: message.trim(),
+          recipientIds
+        }),
       })
       if (res.ok) {
         const data = await res.json()
-        setResult({ success: data.success, failed: data.failed })
+        setResult({ success: data.success ?? data.sent ?? data.attempted ?? 0, failed: data.failed ?? 0 })
+        setSubject("")
         setMessage("")
       }
     } finally {
@@ -100,11 +106,9 @@ export default function WhatsappCampaignsPage() {
             <div className="p-2 bg-burning-flame/20 rounded-lg">
               <MessageSquare className="h-6 w-6 text-burning-flame" />
             </div>
-            <h1 className="text-4xl font-bold text-abyssal">{t.whatsappCampaigns}</h1>
+            <h1 className="text-4xl font-bold text-abyssal">Email Campaigns</h1>
           </div>
-          <p className="text-gray-600 ml-11">
-            {recipients.length} {t.recipientsAvailable}
-          </p>
+          <p className="text-gray-600 ml-11">{recipients.length} recipients available</p>
         </div>
 
         {/* Stats Cards */}
@@ -132,19 +136,32 @@ export default function WhatsappCampaignsPage() {
         </div>
 
         {/* Message Composition */}
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-abyssal mb-6">{t.composeMessage}</h2>
+        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+          <h2 className="text-2xl font-bold text-abyssal mb-6">Compose email</h2>
 
           <div className="mb-6">
-            <label className="block text-sm font-semibold text-abyssal mb-3">{t.message}</label>
+            <label className="block text-sm font-semibold text-abyssal mb-3">Subject</label>
+            <input
+              type="text"
+              className="w-full border-2 border-gray-200 rounded-lg p-4 focus:outline-none focus:border-burning-flame focus:ring-2 focus:ring-burning-flame/20 transition-all"
+              placeholder="Enter email subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+            />
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-abyssal mb-3">Message</label>
             <textarea
               className="w-full border-2 border-gray-200 rounded-lg p-4 h-40 focus:outline-none focus:border-burning-flame focus:ring-2 focus:ring-burning-flame/20 resize-none transition-all"
-              placeholder={t.writeWhatsAppMessagePlaceholder}
+              placeholder="Enter plain text message for the email body"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />
-            <div className="text-right text-sm text-gray-500 mt-2">{message.length} {t.charactersCount}</div>
-          </div>          {/* Recipients Selection */}
+            <div className="text-right text-sm text-gray-500 mt-2">{message.length} characters</div>
+          </div>
+
+          {/* Recipients Selection */}
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <label className="flex items-center gap-3 cursor-pointer hover:bg-gray-100 p-2 rounded transition-colors">
               <input
@@ -161,11 +178,11 @@ export default function WhatsappCampaignsPage() {
             <Button
               variant="primary"
               onClick={handleSend}
-              disabled={loading || !message.trim()}
+              disabled={loading || !message.trim() || !subject.trim()}
               className="flex-1 flex items-center justify-center gap-2"
             >
               <Send className="h-4 w-4" />
-              {loading ? t.sending : t.sendViaWhatsApp}
+              {loading ? 'Sending...' : 'Send Emails'}
             </Button>
           </div>
         </div>
@@ -191,12 +208,12 @@ export default function WhatsappCampaignsPage() {
                     <div className="text-sm text-gray-600">
                       {r.firstName} {r.lastName}
                     </div>
-                    <div className="text-sm text-gray-500">{r.whatsapp}</div>
+                    <div className="text-sm text-gray-500">{r.email ?? '—'}</div>
                   </div>
                 </label>
               ))}
               {recipients.length === 0 && (
-                <div className="text-center py-8 text-gray-500">{t.noOpticiansWithWhatsApp}</div>
+                <div className="text-center py-8 text-gray-500">{t.noOpticiansWithEmail ?? 'No opticians with email found.'}</div>
               )}
             </div>
           </div>
