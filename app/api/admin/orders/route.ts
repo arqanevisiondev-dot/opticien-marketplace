@@ -80,6 +80,7 @@ export async function GET(request: NextRequest) {
       status: string;
       source: string;
       totalAmount: number;
+      deliveryTax: number;
       currency: string;
       createdAt: Date;
       validatedAt: Date | null;
@@ -97,6 +98,7 @@ export async function GET(request: NextRequest) {
         status: order.status,
         source: order.source,
         totalAmount: order.totalAmount,
+        deliveryTax: (order as any).deliveryTax ?? 0,
         currency: order.currency,
         createdAt: order.createdAt,
         validatedAt: order.validatedAt,
@@ -122,7 +124,7 @@ export async function GET(request: NextRequest) {
       (acc, order) => {
         acc.totalOrders += 1;
         acc.totalArticles += order.itemCount;
-        acc.totalValue += order.totalAmount;
+        acc.totalValue += order.totalAmount + (order.deliveryTax ?? 0);
         if (order.status === ORDER_STATUS.PENDING) {
           acc.pending += 1;
         }
@@ -206,8 +208,7 @@ export async function POST(request: NextRequest) {
           totalAmount: 0,
           currency: 'EUR',
           validatedAt: new Date(),
-          whatsappFrom: null,
-          whatsappMessageId: null,
+
         },
       });
 
@@ -243,7 +244,7 @@ export async function POST(request: NextRequest) {
 
       await tx.order.update({
         where: { id: createdOrder.id },
-        data: { totalAmount: runningTotal, whatsappMessageId: note ? note.slice(0, 190) : null },
+        data: { totalAmount: runningTotal },
       });
 
       return createdOrder.id;

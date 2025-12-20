@@ -96,7 +96,6 @@ export default function AdminSidebar() {
       icon: Mail,
       children: [
         { title: t.allCampaigns, href: '/admin/campaigns', icon: List },
-        { title: t.newCampaign, href: '/admin/campaigns/new', icon: Plus },
       ],
     },
     {

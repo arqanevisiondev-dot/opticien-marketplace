@@ -128,10 +128,11 @@ export default function CataloguePage() {
   
 
   const filteredProducts = safeProducts.filter((product) => {
+    const term = (searchTerm || "").toLowerCase()
     const matchesSearch =
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.marque.toLowerCase().includes(searchTerm.toLowerCase())
+      (product.name || "").toLowerCase().includes(term) ||
+      (product.reference || "").toLowerCase().includes(term) ||
+      (product.marque || "").toLowerCase().includes(term)
     const matchesCategory = !filters.category || product.category?.id === filters.category
     const matchesMaterial = !filters.material || product.material === filters.material
     const matchesGender = !filters.gender || product.gender === filters.gender
@@ -140,6 +141,9 @@ export default function CataloguePage() {
 
     return matchesSearch && matchesCategory && matchesMaterial && matchesGender && matchesMarque && matchesColor
   })
+
+  const activeFiltersCount = Object.values(filters).filter(Boolean).length
+  const hasSearchOrFilters = Boolean(searchTerm) || activeFiltersCount > 0
 
   return (
     <div className="min-h-screen bg-[#EEE9DF]">
@@ -227,12 +231,72 @@ export default function CataloguePage() {
           </div>
         </div>
 
-        {/* Categories Grid */}
+        {/* Categories Grid or Filtered Products */}
         {loading ? (
           <div className="text-center py-16">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#f56a24]"></div>
             <p className="mt-4 text-gray-600">{t.loading}...</p>
           </div>
+        ) : hasSearchOrFilters ? (
+          // When user searched or applied filters, show product results
+          filteredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+              {filteredProducts.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/catalogue/${product.slug || product.id}`}
+                  className="group bg-white rounded-lg border-2 border-gray-200 hover:border-[#f56a24]/60 transition-all duration-300 hover:shadow-xl overflow-hidden"
+                >
+                  <div className="relative h-48 bg-gray-100 overflow-hidden">
+                    {product.images && product.images.length > 0 ? (
+                      <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">{t.noImage}</div>
+                    )}
+                    {product.salePrice && (
+                      <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">PROMO</div>
+                    )}
+                  </div>
+
+                  <div className="p-4">
+                    <h3 className="font-bold text-[#1B2632] mb-1 group-hover:text-[#f56a24] transition-colors line-clamp-2">{product.name}</h3>
+                    <p className="text-sm text-gray-500 mb-2">Réf: {product.reference}</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        {effectiveCanSeePrices ? (
+                          product.salePrice ? (
+                            <div>
+                              <span className="text-lg font-bold text-[#f56a24]">{product.salePrice}DH</span>
+                              <span className="text-sm text-gray-400 line-through ml-2">{product.price}DH</span>
+                            </div>
+                          ) : (
+                            <span className="text-lg font-bold text-[#1B2632]">{product.price}DH</span>
+                          )
+                        ) : (
+                          <span className="text-sm text-gray-600">{t.seeMore}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <p className="text-gray-600 text-lg">{t.noProducts || 'No products match your filters.'}</p>
+              <div className="mt-4">
+                <button
+                  onClick={() => {
+                    setFilters({ category: "", material: "", gender: "", marque: "", color: "" })
+                    setSearchTerm("")
+                  }}
+                  className="mt-2 px-4 py-2 bg-[#f56a24] text-white rounded-lg hover:bg-[#f56a24]/90"
+                >
+                  {t.clearAll || 'Clear filters'}
+                </button>
+              </div>
+            </div>
+          )
         ) : categories.length === 0 ? (
           <div className="text-center py-16 bg-white shadow-lg rounded-xl">
             <p className="text-gray-600 text-lg">{t.noCategories || 'No categories found'}</p>

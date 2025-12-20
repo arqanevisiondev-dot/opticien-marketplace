@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { items, totalAmount }: { items: OrderItem[]; totalAmount: number } = await request.json();
+    const { items, totalAmount, deliveryCost }: { items: OrderItem[]; totalAmount: number; deliveryCost?: number } = await request.json();
 
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'No items in order' }, { status: 400 });
@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
       data: {
         opticianId: user.optician.id,
         totalAmount,
+        deliveryTax: deliveryCost ?? 0,
         status: 'PENDING',
         source: 'MANUAL',
         items: {
@@ -107,6 +108,7 @@ export async function POST(request: NextRequest) {
           `   Qté: ${item.quantity}\n` +
           `   Prix: ${item.totalLine.toFixed(2)} DH`
         ).join('\n\n') +
+        `\n\n🚚 Frais de livraison: ${Number(deliveryCost ?? 0) === 0 ? 'Gratuit' : Number(deliveryCost).toFixed(2) + ' DH'}` +
         `\n\n💰 *Total: ${totalAmount.toFixed(2)} DH*\n\n` +
         `🆔 Commande #${order.id.slice(0, 8)}`;
 

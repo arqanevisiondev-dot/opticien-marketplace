@@ -20,7 +20,7 @@ interface LoyaltyProduct {
 }
 
 export default function LoyaltyProductsPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [products, setProducts] = useState<LoyaltyProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteModal, setDeleteModal] = useState<{ show: boolean; product: LoyaltyProduct | null }>({ show: false, product: null });
@@ -56,16 +56,16 @@ export default function LoyaltyProductsPage() {
       });
 
       if (res.ok) {
-        setSuccessMessage('Produit supprimé avec succès!');
+        setSuccessMessage(t.productDeletedSuccessMessage ?? 'Produit supprimé avec succès!');
         setDeleteModal({ show: false, product: null });
         fetchProducts();
         setTimeout(() => setSuccessMessage(''), 3000);
       } else {
-        alert('Erreur lors de la suppression');
+        alert(t.errorDeletingProduct ?? 'Erreur lors de la suppression');
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Erreur lors de la suppression');
+      alert(t.errorDeletingProduct ?? 'Erreur lors de la suppression');
     } finally {
       setDeleting(false);
     }
@@ -76,7 +76,7 @@ export default function LoyaltyProductsPage() {
       <div className="min-h-screen bg-gradient-to-b from-[#EEE9DF] to-white flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#f56a24]"></div>
-          <p className="mt-4 text-gray-600">Chargement...</p>
+          <p className="mt-4 text-gray-600">{t.loading ?? 'Chargement...'}</p>
         </div>
       </div>
     );
@@ -101,24 +101,24 @@ export default function LoyaltyProductsPage() {
             className="inline-flex items-center gap-2 text-[#2C3B4D] hover:text-[#f56a24] transition-colors mb-4"
           >
             <ArrowLeft className="h-5 w-5" />
-            Retour au Dashboard
+            {t.backToDashboardAdmin ?? 'Retour au Dashboard'}
           </Link>
           
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold text-[#2C3B4D] flex items-center gap-3">
                 <Package className="h-10 w-10 text-[#f56a24]" />
-                Catalogue de Fidélité
+                {t.loyaltyCatalogTitle ?? 'Catalogue de Fidélité'}
               </h1>
               <p className="text-gray-600 mt-2">
-                Gérez les produits que les opticiens peuvent échanger avec leurs points
+                {t.manageLoyaltyProductsSubtitle ?? 'Gérez les produits que les opticiens peuvent échanger avec leurs points'}
               </p>
             </div>
             
             <Link href="/admin/loyalty-products/new">
-              <Button className="bg-[#f56a24] hover:bg-[#e55a14] text-white">
+              <Button className="bg-[#f56a24] hover:bg-[#e55a14] text-white inline-flex items-center">
                 <Plus className="h-5 w-5 mr-2" />
-                Nouveau Produit
+                {t.newLoyaltyProductButton ?? 'Nouveau Produit'}
               </Button>
             </Link>
           </div>
@@ -129,7 +129,7 @@ export default function LoyaltyProductsPage() {
           <div className="bg-white rounded-lg shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Produits</p>
+                <p className="text-sm text-gray-600">{t.totalProductsLabel ?? 'Total Produits'}</p>
                 <p className="text-3xl font-bold text-[#2C3B4D] mt-1">{products.length}</p>
               </div>
               <Package className="h-12 w-12 text-[#f56a24] opacity-20" />
@@ -139,7 +139,7 @@ export default function LoyaltyProductsPage() {
           <div className="bg-white rounded-lg shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Produits Actifs</p>
+                <p className="text-sm text-gray-600">{t.activeProductsLabel ?? 'Produits Actifs'}</p>
                 <p className="text-3xl font-bold text-green-600 mt-1">
                   {products.filter(p => p.isActive).length}
                 </p>
@@ -155,20 +155,20 @@ export default function LoyaltyProductsPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gradient-to-r from-[#2C3B4D] to-[#1B2632]">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
-                    Produit
+                      <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
+                    {t.productLabel ?? 'Produit'}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
-                    Description
+                    {t.description ?? 'Description'}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
-                    Coût (Points)
+                    {t.pointsCostLabel ?? 'Coût (Points)'}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
-                    Statut
+                    {t.status ?? 'Statut'}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
-                    Actions
+                    {t.actions ?? 'Actions'}
                   </th>
                 </tr>
               </thead>
@@ -177,11 +177,11 @@ export default function LoyaltyProductsPage() {
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center">
                       <Package className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                      <p className="text-gray-600 text-lg mb-4">Aucun produit de fidélité</p>
+                      <p className="text-gray-600 text-lg mb-4">{t.noLoyaltyProducts ?? 'Aucun produit de fidélité'}</p>
                       <Link href="/admin/loyalty-products/new">
                         <Button className="bg-[#f56a24] hover:bg-[#e55a14] text-white">
                           <Plus className="h-5 w-5 mr-2" />
-                          Créer le premier produit
+                          {t.createFirstLoyaltyProduct ?? 'Créer le premier produit'}
                         </Button>
                       </Link>
                     </td>
@@ -205,7 +205,7 @@ export default function LoyaltyProductsPage() {
                           <div>
                             <div className="text-sm font-bold text-[#2C3B4D]">{product.name}</div>
                             <div className="text-xs text-gray-500">
-                              Créé le {new Date(product.createdAt).toLocaleDateString('fr-FR')}
+                              {t.createdOnLabel ?? 'Créé le'} {new Date(product.createdAt).toLocaleDateString(language === 'fr' ? 'fr-FR' : language === 'ar' ? 'ar' : 'en-US')}
                             </div>
                           </div>
                         </div>
@@ -219,10 +219,10 @@ export default function LoyaltyProductsPage() {
                         <div className="text-lg font-bold text-[#f56a24]">
                           {product.pointsCost}
                         </div>
-                        <div className="text-xs text-gray-500">points</div>
+                        <div className="text-xs text-gray-500">{t.pointsUnit ?? 'points'}</div>
                         {product.productId && (
                           <div className="text-xs text-gray-500 mt-1">
-                            (Produit lié)
+                            {t.linkedProductLabel ?? '(Produit lié)'}
                           </div>
                         )}
                       </td>
@@ -230,12 +230,12 @@ export default function LoyaltyProductsPage() {
                         {product.isActive ? (
                           <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
                             <CheckCircle className="h-3 w-3" />
-                            Actif
+                            {t.activeStatusLabel ?? 'Actif'}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
                             <XCircle className="h-3 w-3" />
-                            Inactif
+                            {t.inactiveStatusLabel ?? 'Inactif'}
                           </span>
                         )}
                       </td>
@@ -246,14 +246,14 @@ export default function LoyaltyProductsPage() {
                             className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
                           >
                             <Edit className="h-4 w-4" />
-                            Modifier
+                            {t.edit ?? 'Modifier'}
                           </Link>
                           <button
                             onClick={() => setDeleteModal({ show: true, product })}
                             className="text-red-600 hover:text-red-900 flex items-center gap-1"
                           >
                             <Trash2 className="h-4 w-4" />
-                            Supprimer
+                            {t.deleteAction ?? 'Supprimer'}
                           </button>
                         </div>
                       </td>
@@ -272,14 +272,14 @@ export default function LoyaltyProductsPage() {
               <div className="bg-gradient-to-r from-red-600 to-red-700 px-6 py-4 rounded-t-lg">
                 <h3 className="text-xl font-bold text-white flex items-center gap-2">
                   <Trash2 className="h-6 w-6" />
-                  Confirmer la suppression
+                  {t.confirmDelete ?? 'Confirmer la suppression'}
                 </h3>
               </div>
               
               <div className="p-6">
                 <div className="mb-6">
                   <p className="text-gray-700 mb-4">
-                    Êtes-vous sûr de vouloir supprimer ce produit de fidélité?
+                    {t.confirmDeleteLoyaltyProductMessage ?? 'Êtes-vous sûr de vouloir supprimer ce produit de fidélité?'}
                   </p>
                   
                   <div className="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
@@ -296,7 +296,7 @@ export default function LoyaltyProductsPage() {
                           {deleteModal.product.name}
                         </p>
                         <p className="text-sm text-gray-600">
-                          {deleteModal.product.pointsCost} points
+                          {deleteModal.product.pointsCost} {t.pointsUnit ?? 'points'}
                         </p>
                       </div>
                     </div>
@@ -304,7 +304,7 @@ export default function LoyaltyProductsPage() {
                 </div>
                 
                 <p className="text-sm text-red-600 font-medium mb-6">
-                  ⚠️ Cette action est irréversible
+                  ⚠️ {t.irreversibleActionWarning ?? 'Cette action est irréversible'}
                 </p>
                 
                 <div className="flex items-center gap-3">
@@ -313,7 +313,7 @@ export default function LoyaltyProductsPage() {
                     disabled={deleting}
                     className="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors disabled:opacity-50"
                   >
-                    Annuler
+                    {t.cancel ?? 'Annuler'}
                   </button>
                   <button
                     onClick={confirmDelete}
@@ -323,12 +323,12 @@ export default function LoyaltyProductsPage() {
                     {deleting ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        Suppression...
+                        {t.deletingInProgress ?? 'Suppression...'}
                       </>
                     ) : (
                       <>
                         <Trash2 className="h-4 w-4" />
-                        Supprimer
+                        {t.deleteAction ?? 'Supprimer'}
                       </>
                     )}
                   </button>

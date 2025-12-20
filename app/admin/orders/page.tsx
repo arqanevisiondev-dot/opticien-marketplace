@@ -166,7 +166,7 @@ export default function AdminOrdersPage() {
 
   const formatCurrency = (amount: number) => {
     // Always display in DH (Moroccan Dirham)
-    return `${amount.toFixed(2)} DH`
+    return `${amount.toFixed(2)} ${t.Dh ?? 'DH'}`
   }
 
   const formatDateTime = (value: string) => {
@@ -296,6 +296,21 @@ export default function AdminOrdersPage() {
               >
                 <RotateCcw className="h-4 w-4" />
                 {t.refresh}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  const base = (process.env.NEXTAUTH_URL ?? "").replace(/\/$/, "")
+                  if (base) {
+                    window.location.href = `${base}/admin/orders/confirm`
+                  } else {
+                    router.push("/admin/orders/confirm")
+                  }
+                }}
+                className="flex items-center gap-2 whitespace-nowrap"
+              >
+                <Clock3 className="h-4 w-4" />
+                Traiter commandes en attente
               </Button>
             </div>
         </div>
@@ -432,12 +447,12 @@ export default function AdminOrdersPage() {
             <table className="min-w-full divide-y divide-gray-200 text-sm">
               <thead className="bg-orange-50">
                 <tr className="text-left text-xs uppercase text-gray-500">
-                  <th className="px-6 py-3">ID</th>
-                  <th className="px-6 py-3">Opticien</th>
-                  <th className="px-6 py-3">Articles</th>
-                  <th className="px-6 py-3">Points</th>
-                  <th className="px-6 py-3">Date</th>
-                  <th className="px-6 py-3">Statut</th>
+                  <th className="px-6 py-3">{t.orderIdLabel}</th>
+                  <th className="px-6 py-3">{t.orderOptician}</th>
+                  <th className="px-6 py-3">{t.orderItemsCount}</th>
+                  <th className="px-6 py-3">{t.pointsLabel ?? t.pointsUnit ?? 'Points'}</th>
+                  <th className="px-6 py-3">{t.orderCreated ?? t.createdOnLabel}</th>
+                  <th className="px-6 py-3">{t.status ?? 'Statut'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -465,7 +480,7 @@ export default function AdminOrdersPage() {
                       </td>
                       <td className="px-6 py-4 text-gray-700">{redemption.itemCount.toLocaleString(locale)}</td>
                       <td className="px-6 py-4 text-gray-700">
-                        <span className="font-semibold text-[#f56a24]">{redemption.totalPoints.toLocaleString(locale)} pts</span>
+                        <span className="font-semibold text-[#f56a24]">{redemption.totalPoints.toLocaleString(locale)} {t.pointsUnit ?? t.pointsLabel ?? 'pts'}</span>
                       </td>
                       <td className="px-6 py-4 text-gray-700">{formatDateTime(redemption.createdAt)}</td>
                       <td className="px-6 py-4">

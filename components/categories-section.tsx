@@ -27,7 +27,17 @@ export default function CategoriesSection() {
       try {
         setLoading(true)
         const response = await fetch("/api/categories")
-        if (!response.ok) throw new Error("Failed to fetch categories")
+        if (!response.ok) {
+          let message = `Request failed with status ${response.status}`
+          try {
+            const body = await response.json()
+            message = body?.error || JSON.stringify(body)
+          } catch (e) {
+            const text = await response.text().catch(() => null)
+            if (text) message = text
+          }
+          throw new Error(message)
+        }
         const data = await response.json()
         setCategories(data)
       } catch (err) {

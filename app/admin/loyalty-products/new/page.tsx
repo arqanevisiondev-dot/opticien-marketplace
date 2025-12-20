@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Upload, X, Package, Wand2, Search, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Product {
   id: string;
@@ -21,6 +22,7 @@ type CreationMode = 'select' | 'manual' | null;
 export default function NewLoyaltyProductPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { t } = useLanguage();
   const [mode, setMode] = useState<CreationMode>(null);
   
   // For selecting existing product
@@ -88,7 +90,7 @@ export default function NewLoyaltyProductPage() {
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.pointsCost) {
-      setError('Le nom et le coût en points sont requis');
+      setError(t.nameAndPointsRequired ?? 'Le nom et le coût en points sont requis');
       return;
     }
 
@@ -122,10 +124,10 @@ export default function NewLoyaltyProductPage() {
         router.push('/admin/loyalty-products');
       } else {
         const data = await res.json();
-        setError(data.error || 'Erreur lors de la création');
+        setError(data.error || (t.errorCreatingLoyalty ?? 'Erreur lors de la création'));
       }
     } catch (error) {
-      setError('Une erreur est survenue');
+      setError(t.error ?? 'Une erreur est survenue');
     } finally {
       setLoading(false);
     }
@@ -133,7 +135,7 @@ export default function NewLoyaltyProductPage() {
 
   const handleConvertProduct = async () => {
     if (!selectedProduct || !pointsCost) {
-      setError('Veuillez sélectionner un produit et définir le coût en points');
+      setError(t.selectProductAndPoints ?? 'Veuillez sélectionner un produit et définir le coût en points');
       return;
     }
 
@@ -163,10 +165,10 @@ export default function NewLoyaltyProductPage() {
         router.push('/admin/loyalty-products');
       } else {
         const data = await res.json();
-        setError(data.error || 'Erreur lors de la conversion');
+        setError(data.error || (t.errorConverting ?? 'Erreur lors de la conversion'));
       }
     } catch (error) {
-      setError('Une erreur est survenue');
+      setError(t.error ?? 'Une erreur est survenue');
     } finally {
       setLoading(false);
     }
@@ -192,14 +194,14 @@ export default function NewLoyaltyProductPage() {
             className="inline-flex items-center gap-2 text-[#2C3B4D] hover:text-[#f56a24] transition-colors mb-4"
           >
             <ArrowLeft className="h-5 w-5" />
-            Retour au Catalogue
+            {t.backToCatalogAdmin ?? 'Retour au Catalogue'}
           </Link>
           
           <h1 className="text-4xl font-bold text-[#2C3B4D]">
-            Nouveau Produit de Fidélité
+            {t.newLoyaltyProductTitle ?? 'Nouveau Produit de Fidélité'}
           </h1>
           <p className="text-gray-600 mt-2">
-            Choisissez comment créer votre produit de fidélité
+            {t.chooseModeSubtitle ?? 'Choisissez comment créer votre produit de fidélité'}
           </p>
         </div>
 
@@ -221,10 +223,10 @@ export default function NewLoyaltyProductPage() {
                   <Wand2 className="h-10 w-10 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-[#2C3B4D] mb-3">
-                  Création Manuelle
+                  {t.manualCreation ?? 'Création Manuelle'}
                 </h2>
                 <p className="text-gray-600">
-                  Créez un nouveau produit de fidélité avec tous les détails personnalisés
+                  {t.manualCreationDesc ?? 'Créez un nouveau produit de fidélité avec tous les détails personnalisés'}
                 </p>
               </div>
             </button>
@@ -238,10 +240,10 @@ export default function NewLoyaltyProductPage() {
                   <Package className="h-10 w-10 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-[#2C3B4D] mb-3">
-                  Depuis un Produit Existant
+                  {t.selectExistingProduct ?? 'Depuis un Produit Existant'}
                 </h2>
                 <p className="text-gray-600">
-                  Convertissez un produit existant en produit de fidélité
+                  {t.selectExistingDesc ?? 'Convertissez un produit existant en produit de fidélité'}
                 </p>
               </div>
             </button>
@@ -254,14 +256,15 @@ export default function NewLoyaltyProductPage() {
             <div className="bg-gradient-to-r from-[#2C3B4D] to-[#1B2632] px-8 py-6">
               <h2 className="text-2xl font-bold text-white flex items-center gap-3">
                 <Wand2 className="h-6 w-6" />
-                Création Manuelle
+                {t.manualCreation ?? 'Création Manuelle'}
               </h2>
             </div>
 
             <form onSubmit={handleManualSubmit} className="p-8 space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Nom du Produit *
+                  {t.loyaltyProductNameLabel ?? 'Nom du Produit'}{' '}
+                  <span className="font-medium">*</span>
                 </label>
                 <input
                   type="text"
@@ -269,27 +272,28 @@ export default function NewLoyaltyProductPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent transition-all"
-                  placeholder="Ex: Écrin Premium"
+                    placeholder={t.exampleSunglasses ?? 'Ex: Écrin Premium'}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Description
+                  {t.loyaltyDescriptionLabel ?? 'Description'}
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent transition-all"
                   rows={4}
-                  placeholder="Décrivez le produit..."
+                  placeholder={t.loyaltyDescriptionPlaceholder ?? 'Décrivez le produit...'}
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Coût en Points *
+                    {t.pointsCostLabel ?? 'Coût en Points'}{' '}
+                    <span className="font-medium">*</span>
                   </label>
                   <input
                     type="number"
@@ -298,14 +302,14 @@ export default function NewLoyaltyProductPage() {
                     value={formData.pointsCost}
                     onChange={(e) => setFormData({ ...formData, pointsCost: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent transition-all"
-                    placeholder="100"
+                      placeholder={t.pointsCostPlaceholder ?? '100'}
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Image du Produit
+                  {t.productImage ?? 'Image du Produit'}
                 </label>
                 
                 <div className="mb-4">
@@ -313,9 +317,9 @@ export default function NewLoyaltyProductPage() {
                     <div className="text-center">
                       <Upload className="mx-auto h-16 w-16 text-gray-400 group-hover:text-[#f56a24] transition-colors" />
                       <p className="mt-4 text-base text-gray-600">
-                        <span className="font-semibold text-[#f56a24]">Cliquez pour uploader</span> ou glissez-déposez
+                        <span className="font-semibold text-[#f56a24]">{t.clickToUpload ?? 'Cliquez pour uploader'}</span> {t.orDragDrop ?? 'ou glissez-déposez'}
                       </p>
-                      <p className="text-sm text-gray-500 mt-2">PNG, JPG, WEBP jusqu&apos;à 10MB</p>
+                      <p className="text-sm text-gray-500 mt-2">{t.imageFormats ?? "PNG, JPG, WEBP jusqu'à 10MB"}</p>
                     </div>
                     <input
                       type="file"
@@ -349,14 +353,14 @@ export default function NewLoyaltyProductPage() {
 
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ou URL de l&apos;image
+                    {t.uploadTypeUrl ?? "Ou URL de l'image"}
                   </label>
                   <input
                     type="url"
                     value={formData.imageUrl}
                     onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent transition-all"
-                    placeholder="https://example.com/image.jpg"
+                    placeholder={t.imageUrlPlaceholder ?? 'https://example.com/image.jpg'}
                   />
                 </div>
               </div>
@@ -370,7 +374,7 @@ export default function NewLoyaltyProductPage() {
                   className="w-5 h-5 text-[#f56a24] rounded focus:ring-2 focus:ring-[#f56a24]"
                 />
                 <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
-                  Produit actif (visible pour les opticiens)
+                  {t.productActiveNote ?? 'Produit actif (visible pour les opticiens)'}
                 </label>
               </div>
 
@@ -380,14 +384,14 @@ export default function NewLoyaltyProductPage() {
                   disabled={loading}
                   className="flex-1 bg-[#f56a24] hover:bg-[#e55a14] text-white py-3 text-lg font-semibold"
                 >
-                  {loading ? 'Création...' : 'Créer le Produit'}
+                  {loading ? (t.creatingLoyalty ?? 'Création...') : (t.createLoyaltyProduct ?? 'Créer le Produit')}
                 </Button>
                 <Button
                   type="button"
                   onClick={() => setMode(null)}
                   className="px-6 bg-gray-200 hover:bg-gray-300 text-gray-700"
                 >
-                  Annuler
+                  {t.cancel ?? 'Annuler'}
                 </Button>
               </div>
             </form>
@@ -398,9 +402,9 @@ export default function NewLoyaltyProductPage() {
         {mode === 'select' && (
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             <div className="bg-gradient-to-r from-[#2C3B4D] to-[#1B2632] px-8 py-6">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                <h2 className="text-2xl font-bold text-white flex items-center gap-3">
                 <Package className="h-6 w-6" />
-                Convertir un Produit Existant
+                {t.selectExistingProduct ?? 'Convertir un Produit Existant'}
               </h2>
             </div>
 
@@ -412,7 +416,7 @@ export default function NewLoyaltyProductPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent transition-all"
-                  placeholder="Rechercher un produit par nom ou référence..."
+                  placeholder={t.searchProducts ?? 'Rechercher un produit par nom ou référence...'}
                 />
               </div>
 
@@ -432,7 +436,7 @@ export default function NewLoyaltyProductPage() {
                           {selectedProduct.name}
                         </h3>
                         <p className="text-sm text-gray-600 mt-1">
-                          Réf: {selectedProduct.reference}
+                          {t.ref ?? 'Réf'} {selectedProduct.reference}
                         </p>
                       </div>
                       <button
@@ -446,7 +450,8 @@ export default function NewLoyaltyProductPage() {
 
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Coût en Points de Fidélité *
+                      {t.pointsCostLabel ?? 'Coût en Points'}{' '}
+                      <span className="font-medium">*</span>
                     </label>
                     <input
                       type="number"
@@ -455,10 +460,10 @@ export default function NewLoyaltyProductPage() {
                       value={pointsCost}
                       onChange={(e) => setPointsCost(e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent transition-all"
-                      placeholder="100"
+                      placeholder={t.pointsCostPlaceholder ?? '100'}
                     />
                     <p className="text-xs text-gray-500 mt-2">
-                      Définissez combien de points ce produit coûtera aux opticiens
+                      {t.pointsCostNote ?? 'Définissez combien de points ce produit coûtera aux opticiens'}
                     </p>
                   </div>
 
@@ -468,13 +473,13 @@ export default function NewLoyaltyProductPage() {
                       disabled={loading}
                       className="flex-1 bg-[#f56a24] hover:bg-[#e55a14] text-white py-3 text-lg font-semibold"
                     >
-                      {loading ? 'Conversion...' : 'Convertir en Produit de Fidélité'}
+                      {loading ? (t.convertingProduct ?? 'Conversion...') : (t.convertToLoyalty ?? 'Convertir en Produit de Fidélité')}
                     </Button>
                     <Button
                       onClick={() => setMode(null)}
                       className="px-6 bg-gray-200 hover:bg-gray-300 text-gray-700"
                     >
-                      Annuler
+                      {t.cancel ?? 'Annuler'}
                     </Button>
                   </div>
                 </div>
@@ -483,7 +488,7 @@ export default function NewLoyaltyProductPage() {
                   {filteredProducts.length === 0 ? (
                     <div className="text-center py-12 text-gray-500">
                       <Package className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-                      <p>Aucun produit trouvé</p>
+                      <p>{t.noProductsFound ?? 'Aucun produit trouvé'}</p>
                     </div>
                   ) : (
                     filteredProducts.map((product) => (
@@ -505,7 +510,7 @@ export default function NewLoyaltyProductPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-bold text-[#f56a24]">
-                            {product.price} DH
+                            {Number(product.price ?? 0).toFixed(2)} {t.Dh ?? 'DH'}
                           </p>
                         </div>
                       </button>

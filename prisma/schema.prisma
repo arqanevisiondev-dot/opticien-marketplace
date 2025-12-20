@@ -112,10 +112,9 @@ model Order {
   opticianId        String
   status            OrderStatus @default(PENDING)
   source            OrderSource @default(WHATSAPP)
-  whatsappMessageId String?
-  whatsappFrom      String?
   totalAmount       Float       @default(0)
   currency          String      @default("DH") @db.VarChar(16)
+  deliveryTax       Float       @default(0)
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   validatedAt       DateTime?

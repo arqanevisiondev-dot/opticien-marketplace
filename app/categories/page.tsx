@@ -126,10 +126,11 @@ function CategoriesContent() {
     }
 
     if (searchQuery) {
+      const term = (searchQuery || "").toLowerCase()
       filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.marque?.toLowerCase().includes(searchQuery.toLowerCase())
+        (p.name || "").toLowerCase().includes(term) ||
+        (p.reference || "").toLowerCase().includes(term) ||
+        (p.marque || "").toLowerCase().includes(term)
       )
     }
 
