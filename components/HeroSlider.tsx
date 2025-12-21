@@ -11,6 +11,8 @@ interface Slide {
   subtitle?: string
   description?: string
   imageUrl: string
+  imageUrlTablet?: string
+  imageUrlMobile?: string
   type: "NEWS" | "PRODUCT" | "PROMOTION" | "ANNOUNCEMENT"
   linkUrl?: string
   linkText?: string
@@ -87,13 +89,12 @@ export default function HeroSlider() {
         {slides.map((s, index) => (
           <div
             key={s.id}
-            className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-              index === currentSlide
-                ? "opacity-100 translate-x-0"
-                : index < currentSlide
-                  ? "opacity-0 -translate-x-full"
-                  : "opacity-0 translate-x-full"
-            }`}
+            className={`absolute inset-0 transition-all duration-700 ease-in-out ${index === currentSlide
+              ? "opacity-100 translate-x-0"
+              : index < currentSlide
+                ? "opacity-0 -translate-x-full"
+                : "opacity-0 translate-x-full"
+              }`}
           >
             <div
               className="relative h-full w-full"
@@ -101,15 +102,41 @@ export default function HeroSlider() {
                 backgroundColor: s.backgroundColor || "transparent",
               }}
             >
-              {/* Background Image */}
+              {/* Background Images */}
               <div className="absolute inset-0">
-                <Image
-                  src={s.imageUrl || "/placeholder.svg"}
-                  alt={s.title}
-                  fill
-                  className="object-cover"
-                  priority={index === 0}
-                />
+                {/* Desktop Image (> 1024px) */}
+                <div className="hidden lg:block absolute inset-0">
+                  <Image
+                    src={s.imageUrl || "/placeholder.svg"}
+                    alt={s.title}
+                    fill
+                    className="object-cover"
+                    priority={index === 0}
+                  />
+                </div>
+
+                {/* Tablet Image (640px - 1024px) */}
+                <div className="hidden sm:block lg:hidden absolute inset-0">
+                  <Image
+                    src={s.imageUrlTablet || s.imageUrl || "/placeholder.svg"}
+                    alt={s.title}
+                    fill
+                    className="object-cover"
+                    priority={index === 0}
+                  />
+                </div>
+
+                {/* Mobile Image (< 640px) */}
+                <div className="block sm:hidden absolute inset-0">
+                  <Image
+                    src={s.imageUrlMobile || s.imageUrl || "/placeholder.svg"}
+                    alt={s.title}
+                    fill
+                    className="object-cover"
+                    priority={index === 0}
+                  />
+                </div>
+
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
               </div>
 
@@ -197,11 +224,10 @@ export default function HeroSlider() {
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`transition-all duration-300 rounded-full ${
-              index === currentSlide
-                ? "w-8 sm:w-12 h-2.5 sm:h-3 bg-burning-flame shadow-lg"
-                : "w-2.5 sm:w-3 h-2.5 sm:h-3 bg-white/60 hover:bg-white/90"
-            }`}
+            className={`transition-all duration-300 rounded-full ${index === currentSlide
+              ? "w-8 sm:w-12 h-2.5 sm:h-3 bg-burning-flame shadow-lg"
+              : "w-2.5 sm:w-3 h-2.5 sm:h-3 bg-white/60 hover:bg-white/90"
+              }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}

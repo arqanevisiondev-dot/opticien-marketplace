@@ -24,25 +24,15 @@ export const metadata: Metadata = {
   description: "Plateforme de marché pour montures de lunettes à destination des opticiens professionnels",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Detect preferred language from the request Accept-Language header (safe access)
-  const _hdrs = headers()
-  let acceptLang = ''
-  try {
-    // headers() may return a Headers-like object with a get() method
-    if (typeof (_hdrs as any).get === 'function') {
-      acceptLang = ( _hdrs as any).get('accept-language') || ''
-    } else if (typeof _hdrs === 'object' && _hdrs) {
-      // Fall back to plain-object access if present
-      acceptLang = ( _hdrs as any)['accept-language'] || ( _hdrs as any)['Accept-Language'] || ''
-    }
-  } catch (e) {
-    acceptLang = ''
-  }
+  // Detect preferred language from the request Accept-Language header
+  const headersList = await headers()
+  const acceptLang = headersList.get('accept-language') || ''
+
   const pickLang = (al: string) => {
     const supported = ['fr', 'en', 'ar'] as const
     const parts = al.split(',').map(p => p.split(';')[0].trim().toLowerCase())
@@ -55,7 +45,7 @@ export default function RootLayout({
   }
   const initialLanguage = pickLang(acceptLang)
   return (
-    <html lang="fr">
+    <html lang={initialLanguage} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
