@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
+import { put } from '@vercel/blob';
 import { randomUUID } from 'crypto';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
@@ -25,9 +24,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 });
     }
 
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'products');
-    await mkdir(uploadsDir, { recursive: true });
-
     const urls: string[] = [];
 
     for (const file of files) {
@@ -48,11 +44,9 @@ export async function POST(request: NextRequest) {
       }
 
       const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
-      const filename = `${randomUUID()}.${ext}`;
-      const filepath = path.join(uploadsDir, filename);
-      const buffer = Buffer.from(await file.arrayBuffer());
-      await writeFile(filepath, buffer);
-      urls.push(`/uploads/products/${filename}`);
+      const filename = `products/${randomUUID()}.${ext}`;
+      const blob = await put(filename, file, { access: 'public' });
+      urls.push(blob.url);
     }
 
     // Return compatible response: `url` for single-file callers, `urls` for multi-file callers

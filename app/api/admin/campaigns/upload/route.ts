@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import fs from "fs"
-import path from "path"
+import { put } from "@vercel/blob"
 import crypto from "crypto"
+import path from "path"
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,23 +33,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `File too large (max ${isVideo ? '50' : '5'} MB)` }, { status: 400 })
     }
 
-    const uploadsDir = path.join(process.cwd(), "public", "uploads")
-    await fs.promises.mkdir(uploadsDir, { recursive: true })
-
-    // Create unique filename preserving extension
     const originalName = (file as any).name || "upload"
     const ext = path.extname(originalName) || ""
-    const filename = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}${ext}`
-    const filePath = path.join(uploadsDir, filename)
+    const filename = `campaigns/${Date.now()}-${crypto.randomBytes(6).toString("hex")}${ext}`
 
-    // Read file data and write to disk
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-    await fs.promises.writeFile(filePath, buffer)
+    const blob = await put(filename, file, { access: 'public' })
 
-    // Return the public URL (relative to site root)
-    const url = `/uploads/${filename}`
-    return NextResponse.json({ url, filename, size: buffer.length, type: file.type })
+    return NextResponse.json({ url: blob.url, filename, size: (file as any).size, type: file.type })
   } catch (err) {
     console.error("Upload error:", err)
     return NextResponse.json({ error: "Upload failed" }, { status: 500 })
