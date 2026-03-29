@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { ArrowLeft, Upload, X, Loader2, Check, Plus } from "lucide-react"
+import { ArrowLeft, Upload, X, Loader2, Check, Plus, Star } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { useLanguage } from "@/contexts/LanguageContext"
 
@@ -264,8 +264,7 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
   const [genders, setGenders] = useState<ProductOptionItem[]>([])
   const [brands, setBrands] = useState<Brand[]>([])
   const [existingImages, setExistingImages] = useState<string[]>([])
-  const [imageFiles, setImageFiles] = useState<File[]>([])
-  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [uploading, setUploading] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
@@ -360,22 +359,39 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
     }
   }, [productId, session, t])
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    const newFiles = [...imageFiles, ...files]
-    setImageFiles(newFiles)
-    const newPreviews = files.map((file) => URL.createObjectURL(file))
-    setImagePreviews((prev) => [...prev, ...newPreviews])
-  }
-
-  const removeImagePreview = (index: number) => {
-    URL.revokeObjectURL(imagePreviews[index])
-    setImageFiles((prev) => prev.filter((_, i) => i !== index))
-    setImagePreviews((prev) => prev.filter((_, i) => i !== index))
+    if (files.length === 0) return
+    setUploading(true)
+    setError("")
+    try {
+      const formData = new FormData()
+      files.forEach(file => formData.append('files', file))
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: formData })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Erreur lors de l\'upload')
+      }
+      const data = await res.json()
+      setExistingImages(prev => [...prev, ...(data.urls as string[])])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de l\'upload des images')
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
   }
 
   const removeExistingImage = (index: number) => {
     setExistingImages((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const setPrimaryImage = (index: number) => {
+    setExistingImages(prev => {
+      const next = [...prev]
+      const [selected] = next.splice(index, 1)
+      return [selected, ...next]
+    })
   }
 
   const handleAddOption = async (value: string, imageData?: string) => {
@@ -523,21 +539,6 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
     setSaving(true)
 
     try {
-      let newImages: string[] = []
-      if (imageFiles.length > 0) {
-        newImages = await Promise.all(
-          imageFiles.map(
-            (file) =>
-              new Promise<string>((resolve, reject) => {
-                const reader = new FileReader()
-                reader.onloadend = () => resolve(reader.result as string)
-                reader.onerror = reject
-                reader.readAsDataURL(file)
-              }),
-          ),
-        )
-      }
-
       const manualImages = formData.images
         .split("\n")
         .map((url) => url.trim())
@@ -560,7 +561,7 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
         salePrice: formData.salePrice ? Number.parseFloat(formData.salePrice) : null,
         firstOrderRemisePct: formData.firstOrderRemisePct ? Number.parseFloat(formData.firstOrderRemisePct) : null,
         loyaltyPointsReward: formData.loyaltyPointsReward ? Number.parseInt(formData.loyaltyPointsReward, 10) : null,
-        images: [...existingImages, ...manualImages, ...newImages],
+        images: [...existingImages, ...manualImages],
       }
 
       const res = await fetch("/api/admin/products", {
@@ -893,59 +894,77 @@ export default function ProductEditForm({ productId }: ProductEditFormProps) {
               </h2>
               
               <div>
-                <label className="flex items-center justify-center w-full px-6 py-12 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-[#f56a24] hover:bg-orange-50 transition-all group">
+                <label className={`flex items-center justify-center w-full px-6 py-12 border-2 border-dashed rounded-xl transition-all group ${
+                  uploading ? 'border-[#f56a24] bg-orange-50 cursor-wait' : 'border-gray-300 cursor-pointer hover:border-[#f56a24] hover:bg-orange-50'
+                }`}>
                   <div className="text-center">
-                    <Upload className="mx-auto h-16 w-16 text-gray-400 group-hover:text-[#f56a24] transition-colors" />
-                    <p className="mt-4 text-base text-gray-600">
-                      <span className="font-semibold text-[#f56a24]">Cliquez pour uploader</span> ou glissez-déposez
-                    </p>
-                    <p className="text-sm text-gray-500 mt-2">PNG, JPG, WEBP jusqu&apos;à 10MB</p>
+                    {uploading ? (
+                      <>
+                        <Loader2 className="mx-auto h-16 w-16 text-[#f56a24] animate-spin" />
+                        <p className="mt-4 text-base text-[#f56a24] font-semibold">Upload en cours...</p>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="mx-auto h-16 w-16 text-gray-400 group-hover:text-[#f56a24] transition-colors" />
+                        <p className="mt-4 text-base text-gray-600">
+                          <span className="font-semibold text-[#f56a24]">Cliquez pour uploader</span> ou glissez-déposez
+                        </p>
+                        <p className="text-sm text-gray-500 mt-2">PNG, JPG, WEBP jusqu&apos;à 5 Mo par image</p>
+                      </>
+                    )}
                   </div>
                   <input
                     type="file"
                     multiple
                     accept="image/*"
                     onChange={handleImageUpload}
+                    disabled={uploading}
                     className="hidden"
                   />
                 </label>
               </div>
 
-              {(existingImages.length > 0 || imagePreviews.length > 0) && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {existingImages.map((url, index) => (
-                    <div key={`existing-${index}`} className="relative group">
-                      <img
-                        src={url || "/placeholder.svg"}
-                        alt={`Existing ${index + 1}`}
-                        className="w-full h-40 object-cover rounded-lg border-2 border-gray-200 group-hover:border-[#f56a24] transition-all"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeExistingImage(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                  {imagePreviews.map((preview, index) => (
-                    <div key={`preview-${index}`} className="relative group">
-                      <img
-                        src={preview || "/placeholder.svg"}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-40 object-cover rounded-lg border-2 border-[#f56a24]"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImagePreview(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+              {existingImages.length > 0 && (
+                <>
+                  <p className="text-sm text-gray-500">La première image est la photo principale affichée sur la fiche produit. Cliquez sur <Star className="inline h-4 w-4 text-yellow-400" /> pour la définir comme principale.</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {existingImages.map((url, index) => (
+                      <div key={`${url}-${index}`} className={`relative group rounded-lg overflow-hidden border-2 transition-all ${
+                        index === 0 ? 'border-yellow-400 shadow-md' : 'border-gray-200 hover:border-[#f56a24]'
+                      }`}>
+                        <img
+                          src={url || "/placeholder.svg"}
+                          alt={`Image ${index + 1}`}
+                          className="w-full h-40 object-cover"
+                        />
+                        {index === 0 && (
+                          <div className="absolute top-2 left-2 bg-yellow-400 text-white px-2 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1 shadow">
+                            <Star className="h-3 w-3 fill-white" /> Principale
+                          </div>
+                        )}
+                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {index !== 0 && (
+                            <button
+                              type="button"
+                              onClick={() => setPrimaryImage(index)}
+                              className="bg-yellow-400 text-white p-1.5 rounded-full hover:bg-yellow-500 shadow-lg"
+                              title="Définir comme principale"
+                            >
+                              <Star className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeExistingImage(index)}
+                            className="bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 shadow-lg"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
 

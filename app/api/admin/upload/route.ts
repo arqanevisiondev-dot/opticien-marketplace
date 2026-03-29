@@ -2,61 +2,65 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import { randomUUID } from 'crypto';
+
+const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+const MAX_SIZE = 5 * 1024 * 1024; // 5MB per file
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
     const session = await auth();
     if (!session || session.user?.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 });
     }
 
     const formData = await request.formData();
-    const file = formData.get('file') as File;
 
-    if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+    // Support both single file (field "file") and multiple files (field "files")
+    const singleFile = formData.get('file') as File | null;
+    const multipleFiles = formData.getAll('files') as File[];
+    const files = singleFile ? [singleFile] : multipleFiles;
+
+    if (files.length === 0) {
+      return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 });
     }
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      return NextResponse.json({ error: 'File must be an image' }, { status: 400 });
-    }
-
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      return NextResponse.json({ error: 'File size must be less than 5MB' }, { status: 400 });
-    }
-
-    // Save file to public/uploads directory
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'products');
     await mkdir(uploadsDir, { recursive: true });
-    
-    // Generate unique filename
-    const timestamp = Date.now();
-    const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const filename = `${timestamp}-${originalName}`;
-    const filepath = path.join(uploadsDir, filename);
-    
-    // Write file to disk
-    await writeFile(filepath, buffer);
-    
-    // Return public URL
-    const url = `/uploads/${filename}`;
 
-    return NextResponse.json({ 
-      url, 
-      filename
-    });
+    const urls: string[] = [];
+
+    for (const file of files) {
+      if (!(file instanceof File)) continue;
+
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        return NextResponse.json(
+          { error: `Type de fichier non autorisé: ${file.type}` },
+          { status: 400 }
+        );
+      }
+
+      if (file.size > MAX_SIZE) {
+        return NextResponse.json(
+          { error: `La taille du fichier dépasse la limite de 5 Mo` },
+          { status: 400 }
+        );
+      }
+
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+      const filename = `${randomUUID()}.${ext}`;
+      const filepath = path.join(uploadsDir, filename);
+      const buffer = Buffer.from(await file.arrayBuffer());
+      await writeFile(filepath, buffer);
+      urls.push(`/uploads/products/${filename}`);
+    }
+
+    // Return compatible response: `url` for single-file callers, `urls` for multi-file callers
+    return NextResponse.json({ url: urls[0], urls });
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json(
-      { error: 'Failed to upload file', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Erreur lors de l\'upload des images' },
       { status: 500 }
     );
   }

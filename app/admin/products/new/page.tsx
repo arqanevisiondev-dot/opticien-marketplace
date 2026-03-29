@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Upload, X, Plus, Check } from 'lucide-react';
+import { ArrowLeft, Upload, X, Plus, Check, Star, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -265,8 +265,8 @@ export default function NewProductPage() {
     isNewCollection: false,
   });
   
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   // Protection admin
   useEffect(() => {
@@ -377,20 +377,39 @@ export default function NewProductPage() {
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newFiles = [...imageFiles, ...files];
-    setImageFiles(newFiles);
-
-    const newPreviews = files.map(file => URL.createObjectURL(file));
-    setImagePreviews([...imagePreviews, ...newPreviews]);
+    if (files.length === 0) return;
+    setUploading(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      files.forEach(file => formData.append('files', file));
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Erreur lors de l\'upload');
+      }
+      const data = await res.json();
+      setUploadedImageUrls(prev => [...prev, ...(data.urls as string[])]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de l\'upload des images');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
   };
 
   const removeImage = (index: number) => {
-    const newFiles = imageFiles.filter((_, i) => i !== index);
-    const newPreviews = imagePreviews.filter((_, i) => i !== index);
-    setImageFiles(newFiles);
-    setImagePreviews(newPreviews);
+    setUploadedImageUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const setPrimaryImage = (index: number) => {
+    setUploadedImageUrls(prev => {
+      const next = [...prev];
+      const [selected] = next.splice(index, 1);
+      return [selected, ...next];
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -404,25 +423,10 @@ export default function NewProductPage() {
         throw new Error('Veuillez remplir tous les champs obligatoires');
       }
 
-      // Handle images
-      let imageUrls: string[] = [];
-      
-      if (imageFiles.length > 0) {
-        // Convert images to base64
-        const base64Images = await Promise.all(
-          imageFiles.map(file => {
-            return new Promise<string>((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(reader.result as string);
-              reader.onerror = reject;
-              reader.readAsDataURL(file);
-            });
-          })
-        );
-        imageUrls = base64Images;
-      } else if (formData.images) {
-        imageUrls = formData.images.split('\n').filter(url => url.trim());
-      }
+      const urlImages = formData.images
+        ? formData.images.split('\n').map(u => u.trim()).filter(Boolean)
+        : [];
+      const imageUrls = uploadedImageUrls.length > 0 ? uploadedImageUrls : urlImages;
 
       const response = await fetch('/api/admin/products', {
         method: 'POST',
@@ -803,72 +807,104 @@ export default function NewProductPage() {
                 </h2>
                 
                 <div>
-                  <label className="flex items-center justify-center w-full px-6 py-12 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-[#f56a24] hover:bg-orange-50 transition-all group">
+                  <label className={`flex items-center justify-center w-full px-6 py-12 border-2 border-dashed rounded-xl transition-all group ${
+                    uploading ? 'border-[#f56a24] bg-orange-50 cursor-wait' : 'border-gray-300 cursor-pointer hover:border-[#f56a24] hover:bg-orange-50'
+                  }`}>
                     <div className="text-center">
-                      <Upload className="mx-auto h-16 w-16 text-gray-400 group-hover:text-[#f56a24] transition-colors" />
-                      <p className="mt-4 text-base text-gray-600">
-                        <span className="font-semibold text-[#f56a24]">Cliquez pour uploader</span> ou glissez-déposez
-                      </p>
-                      <p className="text-sm text-gray-500 mt-2">PNG, JPG, WEBP jusqu&apos;à 10MB</p>
+                      {uploading ? (
+                        <>
+                          <Loader2 className="mx-auto h-16 w-16 text-[#f56a24] animate-spin" />
+                          <p className="mt-4 text-base text-[#f56a24] font-semibold">Upload en cours...</p>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mx-auto h-16 w-16 text-gray-400 group-hover:text-[#f56a24] transition-colors" />
+                          <p className="mt-4 text-base text-gray-600">
+                            <span className="font-semibold text-[#f56a24]">Cliquez pour uploader</span> ou glissez-déposez
+                          </p>
+                          <p className="text-sm text-gray-500 mt-2">PNG, JPG, WEBP jusqu&apos;à 5 Mo par image</p>
+                        </>
+                      )}
                     </div>
                     <input
                       type="file"
                       multiple
                       accept="image/*"
                       onChange={handleImageUpload}
+                      disabled={uploading}
                       className="hidden"
                     />
                   </label>
                 </div>
 
-                {imagePreviews.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {imagePreviews.map((preview, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={preview}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-40 object-cover rounded-lg border-2 border-gray-200 group-hover:border-[#f56a24] transition-all"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                {uploadedImageUrls.length > 0 && (
+                  <>
+                    <p className="text-sm text-gray-500">La première image est la photo principale affichée sur la fiche produit. Cliquez sur <Star className="inline h-4 w-4 text-yellow-400" /> pour la définir comme principale.</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {uploadedImageUrls.map((url, index) => (
+                        <div key={url} className={`relative group rounded-lg overflow-hidden border-2 transition-all ${
+                          index === 0 ? 'border-yellow-400 shadow-md' : 'border-gray-200 hover:border-[#f56a24]'
+                        }`}>
+                          <img
+                            src={url}
+                            alt={`Image ${index + 1}`}
+                            className="w-full h-40 object-cover"
+                          />
+                          {index === 0 && (
+                            <div className="absolute top-2 left-2 bg-yellow-400 text-white px-2 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1 shadow">
+                              <Star className="h-3 w-3 fill-white" /> Principale
+                            </div>
+                          )}
+                          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {index !== 0 && (
+                              <button
+                                type="button"
+                                onClick={() => setPrimaryImage(index)}
+                                className="bg-yellow-400 text-white p-1.5 rounded-full hover:bg-yellow-500 shadow-lg"
+                                title="Définir comme principale"
+                              >
+                                <Star className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 shadow-lg"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
 
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white text-gray-500">OU</span>
-                  </div>
-                </div>
+                {uploadedImageUrls.length === 0 && (
+                  <>
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300"></div>
+                      </div>
+                      <div className="relative flex justify-center text-sm">
+                        <span className="px-4 bg-white text-gray-500">OU</span>
+                      </div>
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    URLs d&apos;images
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={formData.images}
-                    onChange={(e) => setFormData({ ...formData, images: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent transition-all"
-                    placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
-                    disabled={imageFiles.length > 0}
-                  />
-                  {imageFiles.length > 0 && (
-                    <p className="text-sm text-gray-500 mt-2">
-                      Désactivé car des fichiers sont uploadés
-                    </p>
-                  )}
-                </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        URLs d&apos;images (une par ligne)
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={formData.images}
+                        onChange={(e) => setFormData({ ...formData, images: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f56a24] focus:border-transparent transition-all"
+                        placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Options */}
