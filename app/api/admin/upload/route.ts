@@ -2,9 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { put } from '@vercel/blob';
 import { randomUUID } from 'crypto';
+import { writeFile, mkdir } from 'fs/promises';
+import path from 'path';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB per file
+
+async function saveLocally(file: File): Promise<string> {
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+  const filename = `${randomUUID()}.${ext}`;
+  const dir = path.join(process.cwd(), 'public', 'uploads', 'products');
+  await mkdir(dir, { recursive: true });
+  const buffer = Buffer.from(await file.arrayBuffer());
+  await writeFile(path.join(dir, filename), buffer);
+  return `/uploads/products/${filename}`;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,6 +36,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 });
     }
 
+    const useBlob = !!process.env.BLOB_READ_WRITE_TOKEN;
     const urls: string[] = [];
 
     for (const file of files) {
@@ -43,10 +56,15 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
-      const filename = `products/${randomUUID()}.${ext}`;
-      const blob = await put(filename, file, { access: 'public' });
-      urls.push(blob.url);
+      if (useBlob) {
+        const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+        const filename = `products/${randomUUID()}.${ext}`;
+        const blob = await put(filename, file, { access: 'public' });
+        urls.push(blob.url);
+      } else {
+        const url = await saveLocally(file);
+        urls.push(url);
+      }
     }
 
     // Return compatible response: `url` for single-file callers, `urls` for multi-file callers

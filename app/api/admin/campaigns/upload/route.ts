@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { put } from "@vercel/blob"
 import crypto from "crypto"
 import path from "path"
+import { writeFile, mkdir } from "fs/promises"
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,11 +36,23 @@ export async function POST(request: NextRequest) {
 
     const originalName = (file as any).name || "upload"
     const ext = path.extname(originalName) || ""
-    const filename = `campaigns/${Date.now()}-${crypto.randomBytes(6).toString("hex")}${ext}`
+    const uniqueName = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}${ext}`
 
-    const blob = await put(filename, file, { access: 'public' })
+    let url: string
 
-    return NextResponse.json({ url: blob.url, filename, size: (file as any).size, type: file.type })
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      const filename = `campaigns/${uniqueName}`
+      const blob = await put(filename, file, { access: 'public' })
+      url = blob.url
+    } else {
+      const dir = path.join(process.cwd(), 'public', 'uploads', 'campaigns')
+      await mkdir(dir, { recursive: true })
+      const buffer = Buffer.from(await file.arrayBuffer())
+      await writeFile(path.join(dir, uniqueName), buffer)
+      url = `/uploads/campaigns/${uniqueName}`
+    }
+
+    return NextResponse.json({ url, filename: uniqueName, size: (file as any).size, type: file.type })
   } catch (err) {
     console.error("Upload error:", err)
     return NextResponse.json({ error: "Upload failed" }, { status: 500 })
