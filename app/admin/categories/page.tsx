@@ -135,14 +135,16 @@ export default function CategoriesPage() {
     try {
       let finalImageUrl = formData.imageUrl
 
-      // If file was uploaded, convert to base64
+      // If file was uploaded, send it to the upload endpoint to get a URL
       if (imageFile) {
-        finalImageUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader()
-          reader.onloadend = () => resolve(reader.result as string)
-          reader.onerror = reject
-          reader.readAsDataURL(imageFile)
-        })
+        const fd = new FormData()
+        fd.append('file', imageFile)
+        const uploadRes = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+        const uploadData = await uploadRes.json()
+        if (!uploadRes.ok) {
+          throw new Error(uploadData.error || "Erreur lors du téléchargement de l'image")
+        }
+        finalImageUrl = uploadData.url
       }
 
       const url = editingCategory ? `/api/admin/categories/${editingCategory.id}` : "/api/admin/categories"

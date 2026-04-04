@@ -6,7 +6,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB per file
+const MAX_SIZE = 10 * 1024 * 1024; // 10MB per file
 
 async function saveLocally(file: File): Promise<string> {
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';

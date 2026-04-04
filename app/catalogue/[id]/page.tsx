@@ -4,7 +4,7 @@ import { useState, useEffect, use } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { useLanguage } from "@/contexts/LanguageContext"
 import dynamic from "next/dynamic"
@@ -129,7 +129,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
           <div className="flex flex-col">
-            <div className="aspect-square bg-white shadow-lg rounded-2xl overflow-hidden mb-6 flex items-center justify-center">
+            <div className="aspect-square bg-white shadow-lg rounded-2xl overflow-hidden mb-6 flex items-center justify-center relative">
               {product.images && product.images.length > 0 ? (
                 <img
                   src={product.images[selectedImage] || "/placeholder.svg"}
@@ -138,6 +138,24 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">{t.noProducts}</div>
+              )}
+              {product.images && product.images.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setSelectedImage((prev) => (prev - 1 + product.images.length) % product.images.length)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-[#1B2632] rounded-full p-2 shadow-md transition-all hover:shadow-lg"
+                    aria-label="Image précédente"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => setSelectedImage((prev) => (prev + 1) % product.images.length)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-[#1B2632] rounded-full p-2 shadow-md transition-all hover:shadow-lg"
+                    aria-label="Image suivante"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </>
               )}
             </div>
             {product.images && product.images.length > 1 && (
