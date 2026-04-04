@@ -85,11 +85,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories Section */}
-      <CategoriesSection />
-
       {/* Featured Catalogue Section */}
       <CatalogueSection />
+
+      {/* Categories Section */}
+      <CategoriesSection />
 
       {/* Features Section - Updated background with palladian color for contrast */}
       {!session && (

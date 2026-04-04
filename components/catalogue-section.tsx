@@ -56,7 +56,7 @@ export default function CatalogueSection() {
               {t.featuredProductsDesc}
             </p>
           </div>
-          <Link href="/catalogue">
+          <Link href="/products">
             <Button variant="secondary" className="hidden sm:flex items-center gap-2">
               {t.viewAll}
               <ArrowRight className="h-5 w-5" />
@@ -111,7 +111,7 @@ export default function CatalogueSection() {
             </div>
 
             <div className="text-center sm:hidden">
-              <Link href="/catalogue">
+              <Link href="/products">
                 <Button variant="secondary" className="w-full flex items-center justify-center gap-2">
                   {t.viewAllProducts}
                   <ArrowRight className="h-5 w-5" />
