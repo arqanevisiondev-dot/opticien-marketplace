@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
@@ -83,5 +83,28 @@ export async function GET() {
       { error: 'Failed to fetch loyalty redemptions' },
       { status: 500 }
     );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session || session.user?.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 });
+    }
+
+    const all = request.nextUrl.searchParams.get('all');
+    if (all !== 'true') {
+      return NextResponse.json({ error: 'Paramètre manquant' }, { status: 400 });
+    }
+
+    // Items cascade-deleted on LoyaltyRedemption delete
+    await prisma.loyaltyRedemptionItem.deleteMany({});
+    await prisma.loyaltyRedemption.deleteMany({});
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting all loyalty redemptions:', error);
+    return NextResponse.json({ error: 'Erreur lors de la suppression.' }, { status: 500 });
   }
 }

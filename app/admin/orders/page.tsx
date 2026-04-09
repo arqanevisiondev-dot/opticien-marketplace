@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { ClipboardList, CheckCircle2, Clock3, Ban, Coins, RotateCcw, Package, Gift } from "lucide-react"
+import { ClipboardList, CheckCircle2, Clock3, Ban, Coins, RotateCcw, Package, Gift, Trash2, Filter } from "lucide-react"
 
 import { Button } from "@/components/ui/Button"
 import { useLanguage } from "@/contexts/LanguageContext"
@@ -98,6 +98,18 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [activeTab, setActiveTab] = useState<"regular" | "loyalty">("regular")
+
+  // Filters — regular orders
+  const [orderFilterStatus, setOrderFilterStatus] = useState("")
+  const [orderFilterDateFrom, setOrderFilterDateFrom] = useState("")
+  const [orderFilterDateTo, setOrderFilterDateTo] = useState("")
+  const [orderFilterOptician, setOrderFilterOptician] = useState("")
+
+  // Filters — loyalty exchanges
+  const [loyaltyFilterStatus, setLoyaltyFilterStatus] = useState("")
+  const [loyaltyFilterDateFrom, setLoyaltyFilterDateFrom] = useState("")
+  const [loyaltyFilterDateTo, setLoyaltyFilterDateTo] = useState("")
+  const [loyaltyFilterOptician, setLoyaltyFilterOptician] = useState("")
 
   const locale = useMemo(() => {
     if (language === "fr") return "fr-FR"
@@ -213,34 +225,96 @@ export default function AdminOrdersPage() {
     WHATSAPP: t.sourceWhatsapp,
   }
 
+  // Client-side filtered arrays
+  const filteredOrders = useMemo(() => {
+    return orders.filter((o) => {
+      if (orderFilterStatus && o.status !== orderFilterStatus) return false
+      if (orderFilterOptician && !o.optician.name.toLowerCase().includes(orderFilterOptician.toLowerCase())) return false
+      if (orderFilterDateFrom && new Date(o.createdAt) < new Date(orderFilterDateFrom)) return false
+      if (orderFilterDateTo && new Date(o.createdAt) > new Date(orderFilterDateTo + "T23:59:59")) return false
+      return true
+    })
+  }, [orders, orderFilterStatus, orderFilterOptician, orderFilterDateFrom, orderFilterDateTo])
+
+  const filteredRedemptions = useMemo(() => {
+    return loyaltyRedemptions.filter((r) => {
+      if (loyaltyFilterStatus && r.status !== loyaltyFilterStatus) return false
+      if (loyaltyFilterOptician && !r.optician.name.toLowerCase().includes(loyaltyFilterOptician.toLowerCase())) return false
+      if (loyaltyFilterDateFrom && new Date(r.createdAt) < new Date(loyaltyFilterDateFrom)) return false
+      if (loyaltyFilterDateTo && new Date(r.createdAt) > new Date(loyaltyFilterDateTo + "T23:59:59")) return false
+      return true
+    })
+  }, [loyaltyRedemptions, loyaltyFilterStatus, loyaltyFilterOptician, loyaltyFilterDateFrom, loyaltyFilterDateTo])
+
+  const deleteOrder = async (id: string) => {
+    if (!confirm("Supprimer cette commande ?")) return
+    try {
+      const res = await fetch(`/api/admin/orders/${id}`, { method: "DELETE" })
+      if (!res.ok) throw new Error()
+      setOrders((prev) => prev.filter((o) => o.id !== id))
+    } catch {
+      alert("Erreur lors de la suppression.")
+    }
+  }
+
+  const deleteRedemption = async (id: string) => {
+    if (!confirm("Supprimer cet échange fidélité ?")) return
+    try {
+      const res = await fetch(`/api/admin/loyalty-redemptions/${id}`, { method: "DELETE" })
+      if (!res.ok) throw new Error()
+      setLoyaltyRedemptions((prev) => prev.filter((r) => r.id !== id))
+    } catch {
+      alert("Erreur lors de la suppression.")
+    }
+  }
+
+  // Summary cards derived from filtered data so they react to filter changes
+  const filteredSummary = useMemo(() => ({
+    totalOrders: filteredOrders.length,
+    totalArticles: filteredOrders.reduce((s, o) => s + o.itemCount, 0),
+    pending: filteredOrders.filter((o) => o.status === "PENDING").length,
+    approved: filteredOrders.filter((o) => o.status === "APPROVED").length,
+    cancelled: filteredOrders.filter((o) => o.status === "CANCELLED").length,
+    totalValue: filteredOrders.reduce((s, o) => s + o.totalAmount, 0),
+  }), [filteredOrders])
+
+  const filteredLoyaltySummary = useMemo(() => ({
+    totalRedemptions: filteredRedemptions.length,
+    totalItems: filteredRedemptions.reduce((s, r) => s + r.itemCount, 0),
+    pending: filteredRedemptions.filter((r) => r.status === "PENDING").length,
+    approved: filteredRedemptions.filter((r) => r.status === "APPROVED").length,
+    rejected: filteredRedemptions.filter((r) => r.status === "REJECTED").length,
+    totalPoints: filteredRedemptions.reduce((s, r) => s + r.totalPoints, 0),
+  }), [filteredRedemptions])
+
   const summaryCards = [
     {
       label: t.ordersSummaryTotal,
-      value: summary.totalArticles.toLocaleString(locale),
+      value: filteredSummary.totalArticles.toLocaleString(locale),
       icon: ClipboardList,
       color: "bg-burning-flame",
     },
     {
       label: t.ordersSummaryPending,
-      value: summary.pending.toLocaleString(locale),
+      value: filteredSummary.pending.toLocaleString(locale),
       icon: Clock3,
       color: "bg-truffle-trouble",
     },
     {
       label: t.ordersSummaryApproved,
-      value: summary.approved.toLocaleString(locale),
+      value: filteredSummary.approved.toLocaleString(locale),
       icon: CheckCircle2,
       color: "bg-blue-fantastic",
     },
     {
       label: t.ordersSummaryCancelled,
-      value: summary.cancelled.toLocaleString(locale),
+      value: filteredSummary.cancelled.toLocaleString(locale),
       icon: Ban,
       color: "bg-abyssal",
     },
     {
       label: t.ordersSummaryValue,
-      value: formatCurrency(summary.totalValue),
+      value: formatCurrency(filteredSummary.totalValue),
       icon: Coins,
       color: "bg-burning-flame",
     },
@@ -249,31 +323,31 @@ export default function AdminOrdersPage() {
   const loyaltySummaryCards = [
     {
       label: t.loyaltyExchangesTotal,
-      value: loyaltySummary.totalRedemptions.toLocaleString(locale),
+      value: filteredLoyaltySummary.totalRedemptions.toLocaleString(locale),
       icon: Gift,
       color: "bg-burning-flame",
     },
     {
       label: t.loyaltyItemsLabel,
-      value: loyaltySummary.totalItems.toLocaleString(locale),
+      value: filteredLoyaltySummary.totalItems.toLocaleString(locale),
       icon: Package,
       color: "bg-blue-fantastic",
     },
     {
       label: t.loyaltyPendingLabel,
-      value: loyaltySummary.pending.toLocaleString(locale),
+      value: filteredLoyaltySummary.pending.toLocaleString(locale),
       icon: Clock3,
       color: "bg-truffle-trouble",
     },
     {
       label: t.loyaltyApprovedLabel,
-      value: loyaltySummary.approved.toLocaleString(locale),
+      value: filteredLoyaltySummary.approved.toLocaleString(locale),
       icon: CheckCircle2,
       color: "bg-blue-fantastic",
     },
     {
       label: t.loyaltyTotalPointsLabel,
-      value: loyaltySummary.totalPoints.toLocaleString(locale),
+      value: filteredLoyaltySummary.totalPoints.toLocaleString(locale),
       icon: Coins,
       color: "bg-burning-flame",
     },
@@ -347,7 +421,7 @@ export default function AdminOrdersPage() {
           >
               <div className="flex items-center gap-2">
               <Package className="h-5 w-5" />
-              {t.regularOrdersLabel} ({summary.totalOrders})
+              {t.regularOrdersLabel} ({filteredSummary.totalOrders})
             </div>
           </button>
           <button
@@ -360,19 +434,69 @@ export default function AdminOrdersPage() {
           >
               <div className="flex items-center gap-2">
               <Gift className="h-5 w-5" />
-              {t.loyaltyTabLabel} ({loyaltySummary.totalRedemptions})
+              {t.loyaltyTabLabel} ({filteredLoyaltySummary.totalRedemptions})
             </div>
           </button>
         </div>
 
         {activeTab === "regular" ? (
         <div className="mt-0 bg-white shadow-lg">
-          <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+          <div className="border-b border-gray-200 px-6 py-4">
             <div>
               <h2 className="text-lg font-semibold text-abyssal">{t.ordersTableTitle}</h2>
               <p className="text-sm text-gray-500">
-                {t.ordersSummaryTotal}: {summary.totalArticles.toLocaleString(locale)}
+                {t.ordersSummaryTotal}: {filteredOrders.length.toLocaleString(locale)}
+                {filteredOrders.length !== orders.length && ` / ${orders.length.toLocaleString(locale)}`}
               </p>
+            </div>
+
+            {/* Filters */}
+            <div className="mt-4 flex flex-wrap items-end gap-3">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+                <Filter className="h-3.5 w-3.5" />
+                Filtrer :
+              </div>
+              <input
+                type="date"
+                value={orderFilterDateFrom}
+                onChange={(e) => setOrderFilterDateFrom(e.target.value)}
+                className="rounded border border-gray-200 px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                title="Date de début"
+              />
+              <span className="text-xs text-gray-400">→</span>
+              <input
+                type="date"
+                value={orderFilterDateTo}
+                onChange={(e) => setOrderFilterDateTo(e.target.value)}
+                className="rounded border border-gray-200 px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                title="Date de fin"
+              />
+              <select
+                value={orderFilterStatus}
+                onChange={(e) => setOrderFilterStatus(e.target.value)}
+                className="rounded border border-gray-200 px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400"
+              >
+                <option value="">Tous les statuts</option>
+                <option value="PENDING">{t.pending}</option>
+                <option value="APPROVED">{t.approved}</option>
+                <option value="REJECTED">{t.rejected}</option>
+                <option value="CANCELLED">{t.cancelled}</option>
+              </select>
+              <input
+                type="text"
+                value={orderFilterOptician}
+                onChange={(e) => setOrderFilterOptician(e.target.value)}
+                placeholder="Opticien..."
+                className="w-40 rounded border border-gray-200 px-2 py-1.5 text-xs text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+              />
+              {(orderFilterStatus || orderFilterDateFrom || orderFilterDateTo || orderFilterOptician) && (
+                <button
+                  onClick={() => { setOrderFilterStatus(""); setOrderFilterDateFrom(""); setOrderFilterDateTo(""); setOrderFilterOptician("") }}
+                  className="text-xs text-blue-500 hover:underline"
+                >
+                  Réinitialiser
+                </button>
+              )}
             </div>
           </div>
 
@@ -387,23 +511,24 @@ export default function AdminOrdersPage() {
                   <th className="px-6 py-3">{t.orderCreated}</th>
                   <th className="px-6 py-3">{t.orderStatus}</th>
                   <th className="px-6 py-3">{t.orderSource}</th>
+                  <th className="px-6 py-3"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-10 text-center text-gray-500">
+                    <td colSpan={8} className="px-6 py-10 text-center text-gray-500">
                       {t.loading}
                     </td>
                   </tr>
-                ) : orders.length === 0 ? (
+                ) : filteredOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-10 text-center text-gray-500">
+                    <td colSpan={8} className="px-6 py-10 text-center text-gray-500">
                       {t.ordersTableEmpty}
                     </td>
                   </tr>
                 ) : (
-                  orders.map((order) => (
+                  filteredOrders.map((order) => (
                     <tr key={order.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 font-medium text-abyssal">{order.id}</td>
                       <td className="px-6 py-4 text-gray-700">
@@ -425,6 +550,15 @@ export default function AdminOrdersPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-gray-700">{sourceLabels[order.source]}</td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => deleteOrder(order.id)}
+                          className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                          title="Supprimer"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -434,12 +568,62 @@ export default function AdminOrdersPage() {
         </div>
         ) : (
         <div className="mt-0 bg-white shadow-lg">
-          <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+          <div className="border-b border-gray-200 px-6 py-4">
             <div>
               <h2 className="text-lg font-semibold text-[#f56a24]">{t.loyaltyHistoryTitle}</h2>
               <p className="text-sm text-gray-500">
-                {t.loyaltyExchangesTotal}: {loyaltySummary.totalRedemptions.toLocaleString(locale)}
+                {t.loyaltyExchangesTotal}: {filteredRedemptions.length.toLocaleString(locale)}
+                {filteredRedemptions.length !== loyaltyRedemptions.length && ` / ${loyaltyRedemptions.length.toLocaleString(locale)}`}
               </p>
+            </div>
+
+            {/* Filters */}
+            <div className="mt-4 flex flex-wrap items-end gap-3">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+                <Filter className="h-3.5 w-3.5" />
+                Filtrer :
+              </div>
+              <input
+                type="date"
+                value={loyaltyFilterDateFrom}
+                onChange={(e) => setLoyaltyFilterDateFrom(e.target.value)}
+                className="rounded border border-gray-200 px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-orange-400"
+                title="Date de début"
+              />
+              <span className="text-xs text-gray-400">→</span>
+              <input
+                type="date"
+                value={loyaltyFilterDateTo}
+                onChange={(e) => setLoyaltyFilterDateTo(e.target.value)}
+                className="rounded border border-gray-200 px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-orange-400"
+                title="Date de fin"
+              />
+              <select
+                value={loyaltyFilterStatus}
+                onChange={(e) => setLoyaltyFilterStatus(e.target.value)}
+                className="rounded border border-gray-200 px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-orange-400"
+              >
+                <option value="">Tous les statuts</option>
+                <option value="PENDING">{t.pending}</option>
+                <option value="APPROVED">{t.approved}</option>
+                <option value="REJECTED">{t.rejected}</option>
+                <option value="CANCELLED">{t.cancelled}</option>
+              </select>
+              <input
+                type="text"
+                value={loyaltyFilterOptician}
+                onChange={(e) => setLoyaltyFilterOptician(e.target.value)}
+                placeholder="Opticien..."
+                className="w-40 rounded border border-gray-200 px-2 py-1.5 text-xs text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
+              />
+              {(loyaltyFilterStatus || loyaltyFilterDateFrom || loyaltyFilterDateTo || loyaltyFilterOptician) && (
+                <button
+                  onClick={() => { setLoyaltyFilterStatus(""); setLoyaltyFilterDateFrom(""); setLoyaltyFilterDateTo(""); setLoyaltyFilterOptician("") }}
+                  className="text-xs text-[#f56a24] hover:underline"
+                >
+                  Réinitialiser
+                </button>
+              )}
             </div>
           </div>
 
@@ -453,23 +637,24 @@ export default function AdminOrdersPage() {
                   <th className="px-6 py-3">{t.pointsLabel ?? t.pointsUnit ?? 'Points'}</th>
                   <th className="px-6 py-3">{t.orderCreated ?? t.createdOnLabel}</th>
                   <th className="px-6 py-3">{t.status ?? 'Statut'}</th>
+                  <th className="px-6 py-3"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
+                    <td colSpan={7} className="px-6 py-10 text-center text-gray-500">
                       {t.loading}
                     </td>
                   </tr>
-                ) : loyaltyRedemptions.length === 0 ? (
+                ) : filteredRedemptions.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
+                    <td colSpan={7} className="px-6 py-10 text-center text-gray-500">
                       {t.noLoyaltyRedemptions}
                     </td>
                   </tr>
                 ) : (
-                  loyaltyRedemptions.map((redemption) => (
+                  filteredRedemptions.map((redemption) => (
                     <tr key={redemption.id} className="hover:bg-orange-50/50">
                       <td className="px-6 py-4 font-medium text-abyssal">{redemption.id.slice(0, 8)}</td>
                       <td className="px-6 py-4 text-gray-700">
@@ -489,6 +674,15 @@ export default function AdminOrdersPage() {
                         >
                           {redemptionStatusLabels[redemption.status]}
                         </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => deleteRedemption(redemption.id)}
+                          className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                          title="Supprimer"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </td>
                     </tr>
                   ))

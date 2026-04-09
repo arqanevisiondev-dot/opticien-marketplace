@@ -149,6 +149,29 @@ export async function GET(request: NextRequest) {
   }
 }
 
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session || session.user?.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 });
+    }
+
+    const all = request.nextUrl.searchParams.get('all');
+    if (all !== 'true') {
+      return NextResponse.json({ error: 'Paramètre manquant' }, { status: 400 });
+    }
+
+    // Delete all order items first, then orders
+    await prisma.orderItem.deleteMany({});
+    await prisma.order.deleteMany({});
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting all orders:', error);
+    return NextResponse.json({ error: 'Erreur lors de la suppression.' }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
