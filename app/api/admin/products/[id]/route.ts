@@ -19,14 +19,6 @@ export async function DELETE(
       return NextResponse.json({ error: 'Produit introuvable' }, { status: 404 });
     }
 
-    const orderItemCount = await prisma.orderItem.count({ where: { productId: id } });
-    if (orderItemCount > 0) {
-      return NextResponse.json(
-        { error: 'Ce produit ne peut pas être supprimé car il est lié à des commandes existantes.' },
-        { status: 409 }
-      );
-    }
-
     // Remove loyalty product links before deleting
     await prisma.loyaltyProduct.deleteMany({ where: { productId: id } });
 

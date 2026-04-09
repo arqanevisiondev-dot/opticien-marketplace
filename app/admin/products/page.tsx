@@ -128,7 +128,8 @@ export default function ProductsListPage() {
         setProducts(products.filter((p) => p.id !== id));
         setDeleteConfirm(null);
       } else {
-        alert('Erreur lors de la suppression du produit');
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || 'Erreur lors de la suppression du produit');
       }
     } catch (error) {
       console.error('Error deleting product:', error);
@@ -148,7 +149,7 @@ export default function ProductsListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#EEE9DF] to-white py-12">
+    <div className="min-h-screen bg-linear-to-b from-[#EEE9DF] to-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
