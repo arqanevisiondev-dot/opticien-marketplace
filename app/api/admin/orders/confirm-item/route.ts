@@ -38,8 +38,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'confirm') {
-      // Check stock availability
-      if (!orderItem.product.inStock) {
+      // Check stock availability (if product still exists)
+      if (orderItem.product && !orderItem.product.inStock) {
         return NextResponse.json(
           { error: `Produit non disponible en stock` },
           { status: 400 }
@@ -47,9 +47,9 @@ export async function POST(request: NextRequest) {
       }
 
       // Calculate loyalty points to award
-      const pointsToAward = (orderItem.product.loyaltyPointsReward || 0) * orderItem.quantity;
+      const pointsToAward = (orderItem.product?.loyaltyPointsReward || 0) * orderItem.quantity;
 
-      // Update order item status, decrease stock, award loyalty points, and update order status
+      // Update order item status, award loyalty points, and update order status
       await prisma.$transaction([
         prisma.orderItem.update({
           where: { id: itemId },
@@ -57,11 +57,6 @@ export async function POST(request: NextRequest) {
             status: 'CONFIRMED',
             confirmedAt: new Date(),
             confirmedBy: session.user.email!,
-          },
-        }),
-        prisma.product.update({
-          where: { id: orderItem.productId },
-          data: {
           },
         }),
         // Update parent order status to APPROVED
