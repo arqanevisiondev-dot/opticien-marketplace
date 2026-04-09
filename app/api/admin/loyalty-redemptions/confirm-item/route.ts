@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     if (action === 'approve') {
       // Check stock availability
-      const isInStock = item.loyaltyProduct.productId && item.loyaltyProduct.product
+      const isInStock = item.loyaltyProduct?.productId && item.loyaltyProduct?.product
         ? item.loyaltyProduct.product.inStock
         : true;
 

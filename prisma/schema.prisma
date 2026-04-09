@@ -248,7 +248,7 @@ model LoyaltyRedemption {
 model LoyaltyRedemptionItem {
   id              String            @id @default(cuid())
   redemptionId    String
-  loyaltyProductId String
+  loyaltyProductId String?
   productName     String
   quantity        Int               @default(1)
   pointsCost      Int
@@ -256,7 +256,7 @@ model LoyaltyRedemptionItem {
   imageUrl        String?           @db.LongText
   createdAt       DateTime          @default(now())
   redemption      LoyaltyRedemption @relation(fields: [redemptionId], references: [id], onDelete: Cascade)
-  loyaltyProduct  LoyaltyProduct    @relation(fields: [loyaltyProductId], references: [id])
+  loyaltyProduct  LoyaltyProduct?   @relation(fields: [loyaltyProductId], references: [id], onDelete: SetNull)
 
   @@index([redemptionId])
   @@index([loyaltyProductId])
