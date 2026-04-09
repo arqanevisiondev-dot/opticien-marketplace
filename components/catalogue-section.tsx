@@ -29,10 +29,10 @@ export default function CatalogueSection() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("/api/products?limit=6")
+        const res = await fetch("/api/products?limit=8")
         if (res.ok) {
           const data = await res.json()
-          setProducts(Array.isArray(data) ? data.slice(0, 6) : [])
+          setProducts(Array.isArray(data) ? data.slice(0, 8) : [])
         }
       } catch (error) {
         console.error("Error fetching products:", error)
@@ -70,12 +70,12 @@ export default function CatalogueSection() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               {products.map((product) => (
                 <Link key={product.id} href={`/catalogue/${product.slug || product.id}`}>
                   <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group cursor-pointer h-full flex flex-col">
                     {/* Image container */}
-                    <div className="aspect-square bg-gradient-to-br from-[#EEE9DF] to-[#80827f]/10 overflow-hidden relative">
+                    <div className="aspect-4/3 bg-linear-to-br from-[#EEE9DF] to-[#80827f]/10 overflow-hidden relative">
                       {product.images?.[0] ? (
                         <img
                           src={product.images[0] || "/placeholder.svg"}
@@ -86,20 +86,20 @@ export default function CatalogueSection() {
                         <div className="w-full h-full flex items-center justify-center text-gray-400">{t.noImage}</div>
                       )}
                       {product.isNewCollection && (
-                        <div className="absolute top-4 right-4 bg-[#f56a24] text-white px-3 py-1 text-xs font-bold rounded-full">
+                        <div className="absolute top-2 right-2 bg-[#f56a24] text-white px-2 py-0.5 text-xs font-bold rounded-full">
                           {t.newBadge}
                         </div>
                       )}
                     </div>
 
                     {/* Content */}
-                    <div className="p-6 flex flex-col flex-grow">
-                      <h3 className="font-bold text-lg text-[#1B2632] mb-1 group-hover:text-[#f56a24] transition-colors">
+                    <div className="p-3 flex flex-col grow">
+                      <h3 className="font-bold text-sm text-[#1B2632] mb-0.5 group-hover:text-[#f56a24] transition-colors line-clamp-1">
                         {product.name}
                       </h3>
-                      <p className="text-sm text-gray-500 mb-4">{product.reference}</p>
+                      <p className="text-xs text-gray-500 mb-2">{product.reference}</p>
 
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-4 flex-grow">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-600 grow">
                         <span>{product.material}</span>
                         <span>•</span>
                         <span>{product.gender}</span>

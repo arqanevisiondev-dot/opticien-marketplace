@@ -1,8 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const limitParam = request.nextUrl.searchParams.get('limit');
+    const take = limitParam ? Math.min(Math.max(Number(limitParam), 1), 100) : undefined;
+
     const products = await prisma.product.findMany({
       include: {
         user: {
@@ -23,6 +26,7 @@ export async function GET() {
       orderBy: {
         createdAt: 'desc',
       },
+      ...(take !== undefined ? { take } : {}),
     });
 
     // Parse images JSON string to array
