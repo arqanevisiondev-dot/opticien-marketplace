@@ -627,10 +627,8 @@ export default function ProfilePage() {
                         </span>
                       </div>
                       <div className="flex justify-between text-lg font-bold pt-2 border-t border-orange-200">
-                        <span className="text-[#f56a24]">{t.totalPointsLabel}</span>
-                        <span className="text-[#f56a24] text-xl">
-                          {getTotalPoints()} {t.points}
-                        </span>
+                        <span className="text-[#f56a24]">{t.loyaltyProductsTitle}</span>
+                        <span className="text-green-600 text-xl">Free</span>
                       </div>
                     </>
                   )}
@@ -804,7 +802,6 @@ export default function ProfilePage() {
                                 )}
                                 <div className="flex-1">
                                   <h3 className="font-bold text-[#2C3B4D]">{item.name}</h3>
-                                  {item.description && <p className="text-sm text-gray-500">{item.description}</p>}
                                   <div className="mt-2">
                                     <span className="text-lg font-bold text-[#f56a24]">
                                       {item.pointsCost} {t.pointsPerUnit}
