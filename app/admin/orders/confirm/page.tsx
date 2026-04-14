@@ -225,7 +225,14 @@ export default function ConfirmOrdersPage() {
                 {/* Order Items */}
                 <div className="p-6">
                   <div className="space-y-4">
-                    {order.items.map((item) => (
+                    {(order.items ?? []).map((item) => {
+                      if (!item) return null;
+
+                      const availableStock = Number.isFinite(item?.product?.stockQty)
+                        ? item.product.stockQty
+                        : null;
+
+                      return (
                       <div
                         key={item.id}
                         className={`flex items-center justify-between p-4 rounded-lg border-2 ${
@@ -251,7 +258,7 @@ export default function ConfirmOrdersPage() {
                               {t.total}: {item.totalLine.toFixed(2)} DH
                             </span>
                             <span className="text-sm text-gray-600">
-                              {t.availableStock}: {item.product.stockQty}
+                              {t.availableStock}: {availableStock ?? 'N/A'}
                             </span>
                           </div>
                         </div>
@@ -264,7 +271,8 @@ export default function ConfirmOrdersPage() {
                               <Button
                                 onClick={() => handleConfirmItem(item.id, 'confirm')}
                                 disabled={
-                                  confirmingId === item.id || item.product.stockQty < item.quantity
+                                  confirmingId === item.id ||
+                                  (availableStock !== null && availableStock < item.quantity)
                                 }
                                 className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
                                 size="sm"
@@ -286,7 +294,8 @@ export default function ConfirmOrdersPage() {
                           )}
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
                 </div>
               </div>
@@ -331,10 +340,15 @@ export default function ConfirmOrdersPage() {
                     {/* Redemption Items */}
                     <div className="p-6">
                       <div className="space-y-4">
-                        {redemption.items.map((item: any) => {
-                          const actualStock = item.loyaltyProduct.productId && item.loyaltyProduct.product
-                            ? item.loyaltyProduct.product.stockQty
-                            : item.loyaltyProduct.stockQty;
+                        {(redemption.items ?? []).map((item: any) => {
+                          if (!item) return null;
+
+                          const loyaltyProduct = item?.loyaltyProduct;
+                          const actualStock = Number.isFinite(loyaltyProduct?.product?.stockQty)
+                            ? loyaltyProduct.product.stockQty
+                            : Number.isFinite(loyaltyProduct?.stockQty)
+                            ? loyaltyProduct.stockQty
+                            : null;
 
                           return (
                             <div
@@ -362,7 +376,7 @@ export default function ConfirmOrdersPage() {
                                       Total: {item.totalPoints} points
                                     </span>
                                     <span className="text-sm text-gray-600">
-                                      Stock disponible: {actualStock}
+                                      Stock disponible: {actualStock ?? 'N/A'}
                                     </span>
                                   </div>
                                 </div>
@@ -373,7 +387,10 @@ export default function ConfirmOrdersPage() {
                                   <div className="flex gap-2">
                                     <Button
                                       onClick={() => handleConfirmLoyaltyItem(item.id, 'approve')}
-                                      disabled={confirmingId === item.id || actualStock < item.quantity}
+                                      disabled={
+                                        confirmingId === item.id ||
+                                        (actualStock !== null && actualStock < item.quantity)
+                                      }
                                       className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
                                       size="sm"
                                     >
