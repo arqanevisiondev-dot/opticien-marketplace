@@ -16,13 +16,20 @@ interface Category {
   }
 }
 
-export default function CategoriesSection() {
+interface CategoriesSectionProps {
+  /** Pre-fetched categories from a Server Component parent. When provided the
+   * client-side fetch is skipped entirely. */
+  initialCategories?: Category[]
+}
+
+export default function CategoriesSection({ initialCategories }: CategoriesSectionProps = {}) {
   const { t } = useLanguage()
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
+  const [categories, setCategories] = useState<Category[]>(initialCategories ?? [])
+  const [loading, setLoading] = useState(!initialCategories)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (initialCategories) return // data already provided by SSR
     const fetchCategories = async () => {
       try {
         setLoading(true)
@@ -49,7 +56,7 @@ export default function CategoriesSection() {
     }
 
     fetchCategories()
-  }, [])
+  }, [initialCategories])
 
   if (loading) {
     return (

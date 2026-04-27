@@ -21,12 +21,19 @@ interface Product {
   isNewCollection?: boolean
 }
 
-export default function CatalogueSection() {
+interface CatalogueSectionProps {
+  /** Pre-fetched products from a Server Component parent. When provided the
+   * client-side fetch is skipped entirely. */
+  initialProducts?: Product[]
+}
+
+export default function CatalogueSection({ initialProducts }: CatalogueSectionProps = {}) {
   const { t } = useLanguage()
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+  const [products, setProducts] = useState<Product[]>(initialProducts ?? [])
+  const [loading, setLoading] = useState(!initialProducts)
 
   useEffect(() => {
+    if (initialProducts) return // data already provided by SSR
     const fetchProducts = async () => {
       try {
         const res = await fetch("/api/products?limit=8")
@@ -40,9 +47,8 @@ export default function CatalogueSection() {
         setLoading(false)
       }
     }
-
     fetchProducts()
-  }, [])
+  }, [initialProducts])
 
   return (
     <section className="py-20 bg-[#EEE9DF]">

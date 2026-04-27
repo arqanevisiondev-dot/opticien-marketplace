@@ -21,15 +21,22 @@ interface Slide {
   buttonColor?: string
 }
 
-export default function HeroSlider() {
-  const [slides, setSlides] = useState<Slide[]>([])
+interface HeroSliderProps {
+  /** Pre-fetched slides passed from a Server Component parent. When provided,
+   * the client-side fetch is skipped entirely. */
+  initialSlides?: Slide[]
+}
+
+export default function HeroSlider({ initialSlides }: HeroSliderProps = {}) {
+  const [slides, setSlides] = useState<Slide[]>(initialSlides ?? [])
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!initialSlides)
 
   useEffect(() => {
+    if (initialSlides) return // data already provided by SSR
     fetchSlides()
-  }, [])
+  }, [initialSlides])
 
   const fetchSlides = async () => {
     try {
