@@ -4,19 +4,10 @@ import { put } from '@vercel/blob';
 import { randomUUID } from 'crypto';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import { convertToWebp } from '@/lib/image';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB per file
-
-async function saveLocally(file: File): Promise<string> {
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
-  const filename = `${randomUUID()}.${ext}`;
-  const dir = path.join(process.cwd(), 'public', 'uploads', 'products');
-  await mkdir(dir, { recursive: true });
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(dir, filename), buffer);
-  return `/uploads/products/${filename}`;
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,14 +47,19 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      const raw = Buffer.from(await file.arrayBuffer());
+      const { buffer, contentType, ext } = await convertToWebp(raw, file.type);
+
       if (useBlob) {
-        const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
         const filename = `products/${randomUUID()}.${ext}`;
-        const blob = await put(filename, file, { access: 'public' });
+        const blob = await put(filename, buffer, { access: 'public', contentType });
         urls.push(blob.url);
       } else {
-        const url = await saveLocally(file);
-        urls.push(url);
+        const filename = `${randomUUID()}.${ext}`;
+        const dir = path.join(process.cwd(), 'public', 'uploads', 'products');
+        await mkdir(dir, { recursive: true });
+        await writeFile(path.join(dir, filename), buffer);
+        urls.push(`/uploads/products/${filename}`);
       }
     }
 

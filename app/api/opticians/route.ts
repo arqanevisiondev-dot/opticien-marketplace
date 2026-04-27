@@ -25,7 +25,11 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(opticians);
+    return NextResponse.json(opticians, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=3600',
+      },
+    });
   } catch (error) {
     console.error('Error fetching opticians:', error);
     return NextResponse.json(

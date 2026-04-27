@@ -31,7 +31,11 @@ export async function GET() {
     // Filter out slides without imageUrl
     const validSlides = slides.filter(slide => slide.imageUrl);
 
-    return NextResponse.json(validSlides);
+    return NextResponse.json(validSlides, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=600',
+      },
+    });
   } catch (error) {
     console.error('Error fetching slides:', error);
     return NextResponse.json({ error: 'Failed to fetch slides' }, { status: 500 });

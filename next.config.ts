@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactCompiler: true,
+  // sharp is a native module — must not be bundled by webpack
+  serverExternalPackages: ['sharp'],
   images: {
     remotePatterns: [
       {
@@ -18,6 +19,22 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    // Cache optimized images for 1 year in the CDN
+    minimumCacheTTL: 31536000,
+  },
+  async headers() {
+    return [
+      {
+        // Cache static uploads if ever served locally (dev)
+        source: '/uploads/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
   },
 };
 

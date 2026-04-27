@@ -4,6 +4,7 @@ import { put } from "@vercel/blob"
 import crypto from "crypto"
 import path from "path"
 import { writeFile, mkdir } from "fs/promises"
+import { convertToWebp } from "@/lib/image"
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,25 +35,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `File too large (max ${isVideo ? '50' : '5'} MB)` }, { status: 400 })
     }
 
-    const originalName = (file as any).name || "upload"
-    const ext = path.extname(originalName) || ""
-    const uniqueName = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}${ext}`
+    const raw = Buffer.from(await file.arrayBuffer())
+
+    // Convert images to WebP; leave videos and PDFs untouched
+    const { buffer, contentType, ext } = isImage
+      ? await convertToWebp(raw, mime)
+      : { buffer: raw, contentType: mime, ext: path.extname((file as any).name || 'file').replace('.', '') || 'bin' }
+
+    const uniqueName = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}.${ext}`
 
     let url: string
 
     if (process.env.BLOB_READ_WRITE_TOKEN) {
       const filename = `campaigns/${uniqueName}`
-      const blob = await put(filename, file, { access: 'public' })
+      const blob = await put(filename, buffer, { access: 'public', contentType })
       url = blob.url
     } else {
       const dir = path.join(process.cwd(), 'public', 'uploads', 'campaigns')
       await mkdir(dir, { recursive: true })
-      const buffer = Buffer.from(await file.arrayBuffer())
       await writeFile(path.join(dir, uniqueName), buffer)
       url = `/uploads/campaigns/${uniqueName}`
     }
 
-    return NextResponse.json({ url, filename: uniqueName, size: (file as any).size, type: file.type })
+    return NextResponse.json({ url, filename: uniqueName, size: buffer.byteLength, type: contentType })
   } catch (err) {
     console.error("Upload error:", err)
     return NextResponse.json({ error: "Upload failed" }, { status: 500 })
